@@ -2,7 +2,7 @@
 
 dir=$(pwd)
 cd ../
-tar czfv polyView.tgz polyView
+tar czfv polyview.tgz polyView
 
 cd $dir
 cp -fv gui/polyview debian/usr/bin/
