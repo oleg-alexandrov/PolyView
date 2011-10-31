@@ -4,6 +4,9 @@ cp -fv gui/polyview debian/usr/bin/
 dpkg-deb --build debian
 mv -fv debian.deb polyview_0.5.deb
 
+cd ../
+tar czfv polyView.tgz polyView
+
 # Notes to self:
 
 # Zip the debian directory:
