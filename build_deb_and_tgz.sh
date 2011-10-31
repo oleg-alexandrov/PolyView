@@ -1,11 +1,13 @@
 #!/bin/sh
 
-cp -fv gui/polyview debian/usr/bin/
-dpkg-deb --build debian
-mv -fv debian.deb polyview_0.5.deb
-
+dir=$(pwd)
 cd ../
 tar czfv polyView.tgz polyView
+
+cd $dir
+cp -fv gui/polyview debian/usr/bin/
+dpkg-deb --build debian
+mv -fv debian.deb ../polyview_0.5.deb
 
 # Notes to self:
 

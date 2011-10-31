@@ -1,2 +1,3 @@
-See the file 'Readme.txt' one level up.
+The directory containing the gui and the compiled executable.
 
+See ../Readme.txt for more information.
