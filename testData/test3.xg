@@ -1,0 +1,12 @@
+color = yellow
+0 0
+anno 2 3   z
+3 3
+anno 5 6   r
+NEXT
+color = white
+0 0 ; 4:0
+anno 9 9  23
+2 4 ; 4:0
+0 0 ; 4:0
+NEXT

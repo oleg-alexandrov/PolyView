@@ -1,0 +1,11 @@
+Package: polyView
+Version: 0.5
+Section: base
+Priority: optional
+Architecture: all
+Depends: libqt4-qt3support, libqtgui4, libqt4-core, libqt4-sql, libqt4-xml, libqt4-network, libqt4-dbus
+Maintainer: Oleg Alexandrov (oleg.alexandrov@gmail.com)
+Description: A free polygon viewer. Documentation is available at 
+ https://sites.google.com/site/olegalexandrov/polyview
+
+
