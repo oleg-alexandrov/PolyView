@@ -2032,8 +2032,8 @@ void polyView::toggleDifferentColors(){
   // Color the polys in different colors to distinguish them better
   
   if (m_diffColorsMode){
-    // Turn off diff mode
-    m_diffColorsMode      = false;
+    // Turn off diff color mode
+    m_diffColorsMode    = false;
     m_polyVec           = m_polyVecBk;
     m_polyOptionsVec    = m_polyOptionsVecBk;
 
@@ -2041,6 +2041,11 @@ void polyView::toggleDifferentColors(){
     return;
   }
 
+  // Turn on diff color mode
+
+  // First turn off diff mode
+  if (m_polyDiffMode) toggleShowPolyDiff();
+  
   assert( m_polyVec.size() == m_polyOptionsVec.size() );
   
   m_diffColorsMode = true;
@@ -2085,6 +2090,9 @@ void polyView::toggleShowPolyDiff(){
 
   // Turn on diff mode
   
+  // First turn off diff color mode
+  if (m_diffColorsMode) toggleDifferentColors();
+
   assert( m_polyVec.size() == m_polyOptionsVec.size() );
   
   if (m_polyVec.size() < 2){
