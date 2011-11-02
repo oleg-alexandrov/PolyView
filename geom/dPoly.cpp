@@ -1191,12 +1191,26 @@ void dPoly::writePoly(std::string filename, std::string defaultColor){
   return;
 }
 
+bool dPoly::getColorInCntFile(const std::string & line, std::string & color){
+
+  // Minor function. Out of the line: "#Color = #ff00" return the string "#ff00"
+  // and append "00" to it to make it a valid color.
+
+  istringstream iss(line);
+  string equal, colorTag;
+  if ( ! (iss >> colorTag >> equal >> color)        ) return false;
+  if ( colorTag != "#Color" && colorTag != "#color" ) return false;
+  while (color[0] == '#' && color.size() < 7 ) color += "0";
+
+  return true;
+}
+
 bool dPoly::read_pol_or_cnt_format(std::string filename,
                                    std::string type, 
                                    bool isPointCloud 
                                    ){
 
-  // Read in two very simple and related polygon formats.
+  // Read in two very simple and related polygon formats, named pol and cnt.
   
   assert(type == "pol" || type == "cnt");
 
@@ -1212,14 +1226,17 @@ bool dPoly::read_pol_or_cnt_format(std::string filename,
     return false;
   }
  
-  // Bypass lines starting with comments
+  // Bypass the lines starting with comments. Extract the color.
   while (1){
     char c = fh.peek();
     if (c != '#' && c != '!') break;
     string line;
     getline(fh, line);
+    string lColor;
+    if (getColorInCntFile(line, lColor)) color = lColor;
   }  
 
+  // Parse the header for pol files.
   double tmp;
   if (type == "pol" && !(fh >> tmp >> tmp >> tmp >> tmp) ) return false;
 
@@ -1228,14 +1245,21 @@ bool dPoly::read_pol_or_cnt_format(std::string filename,
     int numVerts = 0;
    
     if (type == "pol"){
+      // Extract the number of vertices for pol files
      if (! (fh >> tmp >> numVerts) ) return true;  // no more vertices
      if (! (fh >> tmp >> tmp) )      return false; // invalid format
     }else{
+      // Extract the number of vertices and/or color for cnt file.
+      // Skip lines with comments.
       string line;
       if (!getline(fh, line)) return true;
+      string lColor; if (getColorInCntFile(line, lColor)) color = lColor;
       if (!line.empty() && line[0] == '#') continue;
       numVerts = int(atof(line.c_str()));
     }
+
+    // Now that we know how many vertices to expect, try reading them
+    // from the file. Stop if we are unable to find the expected vertices.
     
     m_numPolys++;
     m_numVerts.push_back(numVerts);

@@ -192,6 +192,7 @@ public:
   
 private:
 
+  bool getColorInCntFile(const std::string & line, std::string & color);
   void get_annoByType(std::vector<anno> & annotations, int annoType);
   void set_annoByType(const std::vector<anno> & annotations, int annoType);
 
