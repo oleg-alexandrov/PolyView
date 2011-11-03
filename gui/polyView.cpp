@@ -3241,39 +3241,49 @@ void polyView::mergePolys(){
   poly.reset();
   for (int s = 0; s < (int)m_polyVec.size(); s++) poly.appendPolygons(m_polyVec[s]);
 
-  // Pairwise merge of polygons
-  for (int i = 0; i < poly.get_numPolys(); i++){
-    for (int j = i + 1; j < poly.get_numPolys(); j++){
+  bool stillMerging = true;
 
-      // Need these since the polygons may have changed in the meantime
-      if (i >= poly.get_numPolys()) break;
-      if (j >= poly.get_numPolys()) break;
+  while (stillMerging){
 
-      // Merge i-th and j-th polygons
-      const int * numV = poly.get_numVerts();
-      int start_i = 0; for (int pIter = 0; pIter < i; pIter++) start_i += numV[pIter]; 
-      int start_j = 0; for (int pIter = 0; pIter < j; pIter++) start_j += numV[pIter];
-      vector<double> mx, my;
-      bool success = utils::mergePolys(// Inputs
-                                       numV[i],
-                                       poly.get_xv() + start_i,
-                                       poly.get_yv() + start_i,  
-                                       numV[j],
-                                       poly.get_xv() + start_j,
-                                       poly.get_yv() + start_j,
-                                       // Outputs
-                                       mx, my
-                                       );
-      if (!success) continue;
+    stillMerging = false;
+    
+    // Pairwise merge of polygons
+    for (int i = 0; i < poly.get_numPolys(); i++){
+      for (int j = i + 1; j < poly.get_numPolys(); j++){
 
-      // Replace i-th poly with the merged poly, and erase j-th poly.
-      // Decrement j since we have one less polygon.
-      poly.replaceOnePoly(i, mx.size(), vecPtr(mx), vecPtr(my));
-      poly.eraseOnePoly(j);
-      j--;
+        // Need these since the polygons may have changed in the meantime
+        if (i >= poly.get_numPolys()) break;
+        if (j >= poly.get_numPolys()) break;
+
+        // Merge i-th and j-th polygons
+        const int * numV = poly.get_numVerts();
+        int start_i = 0; for (int pIter = 0; pIter < i; pIter++) start_i += numV[pIter]; 
+        int start_j = 0; for (int pIter = 0; pIter < j; pIter++) start_j += numV[pIter];
+        vector<double> mx, my;
+        bool success = utils::mergePolys(// Inputs
+                                         numV[i],
+                                         poly.get_xv() + start_i,
+                                         poly.get_yv() + start_i,  
+                                         numV[j],
+                                         poly.get_xv() + start_j,
+                                         poly.get_yv() + start_j,
+                                         // Outputs
+                                         mx, my
+                                         );
+        if (!success) continue;
+
+        stillMerging = true;
+        
+        // Replace i-th poly with the merged poly, and erase j-th poly.
+        // Decrement j since we have one less polygon.
+        poly.replaceOnePoly(i, mx.size(), vecPtr(mx), vecPtr(my));
+        poly.eraseOnePoly(j);
+        j--;
+      }
     }
+    
   }
-
+  
   if (m_polyVec.empty()) return;
   m_polyVec.resize(1);
   m_polyOptionsVec.resize(1);
