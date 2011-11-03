@@ -3231,40 +3231,53 @@ double polyView::calcGrid(double widx, double widy){
   
 void polyView::mergePolys(){
 
+  // Merge all polygons.
+  
   // Highly buggy and incomplete function. Work in progress.
+  // To do: Move this to utilities.
+  
+  // Combine all polygons into one poly structure
   dPoly poly;
   poly.reset();
-  
-  for (int s = 0; s < (int)m_polyVec.size(); s++){
-    poly.appendPolygons(m_polyVec[s]);
+  for (int s = 0; s < (int)m_polyVec.size(); s++) poly.appendPolygons(m_polyVec[s]);
+
+  // Pairwise merge of polygons
+  for (int i = 0; i < poly.get_numPolys(); i++){
+    for (int j = i + 1; j < poly.get_numPolys(); j++){
+
+      // Need these since the polygons may have changed in the meantime
+      if (i >= poly.get_numPolys()) break;
+      if (j >= poly.get_numPolys()) break;
+
+      // Merge i-th and j-th polygons
+      const int * numV = poly.get_numVerts();
+      int start_i = 0; for (int pIter = 0; pIter < i; pIter++) start_i += numV[pIter]; 
+      int start_j = 0; for (int pIter = 0; pIter < j; pIter++) start_j += numV[pIter];
+      vector<double> mx, my;
+      bool success = utils::mergePolys(// Inputs
+                                       numV[i],
+                                       poly.get_xv() + start_i,
+                                       poly.get_yv() + start_i,  
+                                       numV[j],
+                                       poly.get_xv() + start_j,
+                                       poly.get_yv() + start_j,
+                                       // Outputs
+                                       mx, my
+                                       );
+      if (!success) continue;
+
+      // Replace i-th poly with the merged poly, and erase j-th poly.
+      // Decrement j since we have one less polygon.
+      poly.replaceOnePoly(i, mx.size(), vecPtr(mx), vecPtr(my));
+      poly.eraseOnePoly(j);
+      j--;
+    }
   }
 
-  int numPolys         = poly.get_numPolys();
-  const int * numVerts = poly.get_numVerts();
-
-  if (numPolys <= 1) return;
-    
-  vector<double> mx, my;
-  bool success = utils::mergePolys(numVerts[0],
-                                   poly.get_xv(),
-                                   poly.get_yv(),  
-                                   numVerts[1],
-                                   poly.get_xv() + numVerts[0],
-                                   poly.get_yv() + numVerts[0],
-                                   mx, my
-                                   );
-  if (!success) return;
-  
-  bool isPolyClosed = true;
-  string color = (poly.get_colors())[0];
-  string layer = (poly.get_layers())[0];
-
-  m_polyVec[0].setPolygon(mx.size(), vecPtr(mx), vecPtr(my),
-                          isPolyClosed, color, layer
-                          );
-  
+  if (m_polyVec.empty()) return;
   m_polyVec.resize(1);
   m_polyOptionsVec.resize(1);
+  m_polyVec[0] = poly; 
   saveDataForUndo(false);
 
   refreshPixmap();
