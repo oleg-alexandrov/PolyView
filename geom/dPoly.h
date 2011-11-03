@@ -125,6 +125,7 @@ public:
                                 // Outputs
                                 std::map<int, int> & mark
                                 ) const;
+  void replaceOnePoly(int polyIndex, int numV, const double* x, const double* y);
   // Annotations
   void get_annotations (std::vector<anno> & annotations) const;
   void get_layerAnno(std::vector<anno> & annotations) const;

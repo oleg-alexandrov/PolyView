@@ -1378,6 +1378,28 @@ void dPoly::markPolysIntersectingBox(// Inputs
   return;
 }
 
+void dPoly::replaceOnePoly(int polyIndex, int numV, const double* x, const double* y){
+
+  assert(0 <= polyIndex && polyIndex < m_numPolys);
+  
+  int start = 0;
+  for (int pIter = 0; pIter < polyIndex; pIter++) start += m_numVerts[pIter]; 
+
+  m_xv.erase(m_xv.begin() + start, m_xv.begin() + start + m_numVerts[polyIndex]);
+  m_yv.erase(m_yv.begin() + start, m_yv.begin() + start + m_numVerts[polyIndex]);
+
+  m_xv.insert(m_xv.begin() + start, x, x + numV);
+  m_yv.insert(m_yv.begin() + start, y, y + numV);
+
+  m_numVerts[polyIndex] = numV;
+  m_totalNumVerts = m_xv.size();
+  
+  m_vertIndexAnno.clear();
+  m_layerAnno.clear();
+  
+  return;
+}
+
 void dPoly::eraseMarkedPolys(// Inputs
                              std::map<int, int> & mark
                              ){
