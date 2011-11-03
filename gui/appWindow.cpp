@@ -223,15 +223,6 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   edit->insertItem("Merge polygons (buggy)",
                    m_poly, SLOT(mergePolys()), Qt::CTRL+Qt::Key_M);
 
-  Q3PopupMenu* transform = new Q3PopupMenu( menu );
-  menu->insertItem("Transform", transform);
-  transform->insertItem("Translate polygons", m_poly, SLOT(translatePolys()),
-                        Qt::CTRL+Qt::Key_T);
-  transform->insertItem("Rotate polygons", m_poly, SLOT(rotatePolys()),
-                        Qt::CTRL+Qt::Key_R);
-  transform->insertItem("Scale polygons", m_poly, SLOT(scalePolys()),
-                        Qt::CTRL+Qt::Key_X);
-
   Q3PopupMenu* selection = new Q3PopupMenu( menu );
   menu->insertItem("Selection", selection);
   selection->insertItem("Create highlight", m_poly, SLOT(createHlt()));
@@ -245,11 +236,26 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
                         m_poly, SLOT(moveSelectedPolys()));
   selection->insertItem("Deselect polygons/delete highlights",  m_poly,
                         SLOT(deselectPolysDeleteHlts()));
+
+  Q3PopupMenu* transform = new Q3PopupMenu( menu );
+  menu->insertItem("Transform", transform);
+  transform->insertItem("Translate selected polygons", m_poly,
+                        SLOT(translateSelectedPolys()), Qt::CTRL+Qt::Key_T );
+  transform->insertItem("Rotate selected polygons",    m_poly,
+                        SLOT(rotateSelectedPolys()), Qt::CTRL+Qt::Key_R );
+  transform->insertItem("Scale selected polygons",
+                        m_poly, SLOT(scaleSelectedPolys()) );
+  transform->insertItem("Transform selected polygons", m_poly,
+                        SLOT(transformSelectedPolys()) );
+#if 0
   selection->addSeparator();
-  selection->insertItem("Translate selected polygons", m_poly, SLOT(translateSelectedPolys()) );
-  selection->insertItem("Rotate selected polygons",    m_poly, SLOT(rotateSelectedPolys()) );
-  selection->insertItem("Scale selected polygons",     m_poly, SLOT(scaleSelectedPolys()) );
-  selection->insertItem("Transform selected polygons", m_poly, SLOT(transformSelectedPolys()) );
+  transform->insertItem("Translate polygons", m_poly, SLOT(translatePolys()),
+                        Qt::CTRL+Qt::Key_T);
+  transform->insertItem("Rotate polygons around origin", m_poly, SLOT(rotatePolys()),
+                        Qt::CTRL+Qt::Key_R);
+  transform->insertItem("Scale polygons around origin", m_poly, SLOT(scalePolys()),
+                        Qt::CTRL+Qt::Key_X);
+#endif
 
   Q3PopupMenu* grid = new Q3PopupMenu( menu );
   menu->insertItem("Grid", grid);

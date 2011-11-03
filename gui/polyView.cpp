@@ -985,6 +985,11 @@ void polyView::copyPoly(){
 
 void polyView::translateSelectedPolys(){
 
+  if (getNumElements(m_selectedPolyIndices) == 0){
+    popUp("No polygons are selected.");
+    return;
+  }
+
   vector<double> inputVec, shiftVec;
   inputVec.clear();
   if ( ! getRealValuesFromGui(// Inputs
@@ -1002,17 +1007,17 @@ void polyView::translateSelectedPolys(){
 
 void polyView::translateSelectedPolys(std::vector<double> & shiftVec){
   
+  if (getNumElements(m_selectedPolyIndices) == 0){
+    popUp("No polygons are selected.");
+    return;
+  }
+
   if (shiftVec.size() < 2){
-    popUp("Invalid translate vector");
+    popUp("Invalid translate vector.");
     return;
   }
   shiftVec.resize(2);
   
-  if (getNumElements(m_selectedPolyIndices) == 0){
-    popUp("No polygons are selected");
-    return;
-  }
-
   shiftMarkedPolys(// Inputs
                    m_selectedPolyIndices,
                    shiftVec[0], shiftVec[1],  
@@ -1032,6 +1037,11 @@ void polyView::translateSelectedPolys(std::vector<double> & shiftVec){
 
 void polyView::rotateSelectedPolys(){
 
+  if (getNumElements(m_selectedPolyIndices) == 0){
+    popUp("No polygons are selected.");
+    return;
+  }
+
   vector<double> inputVec, angle;
   inputVec.clear();
   if ( ! getRealValuesFromGui(// Inputs
@@ -1050,17 +1060,17 @@ void polyView::rotateSelectedPolys(){
 
 void polyView::rotateSelectedPolys(std::vector<double> & angle){
   
+  if (getNumElements(m_selectedPolyIndices) == 0){
+    popUp("No polygons are selected.");
+    return;
+  }
+
   if (angle.size() < 1){
-    popUp("Invalid rotation angle");
+    popUp("Invalid rotation angle.");
     return;
   }
   angle.resize(1);
   
-  if (getNumElements(m_selectedPolyIndices) == 0){
-    popUp("No polygons are selected");
-    return;
-  }
-
   rotateMarkedPolysAroundCtr(// Inputs
                              m_selectedPolyIndices,  
                              angle[0],  
@@ -1079,6 +1089,11 @@ void polyView::rotateSelectedPolys(std::vector<double> & angle){
 
 void polyView::scaleSelectedPolys(){
 
+  if (getNumElements(m_selectedPolyIndices) == 0){
+    popUp("No polygons are selected.");
+    return;
+  }
+
   vector<double> inputVec, scale;
   inputVec.clear();
   if ( ! getRealValuesFromGui(// Inputs
@@ -1096,17 +1111,17 @@ void polyView::scaleSelectedPolys(){
 
 void polyView::scaleSelectedPolys(std::vector<double> & scale){
   
+  if (getNumElements(m_selectedPolyIndices) == 0){
+    popUp("No polygons are selected.");
+    return;
+  }
+
   if (scale.size() < 1){
-    popUp("Invalid scale value");
+    popUp("Invalid scale value.");
     return;
   }
   scale.resize(1);
   
-  if (getNumElements(m_selectedPolyIndices) == 0){
-    popUp("No polygons are selected");
-    return;
-  }
-
   scaleMarkedPolysAroundCtr(// Inputs
                              m_selectedPolyIndices,  
                              scale[0],  
@@ -1124,6 +1139,11 @@ void polyView::scaleSelectedPolys(std::vector<double> & scale){
 }
 
 void polyView::transformSelectedPolys(){
+
+  if (getNumElements(m_selectedPolyIndices) == 0){
+    popUp("No polygons are selected.");
+    return;
+  }
 
   vector<double> inputVec, T;
   inputVec.clear();
@@ -1143,17 +1163,17 @@ void polyView::transformSelectedPolys(){
 
 void polyView::transformSelectedPolys(std::vector<double> & T){
   
+  if (getNumElements(m_selectedPolyIndices) == 0){
+    popUp("No polygons are selected.");
+    return;
+  }
+
   if (T.size() < 4){
-    popUp("Invalid transform matrix");
+    popUp("Invalid transform matrix.");
     return;
   }
   T.resize(4);
   
-  if (getNumElements(m_selectedPolyIndices) == 0){
-    popUp("No polygons are selected");
-    return;
-  }
-
   matrix2 M;
   M.a11 = T[0]; M.a12 = T[1]; M.a21 = T[2]; M.a22 = T[3];
   transformMarkedPolysAroundCtr(// Inputs
@@ -1411,7 +1431,7 @@ void polyView::setLineWidth(){
     refreshPixmap();
   
   }else{
-    popUp("The line width must be a positive integer");
+    popUp("The line width must be a positive integer.");
   }
   return;
 }
@@ -1430,7 +1450,7 @@ void polyView::setGridWidth(){
     refreshPixmap();
   
   }else{
-    popUp("The grid linewidth must be a positive integer");
+    popUp("The grid linewidth must be a positive integer.");
   }
   return;
 }
@@ -1454,7 +1474,7 @@ void polyView::setGridSize(){
     refreshPixmap();
     
   }else{
-    popUp("The grid size must be positive");
+    popUp("The grid size must be positive.");
   }
   return;
 }
@@ -1471,7 +1491,7 @@ void polyView::setGridColor(){
     m_prefs.gridColor = gridColor;
     refreshPixmap();
   }else{
-    popUp("Invalid grid color");
+    popUp("Invalid grid color.");
   }
   return;
 }
@@ -1489,7 +1509,7 @@ void polyView::setBgColor(){
     setBgFgColorsFromPrefs();
     refreshPixmap();
   }else{
-    popUp("Invalid background color");
+    popUp("Invalid background color.");
   }
   return;
 }
@@ -1568,7 +1588,7 @@ void polyView::scalePolys(){
 void polyView::translatePolys(std::vector<double> & shiftVec){
 
   if (shiftVec.size() < 2){
-    popUp("Invalid shift_x and shift_y values");
+    popUp("Invalid shift_x and shift_y values.");
     return;
   }
   shiftVec.resize(2);
@@ -1587,7 +1607,7 @@ void polyView::translatePolys(std::vector<double> & shiftVec){
 void polyView::rotatePolys(std::vector<double> & angle){
 
   if (angle.size() < 1){
-    popUp("Invalid rotation angle");
+    popUp("Invalid rotation angle.");
     return;
   }
   angle.resize(1);
@@ -1606,7 +1626,7 @@ void polyView::rotatePolys(std::vector<double> & angle){
 void polyView::scalePolys(std::vector<double> & scale){
 
   if (scale.size() < 1){
-    popUp("Invalid scale factor");
+    popUp("Invalid scale factor.");
     return;
   }
   scale.resize(1);
@@ -1625,7 +1645,7 @@ void polyView::scalePolys(std::vector<double> & scale){
 void polyView::transformPolys(std::vector<double> & M){
 
   if (M.size() < 6){
-    popUp("Invalid linear transform");
+    popUp("Invalid linear transform.");
     return;
   }
 
@@ -2096,7 +2116,7 @@ void polyView::toggleShowPolyDiff(){
   assert( m_polyVec.size() == m_polyOptionsVec.size() );
   
   if (m_polyVec.size() < 2){
-    popUp("Must have two polygon files to diff");
+    popUp("Must have two polygon files to diff.");
     return;
   }
 
@@ -2272,7 +2292,7 @@ void polyView::toggleAlignMode(){
   if (m_alignMode){
     
     if (m_polyVec.size() < 2){
-      popUp("Must have two polygon files to align");
+      popUp("Must have two polygon files to align.");
       m_alignMode = false;
       return;
     }
@@ -2607,12 +2627,12 @@ void polyView::enforce45AndSnapToGrid(){
   // Enforce that polygon vertices are on grid that the angles are 45x. 
 
   if (!m_prefs.isGridOn){
-    popUp("Must have the grid on to snap to grid");
+    popUp("Must have the grid on to snap to grid.");
     return;
   }
 
   if (m_prefs.gridSize <= 0){
-    popUp("Error: expecting positive grid size");
+    popUp("Error: expecting positive grid size.");
     return;
   }
   
@@ -2739,7 +2759,7 @@ void polyView::readAllPolys(){
 
   if (numMissing >= 1){
     string suffix = ""; if (numMissing > 1) suffix = "s";
-    popUp("Warning: Could not read file" + suffix + ":" + missingFiles);
+    popUp("Warning: Could not read file" + suffix + ":" + missingFiles + ".");
   }
   
   saveDataForUndo(false);
@@ -2800,7 +2820,7 @@ void polyView::openPoly(){
                              );
 
   if (!success){
-    popUp("Warning: Could not read file: " + m_polyOptionsVec.back().polyFileName);
+    popUp("Warning: Could not read file: " + m_polyOptionsVec.back().polyFileName + ".");
   }
 
   if (m_polyOptionsVec.back().useCmdLineColor){
