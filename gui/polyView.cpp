@@ -433,7 +433,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   double extra  = 2*m_pixelSize*lineWidth;
   double extraX = extra + tol*max(abs(m_viewXll), abs(m_viewXll + m_viewWidX));
   double extraY = extra + tol*max(abs(m_viewYll), abs(m_viewYll + m_viewWidY));
-    
+  
   dPoly clippedPoly;
   currPoly.clipPoly(//inputs
                     m_viewXll - extraX,
@@ -497,10 +497,12 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       pa[vIter] = QPoint(x0, y0);
 
       // Qt's built in points are too small. Instead of drawing a point
-      // draw a small shape. 
-      if ( plotPoints                                          &&
-           x0 > m_screenXll && x0 < m_screenXll + m_screenWidX && 
-           y0 > m_screenYll && y0 < m_screenYll + m_screenWidY
+      // draw a small shape.
+      int tol = 4; // This is a bug fix for missing points. I don't understand
+      //           // why this is necessary and why the number 4 is right.  
+      if ( plotPoints                                                  &&
+           x0 > m_screenXll - tol && x0 < m_screenXll + m_screenWidX + tol && 
+           y0 > m_screenYll - tol && y0 < m_screenYll + m_screenWidY + tol
            ){
         drawOneVertex(x0, y0, color, lineWidth, drawVertIndex, paint);
       }
