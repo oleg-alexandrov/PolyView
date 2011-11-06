@@ -432,10 +432,20 @@ bool utils::mergePolys(int an,
   bool mergeWasSuccessful = false;
   
   int i = 0, in = 0, j = 0, jn = 0;
+
+  // Start at a vertex of A which is not inside of B.
+  for (int t = 0; t < an; t++){
+    if (isPointInPolyOrOnEdges(ax[t], ay[t], bn, bx, by)) continue;
+    i = t; in = t; j = t; jn = t;
+    break;
+  }
+  
   double sx = ax[i], sy = ay[i];
   double currX = ax[i], currY = ay[i];
+
   mergedX.push_back(currX);
   mergedY.push_back(currY);
+
   while(1){
 
 
@@ -483,7 +493,7 @@ bool utils::mergePolys(int an,
 
     if (!foundIntersection){
       i = in;
-      if (sx == ax[i] && sy == ay[i]) break;
+      if (sx == ax[i] && sy == ay[i]) break; // reached the starting point
       currX = ax[i]; currY = ay[i];
       mergedX.push_back(currX);
       mergedY.push_back(currY);
