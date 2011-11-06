@@ -509,7 +509,7 @@ bool utils::mergePolys(int an,
     swap(an, bn);
 
     i = j;
-    if (sx == ax[i] && sy == ay[i]) break;
+    //if (sx == ax[i] && sy == ay[i]) break;
   }
 
   return mergeWasSuccessful;
