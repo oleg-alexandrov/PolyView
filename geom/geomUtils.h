@@ -155,6 +155,8 @@ namespace utils{
                   std::vector<double> & mergedX,
                   std::vector<double> & mergedY 
                   );
+  bool isPointInPolyOrOnEdges(double x, double y,
+                              int n, const double* xv, const double*  yv);
 
   struct linTrans{
     // Linear transform

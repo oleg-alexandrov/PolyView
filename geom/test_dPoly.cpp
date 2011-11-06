@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <limits>
+#include <algorithm>
 #include "dPoly.h"
 
 using namespace std;
@@ -45,6 +46,26 @@ int main(int argc, char** argv){
 
   if (! poly.readPoly(filename, isPointCloud) ) exit(1);
 
+  double * xv   = (double*)poly.get_xv(); 
+  double * yv   = (double*)poly.get_yv();
+  int      numV = poly.get_totalNumVerts();
+
+  double xmin = *min_element(xv, xv + numV) - 10;
+  double xmax = *max_element(xv, xv + numV) + 10;
+  double ymin = *min_element(yv, yv + numV) - 10;
+  double ymax = *max_element(yv, yv + numV) + 10;
+
+  char outFile[] = "pointsInside.xg";
+  cout << "Writing " << outFile << endl;
+  ofstream of(outFile);
+  for (int i = xmin; i <= xmax; i++){
+    for (int j = ymin; j <= ymax ; j++){
+      if (isPointInPolyOrOnEdges(i, j, numV, xv, yv)){
+        of << i  << ' ' << j << endl;
+      }
+    }
+  }
+  
 #if 0
   poly.sortFromLargestToSmallest();
   double * xv   = (double*)poly.get_xv(); // to do: fix this hack
@@ -53,12 +74,12 @@ int main(int argc, char** argv){
 
   bool isClosedPolyLine = true;
   utils::snapPolyLineTo45DegAngles(isClosedPolyLine, numV, xv, yv);
-#endif
   
   const char * outFile = "out.xg";
   cout << "Writing to " << outFile << endl;
   poly.writePoly(outFile);
 
+#endif
   return 0;
   
 }

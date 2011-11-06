@@ -505,3 +505,39 @@ bool utils::mergePolys(int an,
   return mergeWasSuccessful;
 }
 
+bool utils::isPointInPolyOrOnEdges(double x, double y,
+                                   int n, const double* xv, const double*  yv){
+
+  // Is the given point either completely inside or on the edges
+  // of the given polygon.
+  
+  if (n <= 0) return false;
+
+  bool isInsideOrOnEdges = false;
+  
+  for (int i = 0; i < n; i++){
+    int j = (i + 1)%n;
+
+    double x0 = xv[i], x1 = xv[j];
+    double y0 = yv[i], y1 = yv[j];
+
+    if (x0 > x1){
+      swap(x0, x1);
+      swap(y0, y1);
+    }
+
+    if (x < x0 || x > x1) continue;
+
+    if (x0 == x1){
+      if (y >= min(y0, y1) && y <= max(y0, y1)) return true;
+      else                                      continue;
+    }
+    
+    double det = (y - y0)*(x1 - x0) - (x - x0)*(y1 - y0);
+    if (det == 0) return true; // is on edge
+      
+    if (x < x1 && det < 0) isInsideOrOnEdges = !isInsideOrOnEdges;
+  }
+
+  return isInsideOrOnEdges;
+}
