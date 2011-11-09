@@ -1,6 +1,6 @@
 PolyView is a free polygon viewer. The PolyView documentation is at
 
-https://sites.google.com/site/olegalexandrov/polyview
+https://sites.google.com/site/polyview2d/
 
 To compile PolyView from source, the Qt 4 development libraries need to
 be installed. They can can be obtained in Ubuntu by typing
