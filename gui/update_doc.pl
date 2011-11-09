@@ -19,11 +19,12 @@ MAIN:{
   $preProcDocText =~ s/Updated:.*?$//sg;
 
   # Other minor
-  my $local = 0;
+  my $local = 1;
   if ($local){
     $preProcDocText =~ s/\s*\<br\>\s*\<br\>(^|\n).*?source code.*?\n/\n/g;
     $preProcDocText =~ s/(^|\n).*?mailto:.*?\n/\n/g;
-    $preProcDocText =~ s/free and open source software program for Linux/program/g; 
+    $preProcDocText =~ s/free and open source software program for Linux/program/g;
+    $preProcDocText =~ s/\<h2\>Download.*?(\<h2\>)/$1/sg;
   }
   
   my $docText = "";
