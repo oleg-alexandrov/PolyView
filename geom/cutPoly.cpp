@@ -425,8 +425,10 @@ void utils::processPointsOnCutline(std::vector<valIndex> & ptsOnCutline){
   // there must be a corresponding point at which we come back. Match
   // the i-th outward point to the corresponding i-th inward point.
   int numOut = outwardPositions.size();
+#ifndef NDEBUG
   int numIn  = inwardPositions.size();
   assert(numIn == numOut);
+#endif
   for (int i = 0; i < numOut; i++){
 
     valIndex & C = ptsOnCutline[outwardPositions[i]]; //alias

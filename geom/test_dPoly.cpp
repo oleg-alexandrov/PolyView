@@ -58,8 +58,8 @@ int main(int argc, char** argv){
   char outFile[] = "pointsInside.xg";
   cout << "Writing " << outFile << endl;
   ofstream of(outFile);
-  for (int i = xmin; i <= xmax; i++){
-    for (int j = ymin; j <= ymax ; j++){
+  for (int i = (int)xmin; i <= (int)xmax; i++){
+    for (int j = (int)ymin; j <= (int)ymax ; j++){
       if (isPointInPolyOrOnEdges(i, j, numV, xv, yv)){
         of << i  << ' ' << j << endl;
       }
