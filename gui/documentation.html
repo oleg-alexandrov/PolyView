@@ -1,5 +1,7 @@
-<div align="center"><a href="https://sites.google.com/site/olegalexandrov/polyview/pvLogo.png?attredirects=0" imageanchor="1"><img alt="PolyView logo" src="https://sites.google.com/site/olegalexandrov/polyview/pvLogo.png" border="0"></a></div>
-<div align="left">
+<div>
+<div dir="ltr">
+<div style="background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)" align="center"><a href="https://sites.google.com/site/olegalexandrov/polyview/pvLogo.png?attredirects=0" imageanchor="1"><img alt="PolyView logo" src="https://sites.google.com/site/olegalexandrov/polyview/pvLogo.png" border="0"></a></div>
+<div style="background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)" align="left">
 <br>
 <br>
 <b>PolyView</b> is a free and open source software program for Linux designed to quickly load and visualize multiple sets of polygon files from the command line. It can zoom and pan, show polygons as edges, points, and filled, display text labels, print the coordinates of vertices and measure distances, change the order in which polygons are displayed, choose which polygons to show, etc.<br>
@@ -10,7 +12,50 @@ PolyView accepts a lengthy list of command line arguments, and the view can be a
 <br>
 PolyView is implemented in C++ using Qt 4. Its source code is freely available under the MIT license and can be used for any purpose, academic or commercial.
 
+<h2>Download</h2>
+<ul>
+<li><a href="https://sites.google.com/site/polyview2d/polyview_0.5.deb?attredirects=0">polyview_0.5.deb</a> - Ubuntu 10.10 Debian package</li>
+<ul><li>depends on the Qt4 run-time libraries</li>
+<li>install with: dpkg -i polyView_0.5.deb</li>
+<li>path to executable is /usr/bin/polyview</li>
+<li>remove with:<span>dpkg -r polyview</span></li></ul></ul>
+</div>
+<div style="background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)" align="left">
+<ul><li><a href="https://sites.google.com/site/polyview2d/polyview.tgz?attredirects=0">polyview.tgz</a><span> - C++ source code</span></li>
+<ul><li><span>depends on the Qt4 development libraries, which can be installed on Ubuntu with command: apt-get install qmake
+</span></li></ul>
+</ul>
+</div>
+<div style="background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)" align="left">
 <h2>Documentation</h2>
+<h3>File format</h3>
+PolyView was inspired by <a href="http://www.xgraph.org/xgraph.html">xgraph</a>,
+and it uses xgraph's file format, in which the x and y coordinates of 
+each polygon are stored as two columns in a plain text file followed by 
+the "NEXT" statement. Here is a sample polygon file storing a rectangle 
+and a triangle.
+</div>
+
+<br>
+<div style="background-color:rgb(255, 255, 255);color:rgb(0, 0, 0)" align="left">
+<div style="margin-left:40px">color = red<br>
+60 50<br>
+70 50<br>
+70 70<br>
+60 70<br>
+60 50<br>
+NEXT<br>
+color = green<br>
+80 30<br>
+90 30<br>
+80 40<br>
+80 30<br>
+NEXT<br>
+</div>
+
+Notice that the first vertex of each polygon is repeated again before 
+the "NEXT" statement, to signal to the viewer that the polygon is 
+closed. 
 <h3>Features of PolyView accessible from the GUI</h3>
 <h4>Mouse buttons</h4>
 
@@ -239,12 +284,15 @@ PolyView will open simultaneously all polygon files supplied as inputs on the co
 <tr>
 <td>-gridColor&lt;color&gt;</td>
 <td>Grid color<br>
-<br>
 </td>
 </tr>
 </tbody>
 </table>
 <b>Author:</b> Oleg Alexandrov &lt;<a href="mailto:oleg.alexandrov@gmail.com">oleg.alexandrov@gmail.com</a>&gt;
 </div>
+
 </div>
-Updated: October 28, 2011
+</div>
+</div>
+
+Updated: November 08, 2011
