@@ -19,7 +19,7 @@ MAIN:{
   $preProcDocText =~ s/Updated:.*?$//sg;
 
   # Other minor
-  my $local = 1;
+  my $local = 1; # If the code does not compile, update and set this to 0.
   if ($local){
     $preProcDocText =~ s/\s*\<br\>\s*\<br\>(^|\n).*?source code.*?\n/\n/g;
     $preProcDocText =~ s/(^|\n).*?mailto:.*?\n/\n/g;
