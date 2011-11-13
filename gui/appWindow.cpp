@@ -22,7 +22,7 @@
 #include <qapplication.h>
 #include <Q3PopupMenu>
 #include <qlabel.h>
-#include <QtGui/QMainWindow>
+#include <QtGui>
 #include <qmenubar.h>
 #include <qmessagebox.h>
 #include <qstatusbar.h>
@@ -55,7 +55,6 @@ appWindow::appWindow(QWidget* parent, std::string progName,
   resize(windowWidX, windowWidY);
 
   createMenusAndMainWidget(options);
-  installEventFilter(m_poly);
   
   // Command line
   m_cmdLine = new cmdLine(this);
@@ -191,7 +190,6 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
 
   Q3PopupMenu* view = new Q3PopupMenu( menu );
   menu->insertItem("View", view);
-  //view->insertSeparator();
   view->insertItem(chooseFilesDlg::selectFilesTag(), m_poly, SLOT(chooseFilesToShow()));
   view->insertItem("Zoom out",             m_poly, SLOT(zoomOut()),      Qt::Key_Minus);
   view->insertItem("Zoom in",              m_poly, SLOT(zoomIn()),       Qt::Key_Equal);

@@ -62,6 +62,9 @@ using namespace utils;
 
 polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(parent){
 
+  
+  installEventFilter(this);
+  
   // Choose which files to hide/show in the GUI
   QObject::connect(m_chooseFilesDlg.getFilesTable(),
                    SIGNAL(itemSelectionChanged()),
@@ -185,7 +188,7 @@ bool polyView::eventFilter(QObject *obj, QEvent *E){
 
     const QPoint Q = H->pos(); // mouse point position
     int x = Q.x();
-    int y = Q.y() - 25; // A hack as Qt does not give this number correctly
+    int y = Q.y();
     double wx, wy;
     pixelToWorldCoords(x, y, wx, wy);
 
