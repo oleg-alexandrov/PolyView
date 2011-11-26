@@ -1768,7 +1768,8 @@ void polyView::appendToPolyVec(const dPoly & P){
     m_polyVec.push_back(P);
     m_polyOptionsVec.push_back(m_prefs);
     string fileName = "poly" + num2str(m_polyVec.size() - 1) + ".xg";
-    m_polyOptionsVec.back().polyFileName = fileName;
+    m_polyOptionsVec.back().polyFileName     = fileName;
+    m_polyOptionsVec.back().readPolyFromDisk = false;
   }else{
     m_polyVec.back().appendPolygons(P);
   }
@@ -2165,6 +2166,9 @@ void polyView::toggleShowPolyDiff(){
   m_polyOptionsVec[2].polyFileName = "diff1.xg";
   m_polyOptionsVec[3].polyFileName = "diff2.xg";
   
+  m_polyOptionsVec[2].readPolyFromDisk = false;
+  m_polyOptionsVec[3].readPolyFromDisk = false;
+
   refreshPixmap();
 }
 
@@ -2733,6 +2737,11 @@ void polyView::redo(){
 }
 
 
+void polyView::reloadPolys(){
+  readAllPolys();
+  refreshPixmap();
+}
+
 void polyView::readAllPolys(){
 
   int numFiles = m_polyOptionsVec.size();
@@ -2742,6 +2751,10 @@ void polyView::readAllPolys(){
   int numMissing = 0;
   
   for (int fileIter = 0; fileIter < numFiles; fileIter++){
+
+    // Do not read polygons which were created by the program itself
+    // rather than read from disk.
+    if (!m_polyOptionsVec[fileIter].readPolyFromDisk) continue;
     
     bool success = readOnePoly(// inputs
                                m_polyOptionsVec[fileIter].polyFileName,
@@ -2813,7 +2826,8 @@ void polyView::openPoly(){
   assert ( (int)m_polyVec.size() == (int)m_polyOptionsVec.size() );
 
   m_polyOptionsVec.push_back(m_prefs);
-  m_polyOptionsVec.back().polyFileName = fileName;
+  m_polyOptionsVec.back().polyFileName     = fileName;
+  m_polyOptionsVec.back().readPolyFromDisk = true;
   
   dPoly poly;
   bool success = readOnePoly(// inputs

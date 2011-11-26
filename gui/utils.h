@@ -47,6 +47,7 @@ struct polyOptions{
   bool            isGridOn;
   double          gridSize;
   int             gridWidth;
+  bool            readPolyFromDisk;
   std::string     bgColor;
   std::string     fgColor;
   std::string     cmdLineColor;
@@ -54,20 +55,21 @@ struct polyOptions{
   std::string     polyFileName;
   
   polyOptions(){
-    plotAsPoints    = false;
-    isPolyFilled    = false;
-    isPolyClosed    = readClosedPolyInfoFromFile;
-    fontSize        = 10; 
-    lineWidth       = 1;
-    useCmdLineColor = false;
-    isGridOn        = false;
-    gridWidth       = 1;
-    gridSize        = -1;
-    bgColor         = "black";
-    fgColor         = "white";
-    cmdLineColor    = "green";
-    gridColor       = "white";
-    polyFileName    = "unnamed.xg";
+    plotAsPoints     = false;
+    isPolyFilled     = false;
+    isPolyClosed     = readClosedPolyInfoFromFile;
+    fontSize         = 10; 
+    lineWidth        = 1;
+    useCmdLineColor  = false;
+    isGridOn         = false;
+    gridWidth        = 1;
+    gridSize         = -1;
+    readPolyFromDisk = true;
+    bgColor          = "black";
+    fgColor          = "white";
+    cmdLineColor     = "green";
+    gridColor        = "white";
+    polyFileName     = "unnamed.xg";
   }
   
 };

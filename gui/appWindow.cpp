@@ -186,6 +186,8 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
                    SLOT(saveAsMultiplePolys()), Qt::ALT+Qt::Key_S);
   file->insertItem("Overwrite current files", m_poly,
                    SLOT(overwriteMultiplePolys()), Qt::CTRL+Qt::Key_W);
+  file->insertItem("Reload polygons from disk", m_poly,
+                   SLOT(reloadPolys()), Qt::ALT+Qt::Key_R);
   file->insertItem("Exit", this, SLOT(forceQuit()), Qt::Key_Q);
 
   Q3PopupMenu* view = new Q3PopupMenu( menu );

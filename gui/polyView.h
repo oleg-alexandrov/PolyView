@@ -53,9 +53,7 @@ public slots:
   void overwriteMultiplePolys();
   void saveAsMultiplePolys();
   void writeMultiplePolys(bool overwrite);
-  void translatePolys();
-  void rotatePolys();
-  void scalePolys();
+  void reloadPolys();
 
   // View menu
   void zoomOut();
@@ -91,6 +89,9 @@ public slots:
   // Transform menu
   void enforce45();
   void enforce45AndSnapToGrid();
+  void translatePolys();
+  void rotatePolys();
+  void scalePolys();
 
   // Highlights menu
   void createHlt();
