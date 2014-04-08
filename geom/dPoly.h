@@ -71,6 +71,8 @@ public:
                     const std::string & color, const std::string & layer
                     );
 
+  bool isXYRect();
+
   void clipPoly(// inputs
                 double clip_xll, double clip_yll,
                 double clip_xur, double clip_yur,

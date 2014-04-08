@@ -168,6 +168,33 @@ void dPoly::setRectangle(double xl, double yl, double xh, double yh,
   return;
 }
 
+bool dPoly::isXYRect(){
+  
+  // Check if the current polygon set is a (perhaps degenerate)
+  // rectangle with sides parallel to the x and y axes.
+
+  if (m_numPolys != 1 || m_totalNumVerts != 4) return false;
+
+  double xll, yll, xur, yur;
+  bdBox(xll, yll, xur, yur);
+  double tol = 1e-15*(std::abs(xll) + std::abs(yll) +
+                      std::abs(xur) + std::abs(yur));
+
+  // Midpoint test (will catch things the direction test won't)
+  if (std::abs( m_xv[0] + m_xv[2] - m_xv[1] - m_xv[3] ) > tol ) return false;
+  if (std::abs( m_yv[0] + m_yv[2] - m_yv[1] - m_yv[3] ) > tol ) return false;
+
+  // Direction test
+  for (int i = 0; i < m_totalNumVerts; i++){
+    int i1 = ( i + m_totalNumVerts + 1) % m_totalNumVerts;
+    if (std::abs(m_xv[i1] - m_xv[i]) > tol &&
+        std::abs(m_yv[i1] - m_yv[i]) > tol )
+      return false;
+  }
+  
+  return true;
+}
+
 void dPoly::get_annoByType(std::vector<anno> & annotations, int annoType){
   
   if (annoType == 0){

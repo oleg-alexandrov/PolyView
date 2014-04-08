@@ -22,7 +22,7 @@
 #ifndef POLYVIEW_H
 #define POLYVIEW_H
 
-#include <Q3PointArray>
+#include <QPolygon>
 #include <QContextMenuEvent>
 #include <QEvent>
 #include <QKeyEvent>
@@ -212,7 +212,7 @@ private:
   bool isClosestGridPtFree(std::vector< std::vector<int> > & Grid,
                            int x, int y);
   void initTextOnScreenGrid(std::vector< std::vector<int> > & Grid);
-  bool isPolyZeroDim(const Q3PointArray & pa);
+  bool isPolyZeroDim(const QPolygon & pa);
   void centerViewAtPoint(double x, double y);
   void drawOneVertex(int x0, int y0, QColor color, int lineWidth,
                      int drawVertIndex, QPainter * paint);
