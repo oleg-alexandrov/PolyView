@@ -1,4 +1,7 @@
-PolyView is a free polygon viewer. The PolyView documentation is at
+![ScreenShot](gui/pvLogo.png)
+
+PolyView is a free polygon viewer, released under the MIT license. 
+The PolyView documentation is at
 
 https://sites.google.com/site/polyview2d/
 
