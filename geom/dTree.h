@@ -1,17 +1,17 @@
 // MIT License Terms (http://en.wikipedia.org/wiki/MIT_License)
-// 
+//
 // Copyright (C) 2011 by Oleg Alexandrov
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,7 +25,7 @@
 #include <vector>
 #include <algorithm>
 #include <cfloat> // defines DBL_MAX
-#include "geomUtils.h"
+#include <geomUtils.h>
 
 // Trees for storing double precision (as opposed to integer) geometry.
 
@@ -120,9 +120,9 @@ public:
   boxTree();
   void formTreeOfBoxes(// Boxes will be reordered but otherwise
                        // unchanged inside this function
-                       std::vector<Box> & Boxes 
+                       std::vector<Box> & Boxes
                        );
-  
+
   void getBoxesInRegion(double xl, double yl, double xh, double yh, // Inputs
                         std::vector<Box> & outBoxes                 // Outputs
                         );
@@ -138,22 +138,22 @@ private:
                                boxNode<Box> *&  root
                                );
 
-  
+
   void getBoxesInRegionInternal(//Inputs
                                 double xl, double yl, double xh, double yh,
                                 boxNode<Box> * root,
                                 // Outputs
                                 std::vector<Box> & outBoxes);
-  
+
   void reset();
   boxNode<Box> * getNewboxNode();
-  
+
   // Will get nodes from this pool (for performance reasons)
-  std::vector< boxNode<Box> > m_nodePool; 
+  std::vector< boxNode<Box> > m_nodePool;
 
   int m_freeNodeIndex;
   boxNode<Box> * m_root;
-    
+
 };
 
 template <typename Box>
@@ -176,15 +176,15 @@ boxNode<Box> * boxTree<Box>::getNewboxNode(){
   boxNode<Box> * ptr = vecPtr(m_nodePool) + m_freeNodeIndex;
   assert( m_freeNodeIndex < (int)m_nodePool.size() );
   m_freeNodeIndex++;
-  return ptr;  
+  return ptr;
 }
 
 template <typename Box>
 void boxTree<Box>::formTreeOfBoxes(// Boxes will be reordered but otherwise
                                    // unchanged inside this function
-                                   std::vector<Box> & Boxes 
+                                   std::vector<Box> & Boxes
                                    ){
-  
+
   reset();
   int numBoxes = Boxes.size();
   m_nodePool.resize(numBoxes);
@@ -199,7 +199,7 @@ void boxTree<Box>::formTreeOfBoxesInternal(Box * Boxes, int numBoxes,
                                            bool isLeftRightSplit,
                                            boxNode<Box> *&  root
                                            ){
-  
+
 
   // To do: Implement this without recursion.
 
@@ -209,26 +209,26 @@ void boxTree<Box>::formTreeOfBoxesInternal(Box * Boxes, int numBoxes,
 
   // To do: No need even for the tree, it can be stored in-place in
   // Boxes, in the same way as an in-place heap is stored.
-  
+
   assert(numBoxes >= 0);
-  
+
   if (numBoxes == 0){
     root = NULL;
-    return; 
+    return;
   }
-  
+
   root = getNewboxNode();
   root->isLeftRightSplit = isLeftRightSplit;
-  
+
   if (isLeftRightSplit){ // Left-most boxes go in the left child
-    sort(Boxes, Boxes + numBoxes, leftLessThan<Box>);
+    std::sort(Boxes, Boxes + numBoxes, leftLessThan<Box>);
   }else{               // Bottom-most boxes go in the left child
-    sort(Boxes, Boxes + numBoxes, botLessThan<Box>);
+    std::sort(Boxes, Boxes + numBoxes, botLessThan<Box>);
   }
 
   int mid = numBoxes/2;
   assert( 0 <= mid && mid < numBoxes);
-  
+
   root->Rect = Boxes[mid]; // Must happen after sorting
 
   // A box is not a point, it has non-zero width. A box whose midpoint
@@ -237,29 +237,29 @@ void boxTree<Box>::formTreeOfBoxesInternal(Box * Boxes, int numBoxes,
   // searching for boxes in the tree, we will need to consider how far
   // to the right the left subtree goes, and how far to the left the
   // right subtree goes.
-  
+
   double maxInLeftChild = -DBL_MAX, minInRightChild = DBL_MAX;
   if (isLeftRightSplit){
-    
+
     for (int s = 0; s < mid; s++)
       if (Boxes[s].xh >= maxInLeftChild) maxInLeftChild = Boxes[s].xh;
-    
+
     for (int s = mid + 1; s < numBoxes; s++)
       if (Boxes[s].xl <= minInRightChild) minInRightChild = Boxes[s].xl;
-    
+
   }else{
-    
+
     for (int s = 0; s < mid; s++)
       if (Boxes[s].yh >= maxInLeftChild) maxInLeftChild = Boxes[s].yh;
-    
+
     for (int s = mid + 1; s < numBoxes; s++)
       if (Boxes[s].yl <= minInRightChild) minInRightChild = Boxes[s].yl;
-    
+
   }
 
   root->maxInLeftChild  = maxInLeftChild;
   root->minInRightChild = minInRightChild;
-  
+
   // At the next split we will split perpendicularly to the direction
   // of the current split
   formTreeOfBoxesInternal( Boxes,            mid,
@@ -298,32 +298,32 @@ void boxTree<Box>::getBoxesInRegionInternal(// Inputs
 
   const Box & B = root->Rect; // alias
 
-  if (boxesIntersect(B.xl, B.yl, B.xh, B.yh, xl, yl, xh, yh))
+  if (utils::boxesIntersect(B.xl, B.yl, B.xh, B.yh, xl, yl, xh, yh))
     outBoxes.push_back(B);
-  
+
   if (root->isLeftRightSplit){
-    
+
     if (root->left != NULL  && xl <= root->maxInLeftChild)
       getBoxesInRegionInternal(xl, yl, xh, yh, root->left,  outBoxes);
     if (root->right != NULL && xh >= root->minInRightChild)
       getBoxesInRegionInternal(xl, yl, xh, yh, root->right, outBoxes);
-    
+
   }else{
-    
+
     if (root->left != NULL  && yl <= root->maxInLeftChild)
       getBoxesInRegionInternal(xl, yl, xh, yh, root->left,  outBoxes);
     if (root->right != NULL && yh >= root->minInRightChild)
       getBoxesInRegionInternal(xl, yl, xh, yh, root->right, outBoxes);
-    
+
   }
-    
+
   return;
 }
 
 class edgeTree{
-  
+
 public:
-  
+
   void putPolyEdgesInTree(const dPoly & poly);
 
   void findPolyEdgesInBox(// inputs
@@ -332,7 +332,7 @@ public:
                           // outputs
                           std::vector<utils::seg> & edgesInBox
                           );
-  
+
   void findClosestEdgeToPoint(// inputs
                               double x0, double y0,
                               // outputs
@@ -342,7 +342,7 @@ public:
                               // edge where closestDist is achieved
                               double & closestX, double & closestY
                               );
-  
+
 private:
 
   inline void edgeToBox(//inputs
@@ -358,9 +358,9 @@ private:
     R = utils::dRectWithId(bx, by, ex, ey, id);
     return;
   }
-  
+
   inline void boxToEdge(// inputs
-                        const utils::dRectWithId & R, 
+                        const utils::dRectWithId & R,
                         // outputs
                         double & bx, double & by, double & ex, double & ey
                         ){
@@ -370,7 +370,7 @@ private:
     if (id & 1) std::swap (bx, ex);
     if (id & 2) std::swap (by, ey);
   }
-  
+
   void findClosestEdgeToPointInternal(// inputs
                                       double x0, double y0,
                                       boxNode<utils::dRectWithId> * root,
@@ -380,9 +380,9 @@ private:
                                       );
   // Internal data structures
   boxTree<utils::dRectWithId>      m_boxTree;
-  std::vector<utils::dRectWithId>  m_allEdges; 
+  std::vector<utils::dRectWithId>  m_allEdges;
   std::vector<utils::dRectWithId>  m_boxesInRegion;
-  
+
 };
 
 
