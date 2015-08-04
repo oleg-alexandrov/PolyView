@@ -166,7 +166,6 @@ reproducibility.
 * Enforce integer vertices and edge angles multiple of 45 degrees
 * Create a polygon with arbitrary angles
 * Delete the polygon at mouse cursor
-* Enter align mode (a mode in which, given two polygon files, the second polygon file is kept fixed, while the first one can be interactively translated using Shift-Mouse and rotated/flipped from the right-click menu until it aligns to the second one)
 * Enter move polygons mode (use Shift-Mouse to move a polygon; if some polygons are selected using a highlight, then all selected polygons will be moved)
 * Enter move vertices mode (use Shift-Mouse to move a vertex)
 * Enter move edges mode (use Shift-Mouse to move an edge)
@@ -175,6 +174,9 @@ reproducibility.
 * Copy the polygon closest to the mouse cursor
 * Paste the polygon closest to the mouse cursor
 * Reverse the orientation of the polygon closest to the mouse cursor
+* Insert text label
+* Delete text label
+* Enter align mode (a mode in which, given two polygon files, the second polygon file is kept fixed, while the first one can be interactively translated using Shift-Mouse and rotated/flipped from the right-click menu until it aligns to the second one)
 
 # Command line options
 
