@@ -1,11 +1,11 @@
 ![ScreenShot](gui/pvLogo.png)
 
 PolyView is a free and open source cross-platform program designed to
-quickly load and visualize multiple sets of polygon files from the
-command line. It can zoom and pan, show polygons as edges, points, and
-filled, display text labels, print the coordinates of vertices and
-measure distances, change the order in which polygons are displayed,
-choose which polygons to show, etc.
+quickly load and visualize multiple files containing polygons. It can
+zoom and pan, show polygons as edges, points, and filled, display text
+labels, print the coordinates of vertices and measure distances,
+change the order in which polygons are displayed, choose which
+polygons to show, etc.
 
 PolyView can also do basic polygon editing, such as adding,
 deleting, moving, rotating, and scaling polygons, adding, deleting,
