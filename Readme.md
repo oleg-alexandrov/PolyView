@@ -7,15 +7,10 @@ filled, display text labels, print the coordinates of vertices and
 measure distances, change the order in which polygons are displayed,
 choose which polygons to show, etc.
 
-PolyView can also do basic polygon editing, such as
-creating/deleting/moving/rotating/scaling polygons,
-adding/removing/modifying vertices, as well as cutting polygons to a
-box.
-
-PolyView accepts a lengthy list of command line arguments, and the
-view can be also manipulated interactively from the GUI once the
-polygons are loaded. The most frequent actions are bound to keyboard
-shortcuts. A complete list of features and functions is shown below.
+PolyView can also do basic polygon editing, such as adding,
+deleting, moving, rotating, and scaling polygons, adding, deleting,
+and moving vertices, adding and deleting text labels, as well as
+cutting polygons to a box.
 
 # License
 
@@ -72,11 +67,15 @@ color = green
 80 40
 80 30
 NEXT
+anno 70 55 text label
 ```
 
 Notice that the first vertex of each polygon is repeated again before
 the "NEXT" statement, to signal to the viewer that the polygon is
-closed.  
+closed. PolyView can also display polygonal lines, in addition to
+polygons, when the last vertex need not equal the first one. The last line
+above shows how to place a text label, with its coordinates and text.
+
 
 ## GUI functionality
 

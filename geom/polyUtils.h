@@ -1,17 +1,17 @@
 // MIT License Terms (http://en.wikipedia.org/wiki/MIT_License)
-// 
+//
 // Copyright (C) 2011 by Oleg Alexandrov
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -41,7 +41,16 @@ namespace utils{
              double & xll, double & yll,
              double & xur, double & yur
              );
-  
+
+
+  void findClosestAnnotation(// inputs
+                             double x0, double y0,
+                             const std::vector<dPoly> & polyVec,
+                             // outputs
+                             int & polyVecIndex,
+                             int & annoIndexInCurrPoly,
+                             double & minDist
+                             );
 
   void findClosestPolyVertex(// inputs
                              double x0, double y0,
@@ -53,14 +62,14 @@ namespace utils{
                              double & minX, double & minY,
                              double & minDist
                              );
-  
+
   void findDistanceBwPolys(// inputs
                            const dPoly & poly1,
                            const dPoly & poly2,
                            // outputs
                            std::vector<segDist> & distVec
                            );
-  
+
   void findDistanceFromPoly1ToPoly2(// inputs
                                     const dPoly & poly1,
                                     const dPoly & poly2,
@@ -74,7 +83,7 @@ namespace utils{
                                      // outputs
                                      std::vector<segDist> & distVec
                                      );
-  
+
   void putPolyInMultiSet(const dPoly & P, std::multiset<dPoint> & mP);
 
   void findClosestPolyEdge(// inputs
@@ -103,7 +112,7 @@ namespace utils{
                     double & xll,  double & yll,
                     double & widx, double & widy
                     );
-  
+
   void markPolysInHlts(// Inputs
                        const std::vector<dPoly> & polyVec,
                        const std::vector<dPoly> & highlights,
@@ -129,14 +138,14 @@ namespace utils{
                                   // Inputs-outputs
                                   std::vector<dPoly> & polyVec
                                   );
-  
+
   void transformMarkedPolysAroundCtr(// Inputs
                                      std::map< int, std::map<int, int> > & markedPolyIndices,
                                      const utils::matrix2 & M,
                                      // Inputs-outputs
                                      std::vector<dPoly> & polyVec
                                      );
-  
+
   void eraseMarkedPolys(// Inputs
                         std::map< int, std::map<int, int> > & markedPolyIndices,
                         // Inputs-outputs
@@ -149,9 +158,8 @@ namespace utils{
                           std::vector<dPoly> & extractedPolyVec
                           );
   int getNumElements(std::map< int, std::map<int, int> > & Indices);
-  
+
 }
-  
+
 
 #endif
-  

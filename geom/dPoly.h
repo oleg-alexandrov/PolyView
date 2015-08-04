@@ -1,17 +1,17 @@
 // MIT License Terms (http://en.wikipedia.org/wiki/MIT_License)
-// 
+//
 // Copyright (C) 2011 by Oleg Alexandrov
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -38,19 +38,19 @@ public:
   }
 
   void reset();
-  
+
   bool read_pol_or_cnt_format(std::string filename,
                               std::string type,
                               bool isPointCloud = false
                               );
-  
+
   bool readPoly(std::string filename,
                 bool isPointCloud = false
                 );
-  
+
   void writePoly(std::string filename, std::string defaultColor = "yellow");
   void bdBoxCenter(double & mx, double & my) const;
-  
+
   void appendPolygon(int numVerts,
                      const double * xv,
                      const double * yv,
@@ -58,9 +58,9 @@ public:
                      const std::string & color,
                      const std::string & layer
                      );
-  
+
   void appendPolygons(const dPoly & poly);
-  
+
   void appendRectangle(double xl, double yl, double xh, double yh,
                        bool isPolyClosed,
                        const std::string & color, const std::string & layer
@@ -78,7 +78,7 @@ public:
                 double clip_xur, double clip_yur,
                 dPoly & clippedPoly // output
                 );
-  
+
   void shift(double shift_x, double shift_y);
   void rotate(double angle);
   void scale(double scale);
@@ -90,9 +90,9 @@ public:
                       );
   void applyTransformAroundBdBoxCenter(double a11, double a12,
                                        double a21, double a22,
-                                       utils::linTrans & T 
+                                       utils::linTrans & T
                                        );
-  
+
   const int    * get_numVerts         () const { return utils::vecPtr(m_numVerts); }
   const double * get_xv               () const { return utils::vecPtr(m_xv);       }
   const double * get_yv               () const { return utils::vecPtr(m_yv);       }
@@ -101,11 +101,11 @@ public:
   std::vector<char> get_isPolyClosed  () const { return m_isPolyClosed;            }
   std::vector<std::string> get_colors () const { return m_colors;                  }
   std::vector<std::string> get_layers () const { return m_layers;                  }
-  
+
   void set_color(std::string color);
 
   void set_isPolyClosed(bool isPolyClosed);
-  
+
   void eraseMarkedPolys(// Inputs
                         std::map<int, int> & mark
                         );
@@ -116,7 +116,7 @@ public:
                                  );
   void set_isPointCloud(bool isPointCloud){ m_isPointCloud = isPointCloud; }
   bool isPointCloud() { return m_isPointCloud;}
-  
+
   void set_pointCloud(const std::vector<dPoint> & P, std::string color,
                       std::string layer);
   void buildGrid(double xl, double yl, double xh, double yh,
@@ -135,16 +135,16 @@ public:
   void set_annotations(const std::vector<anno> & A);
   void set_layerAnno(const std::vector<anno> & annotations);
   void set_vertIndexAnno(const std::vector<anno> & annotations);
-  
+
   void addAnno(const anno & A){m_annotations.push_back(A); }
   void compVertIndexAnno();
   void compLayerAnno();
-  
+
   void bdBox(double & xll, double & yll, double & xur, double & yur) const;
-  
+
   void bdBoxes(std::vector<double> & xll, std::vector<double> & yll,
                std::vector<double> & xur, std::vector<double> & yur) const;
-  
+
   void setPolygon(int numVerts,
                   const double * xv,
                   const double * yv,
@@ -152,7 +152,16 @@ public:
                   const std::string & color,
                   const std::string & layer
                   );
-  
+
+  void eraseAnno(int annoIndex);
+
+  void findClosestAnnotation(// inputs
+                             double x0, double y0,
+                             // outputs
+                             int & annoIndex,
+                             double & min_dist
+                             ) const;
+
   void findClosestPolyVertex(// inputs
                              double x0, double y0,
                              // outputs
@@ -161,14 +170,14 @@ public:
                              double & min_x, double & min_y,
                              double & min_dist
                              ) const;
-  
+
   void findClosestPolyEdge(//inputs
                            double x0, double y0,
                            // outputs
                            int & polyIndex, int & vertIndex,
                            double & minX, double & minY, double & minDist
                            ) const;
-  
+
   void eraseOnePoly(int polyIndex);
   void insertVertex(int polyIndex, int vertIndex,
                     double x, double y);
@@ -192,7 +201,7 @@ public:
                                               );
 
   void enforce45();
-  
+
 private:
 
   bool getColorInCntFile(const std::string & line, std::string & color);
@@ -200,10 +209,10 @@ private:
   void set_annoByType(const std::vector<anno> & annotations, int annoType);
 
   // If isPointCloud is true, treat each point as a set of unconnected points
-  bool                     m_isPointCloud; 
+  bool                     m_isPointCloud;
 
   std::vector<double>      m_xv;
-  std::vector<double>      m_yv; 
+  std::vector<double>      m_yv;
   std::vector<int>         m_numVerts;
   int                      m_numPolys;
   int                      m_totalNumVerts;
@@ -213,7 +222,7 @@ private:
   std::vector<anno>        m_annotations;
   std::vector<anno>        m_vertIndexAnno; // Anno showing vertex index
   std::vector<anno>        m_layerAnno;     // Anno showing layer number
-  
+
 };
 
 #endif
