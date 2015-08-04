@@ -32,13 +32,17 @@ platform and compiler.
 Its only dependency is the Qt 4 development library, which can be
 installed on Ubuntu with the command:
 
- apt-get install qmake
+```
+apt-get install qmake
+```
 
 To compile on Linux or OSX:
 
- cd gui
- qmake polyview.pro
- make
+```
+cd gui
+qmake polyview.pro
+make
+```
 
 The 'qmake' command will generate a makefile which will be used by
 'make' to build the executable. The 'gui' directory has a sample
@@ -72,9 +76,11 @@ NEXT
 
 Notice that the first vertex of each polygon is repeated again before
 the "NEXT" statement, to signal to the viewer that the polygon is
-closed.  Features of PolyView accessible from the GUI
+closed.  
 
-## Mouse buttons
+## GUI functionality
+
+### Mouse buttons
 
 The left mouse button snaps to the closest polygon vertex and prints
 its coordinates. A subsequent click also prints the distance from the
@@ -85,7 +91,7 @@ zooms in, and doing it in reverse zooms out.  Dragging the mouse while
 keeping the Control key pressed creates a highlight which can be used
 to cut the polygons to the highlight or to paste/move/delete them.
 
-## Command box
+### Command box
 
 Many GUI operations (such as zoom) echo their action as a command in
 the terminal used to start PolyView. That command can be pasted in the
@@ -93,16 +99,16 @@ command box at the bottom of the PolyView GUI to reproduce the
 original operation. This provides a basic level of scripting and
 reproducibility.
 
-## Menu functions 
+### Menu functions 
 
-### File menu
+#### File menu
 
 * Load a polygon file in addition to existing files
 * Save the polygons as one file
 * Save the polygons as individual files
 * Overwrite the existing polygons
 
-### View menu
+#### View menu
 
 * Choose which files to hide/show
 * Zoom and pan
@@ -114,18 +120,18 @@ reproducibility.
 * Show the index of each vertex
 * Show the layer ids (if present)
 
-### Edit menu
+#### Edit menu
 
 * Undo and redo
 * Create a polygon with integer vertices and edge angles multiple of 45 degrees
 * Enforce integer vertices and edge angles multiple of 45 degrees
 * Create a polygon with arbitrary angles
 
-### Transform menu
+#### Transform menu
 
 * Translate/rotate/scale the polygons
 
-### Selection menu
+#### Selection menu
 
 * Create a highlight (the polygons in the highlight are automatically selected and copied to a buffer)
 * Cut the polygons to the current highlight
@@ -135,7 +141,7 @@ reproducibility.
 * Deselect all polygons and delete all highlights
 * Translate/rotate/scale/transform selected polygons
 
-### Grid menu
+#### Grid menu
 
 * Show/hide the grid
 * Enforce that all polygon edges have angles multiple of 45 degrees and snap the vertices to the grid
@@ -143,18 +149,18 @@ reproducibility.
 * Set the grid linewidth
 * Set the grid color
 
-### Diff menu
+#### Diff menu
 
 * Change the colors of polygons so that polygons from different files have different colors
 * Enter diff mode (a mode in which two similar polygon files can be compared)
 * Show the next/previous difference between given two given polygon files (starting with the largest difference)
 
-### Options menu
+#### Options menu
 
 * Set the linewidth of polygon edges
 * Set the background color
 
-### Right-click menu
+#### Right-click menu
 
 * Show and save a mark at the current point
 * Create a polygon with integer vertices and edge angles multiple of 45 degrees
