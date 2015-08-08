@@ -25,7 +25,7 @@ portability in mind and it should be possible to compile it on any
 platform and compiler.
 
 Its only dependency is the Qt 4 library (e.g., Qt 4.8). Instructions
-on how to get Qt from are given at the end of this document.
+on how to get Qt are given at the end of this document.
 
 To compile PolyView on Linux or OSX, run:
 
