@@ -12,6 +12,10 @@ deleting, moving, rotating, and scaling polygons, adding, deleting,
 and moving vertices, adding and deleting text labels, as well as
 cutting polygons to a box.
 
+# Download
+
+ https://github.com/oleg-alexandrov/PolyView/releases
+
 # License
 
 PolyView is available under the MIT license and can be used for any
