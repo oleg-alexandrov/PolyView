@@ -24,7 +24,7 @@ OSX using g++ and on Windows with MinGW. It was written with
 portability in mind and it should be possible to compile it on any
 platform and compiler.
 
-Its only dependency is the Qt 4 development library, which can be
+Its only dependency is the Qt 4 library (e.g., Qt 4.8). Qt can be 
 installed on Ubuntu with the command:
 
 ```
@@ -55,20 +55,22 @@ a sample polygon file storing a rectangle and a triangle.
 
 ```
 color = red
-60 50
-70 50
-70 70
-60 70
-60 50
+6.5 5
+7.2 5.0
+7.2 7.0
+6.5 7.0
+6.5 5.0
 NEXT
 color = green
-80 30
-90 30
-80 40
-80 30
+8.0 3.0
+9.0 3.0
+8.0 4.0
+8.0 3.0
 NEXT
-anno 70 55 text label
+anno 7.0 5.5 text label
 ```
+
+Polygon vertices are stored in double precision.
 
 Notice that the first vertex of each polygon is repeated again before
 the "NEXT" statement, to signal to the viewer that the polygon is
