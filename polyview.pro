@@ -9,6 +9,15 @@ HEADERS = gui/polyView.h gui/appWindow.h gui/chooseFilesDlg.h gui/utils.h geom/d
 
 # Install
 polyview.path = $$(INSTALL_DIR)/bin # install directory
-polyview.files = polyview
-#polyview.extra = custom commands to run, eg. `touch somefile.txt`
+
+win32 {
+  polyview.files = polyview
+}
+unix {
+  polyview.files = polyview
+}
+macx {
+  polyview.files =  polyview.app/Contents/MacOS/polyview
+}
+
 INSTALLS += polyview
