@@ -36,7 +36,7 @@
 #include "utils.h"
 #include "chooseFilesDlg.h"
 
-class cmdLineOptions;
+struct cmdLineOptions;
 
 class polyView : public QWidget{
   Q_OBJECT
