@@ -55,7 +55,7 @@ a sample polygon file storing a rectangle and a triangle.
 
 ```
 color = red
-6.5 5
+6.5 5.0
 7.2 5.0
 7.2 7.0
 6.5 7.0
