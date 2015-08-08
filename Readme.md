@@ -34,7 +34,6 @@ apt-get install qmake
 To compile on Linux or OSX:
 
 ```
-cd gui
 qmake polyview.pro
 make
 ```
