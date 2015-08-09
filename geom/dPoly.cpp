@@ -636,7 +636,6 @@ void dPoly::findClosestAnnotation(// inputs
   min_dist = DBL_MAX;
   annoIndex = -1;
 
-  int start = 0;
   for (size_t aIter = 0; aIter < m_annotations.size(); aIter++){
     double dist = distance(x0, y0, m_annotations[aIter].x, m_annotations[aIter].y);
     if (dist <= min_dist){

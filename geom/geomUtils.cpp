@@ -1,17 +1,17 @@
 // MIT License Terms (http://en.wikipedia.org/wiki/MIT_License)
-// 
+//
 // Copyright (C) 2011 by Oleg Alexandrov
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -40,7 +40,7 @@ void utils::snapPolyLineTo45DegAngles(bool isClosedPolyLine,
   // with the x axis.
 
   if (numVerts <= 0) return;
-  
+
   // The vectors corresponding to angles multiple of 45 degree
   int numAngles = 8;
   double xs[numAngles], ys[numAngles];
@@ -60,7 +60,7 @@ void utils::snapPolyLineTo45DegAngles(bool isClosedPolyLine,
     snapOneEdgeTo45(numAngles, xs, ys, snap2ndClosest,  // inputs
                     xv[v], yv[v], xv[v + 1], yv[v + 1]  // in-out
                     );
-    
+
   }
 
   if (!isClosedPolyLine || numVerts < 3) return;
@@ -75,7 +75,7 @@ void utils::snapPolyLineTo45DegAngles(bool isClosedPolyLine,
     int vn = (v + numVerts - 1) % numVerts;
     double xp = xv[vp], xc = xv[vc], xc2 = xv[vc], xn = xv[vn];
     double yp = yv[vp], yc = yv[vc], yc2 = yv[vc], yn = yv[vn];
-    
+
     bool snap2ndClosest = false;
     snapOneEdgeTo45(numAngles, xs, ys, snap2ndClosest,  // inputs
                    xn, yn, xc2, yc2                     // in-out
@@ -109,21 +109,21 @@ void utils::snapPolyLineTo45DegAngles(bool isClosedPolyLine,
          yv[v] != round(yv[v]) ||
          !( dx == 0 || dy == 0 || abs(dx) == abs(dy) ) ){
       cerr << "Error: Expecting integer vertices with 45 degree angles."  << endl;
-      cerr << "Instead, got the vector (" << dx << ", " << dy << ") " 
+      cerr << "Instead, got the vector (" << dx << ", " << dy << ") "
            << "with starting point " << xv[v] << ' ' << yv[v] << endl;
       //assert(false);
     }
   }
-  
+
   return;
 }
 
 void utils::snapOneEdgeTo45(int numAngles, double* xs, double* ys,
-                            bool snap2ndClosest, 
+                            bool snap2ndClosest,
                             double & x0, double & y0,
                             double & x1, double & y1){
 
-  
+
   double dx = x1 - x0, dy = y1 - y0;
   double len = distance(0, 0, dx, dy);
   if (len == 0.0) return;
@@ -157,8 +157,8 @@ void utils::snapOneEdgeTo45(int numAngles, double* xs, double* ys,
     }
     minAngle = minAngle2;
   }
-  
-  // Snap to integer coordinates in the direction of minAngle 
+
+  // Snap to integer coordinates in the direction of minAngle
   double factor =  abs(xs[minAngle]) + abs(ys[minAngle]); // 1 or sqrt(2)
   len = factor*round(len/factor);
   x1 = x0 + round( len*xs[minAngle] );
@@ -179,7 +179,7 @@ void utils::minDistFromPtToSeg(//inputs
   // Given the point (xin, yin) and the segment going from (x0, y0) to
   // (x1, y1), find the point (minX, minY) on this segment (not on its
   // continuation) closest to (xin, yin).
-  
+
   double a = (x1  - x0)*(x1 - x0) + (y1  - y0)*(y1 - y0);
   double b = (xin - x0)*(x1 - x0) + (yin - y0)*(y1 - y0);
 
@@ -202,13 +202,13 @@ void utils::minDistFromPtToSeg(//inputs
 void utils::searchForColor(std::string lineStr, // input, not a reference on purpose
                            std::string & color  // output
                            ){
-  
-//   const char * xgraph_colors[] = 
+
+//   const char * xgraph_colors[] =
 //     {"black", "white", "red", "blue", "green", "violet",
 //      "orange", "yellow", "pink", "cyan", "lightGray",
 //      "darkGray", "fuchsia", "aqua", "navy", "gold"};
 
-  const char * xgraph_colors[] = 
+  const char * xgraph_colors[] =
     {"black", "white", "red", "blue", "green", "violet", // 0,  ..., 5
      "orange", "yellow", "pink", "cyan", "#A2B5CD",      // 6,  ..., 10
      "#6C7B8B", "#FF00FF", "#00CDCD", "navy", "gold"     // 11, ..., 15
@@ -228,7 +228,7 @@ void utils::searchForColor(std::string lineStr, // input, not a reference on pur
     if (start[i] == '"' || start[i] == '=' || start[i] == '\''){
       start[i] = ' ';
     }
-    
+
   }
 
   const char *delimiter = " \t";
@@ -238,14 +238,14 @@ void utils::searchForColor(std::string lineStr, // input, not a reference on pur
   color = string(pch);
 
   int numColors = sizeof(xgraph_colors)/sizeof(char*);
-  
+
   // If the color is given as a number, per xgraph's conventions
   // (e.g., red is color 2), convert that number to the color name.
   if ('0' <= pch[0] && pch[0] <= '9'){
     int colorIndex = atoi(pch)%numColors;
     color = string( xgraph_colors[colorIndex] );
   }
-  
+
   return;
 }
 
@@ -264,7 +264,7 @@ bool utils::searchForAnnotation(std::string lineStr, anno & annotation){
   }
 
   getline(iss, label); // Everything else goes to the label
-  
+
   annotation.x     = x;
   annotation.y     = y;
   annotation.label = label;
@@ -277,7 +277,7 @@ void utils::searchForLayer(std::string   lineStr, // input
                            ){
 
   layer = "";
-  
+
   // We are searching for ";" followed by zero or more spaces,
   // followed by something like "65:0"
   char * line = (char *) lineStr.c_str();
@@ -293,7 +293,7 @@ void utils::searchForLayer(std::string   lineStr, // input
   if (start2 == NULL) return;
   start2++; // Move beyond ":"
   if (*start2 == '\0') return;
-  
+
   int l2 = atoi(start2);
 
   ostringstream strout;
@@ -307,15 +307,15 @@ double utils::signedPolyArea(int numV, const double* xv, const double* yv){
 
   // Subtract the first vertex when computing the area to handle more
   // accurately polygons very far from the origin.
-  
+
   double area = 0.0;
-  
+
   for (int vIter = 0; vIter < numV; vIter++){
 
     int vNext = (vIter + 1)%numV;
     area += (xv[vIter] - xv[0])*(yv[vNext] - yv[0]) -
       (xv[vNext] - xv[0])*(yv[vIter] - yv[0]);
-    
+
   }
 
   area /= 2.0;
@@ -324,7 +324,7 @@ double utils::signedPolyArea(int numV, const double* xv, const double* yv){
 }
 
 void utils::expandBoxToGivenRatio(// inputs
-                                  double aspectRatio, 
+                                  double aspectRatio,
                                   // inputs/outputs
                                   double & xll,  double & yll,
                                   double & widx, double & widy){
@@ -354,7 +354,7 @@ void utils::expandBoxToGivenRatio(// inputs
   yll += widy/2.0 - nwidy/2.0;
 
   // Overwrite the previous box
-  widx = nwidx; 
+  widx = nwidx;
   widy = nwidy;
 
   return;
@@ -363,25 +363,25 @@ void utils::expandBoxToGivenRatio(// inputs
 bool utils::boxesIntersect(double xl1, double yl1, double xh1, double yh1,
                            double xl2, double yl2, double xh2, double yh2
                            ){
-  
+
   assert(xl1 <= xh1 && yl1 <= yh1);
   assert(xl2 <= xh2 && yl2 <= yh2);
-  
+
   return
     (
      std::max(xl1, xl2) <= std::min(xh1, xh2)
      &&
      std::max(yl1, yl2) <= std::min(yh1, yh2)
      );
-  
+
 }
 
 utils::linTrans utils::composeTransforms(utils::linTrans P, utils::linTrans Q){
 
   // Composition of two transforms
-  
+
   linTrans R;
-  
+
   R.a11 = P.a11*Q.a11 + P.a12*Q.a21;
   R.a12 = P.a11*Q.a12 + P.a12*Q.a22;
   R.a21 = P.a21*Q.a11 + P.a22*Q.a21;
@@ -398,7 +398,7 @@ utils::linTrans utils::transAroundPt(const utils::matrix2 & M, dPoint P){
   // Find the linear transformation which applies a given matrix
   // transform around the current point (for example, rotation around
   // the current point).
-  
+
   linTrans T;
   T.a11 = M.a11; T.a12 = M.a12;
   T.a21 = M.a21; T.a22 = M.a22;
@@ -412,34 +412,34 @@ bool utils::mergePolys(int an,
                        int bn,
                        const double * bx_in, const double * by_in,
                        std::vector<double> & mergedX,
-                       std::vector<double> & mergedY 
+                       std::vector<double> & mergedY
                        ){
 
   // Merge two polygons. This function is INCOMPLETE and BUGGY.
   // To be finished.
-  
+
   mergedX.clear();
   mergedY.clear();
 
   // The tol value needs careful thinking
   double tol = 1e-12;
-  
+
   // Copy the pointers to non-constant pointers so what we can swap
   // them.
   double* ax = (double*)ax_in; double* ay = (double*)ay_in;
   double* bx = (double*)bx_in; double* by = (double*)by_in;
-  
+
   bool mergeWasSuccessful = false;
-  
-  int i = 0, in = 0, j = 0, jn = 0;
+
+  int i = 0, in = 0, j = 0;
 
   // Start at a vertex of A which is not inside of B.
   for (int t = 0; t < an; t++){
     if (isPointInPolyOrOnEdges(ax[t], ay[t], bn, bx, by)) continue;
-    i = t; in = t; j = t; jn = t;
+    i = t; in = t; j = t;
     break;
   }
-  
+
   double sx = ax[i], sy = ay[i];
   double currX = ax[i], currY = ay[i];
 
@@ -481,12 +481,12 @@ bool utils::mergePolys(int an,
         if (distA < minDistA                                   ||
             (distA == minDistA && distB_beg < minDistB_beg)    ||
             (distA == minDistA && distB_beg == minDistB_beg
-             && distB_end >= maxDistB_end ) 
+             && distB_end >= maxDistB_end )
             ){
           minDistA = distA;
           minDistB_beg = distB_beg;
           maxDistB_end = distB_end;
-          j = jl; jn = jnl; x = xl; y = yl;
+          j = jl; ; x = xl; y = yl;
         }
       }
     }
@@ -520,11 +520,11 @@ bool utils::isPointInPolyOrOnEdges(double x, double y,
 
   // Is the given point either completely inside or on the edges
   // of the given polygon.
-  
+
   if (n <= 0) return false;
 
   bool isInsideOrOnEdges = false;
-  
+
   for (int i = 0; i < n; i++){
     int j = (i + 1)%n;
 
@@ -542,10 +542,10 @@ bool utils::isPointInPolyOrOnEdges(double x, double y,
       if (y >= min(y0, y1) && y <= max(y0, y1)) return true;
       else                                      continue;
     }
-    
+
     double det = (y - y0)*(x1 - x0) - (x - x0)*(y1 - y0);
     if (det == 0) return true; // is on edge
-      
+
     if (x < x1 && det < 0) isInsideOrOnEdges = !isInsideOrOnEdges;
   }
 
