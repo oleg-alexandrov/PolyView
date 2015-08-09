@@ -28,7 +28,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <string>
-#include "geomUtils.h"
+#include <geomUtils.h>
 
 namespace utils{
 

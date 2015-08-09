@@ -43,9 +43,10 @@
 #include <qdir.h>
 #include <qinputdialog.h>
 #include <qpainter.h>
-#include "polyView.h"
 #include <qmessagebox.h>
-#include "utils.h"
+
+#include <gui/polyView.h>
+#include <gui/utils.h>
 
 using namespace std;
 using namespace utils;

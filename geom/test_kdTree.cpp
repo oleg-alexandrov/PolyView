@@ -26,8 +26,8 @@
 #include <cassert>
 #include <algorithm>
 #include <limits>
-#include "kdTree.h"
-#include "dPoly.h"
+#include <kdTree.h>
+#include <dPoly.h>
 
 using namespace std;
 using namespace utils;

@@ -26,9 +26,9 @@
 #include <qimage.h>
 #include <iostream>
 #include <stdlib.h>
-#include "appWindow.h"
-#include "polyView.h"
-#include "utils.h"
+#include <appWindow.h>
+#include <polyView.h>
+#include <utils.h>
 
 using namespace std;
 using namespace utils;

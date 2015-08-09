@@ -1,17 +1,17 @@
 // MIT License Terms (http://en.wikipedia.org/wiki/MIT_License)
-// 
+//
 // Copyright (C) 2011 by Oleg Alexandrov
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,7 +26,7 @@
 #include <limits>
 #include <cstring>
 #include <algorithm>
-#include "utils.h"
+#include <gui/utils.h>
 
 using namespace std;
 
@@ -52,22 +52,22 @@ void utils::extractWindowDims(// inputs
   // Parse the command line arguments '-geo[metry] 500x600'
 
   windowWidX = 900; windowWidY = 700; // defaults
-   
+
   for (int s = 1; s < numArgs; s++){
 
     if ( !strstr(args[s-1], "-geo") ) continue;
 
     string lineStr = args[s];
     char * line    = (char*) lineStr.c_str();
-    
+
     // Blank the geometry settings once located
     // to not confuse other parsers.
     args[s-1][0] = '\0';
     args[s  ][0] = '\0';
-    
+
     char * pch;
     char delimiter[] = "x";
-    
+
     pch = strtok (line, delimiter);
     if (pch == NULL) continue;
     int windowWidX_tmp = atoi(pch);
@@ -75,14 +75,14 @@ void utils::extractWindowDims(// inputs
     pch = strtok (NULL, delimiter);
     if (pch == NULL) continue;
     int windowWidY_tmp = atoi(pch);
-    
+
     if (windowWidX_tmp > 0 && windowWidY_tmp > 0){
       windowWidX = windowWidX_tmp;
       windowWidY = windowWidY_tmp;
     }
-    
+
   }
-  
+
 }
 
 void utils::parseCmdOptions(//inputs
@@ -92,9 +92,9 @@ void utils::parseCmdOptions(//inputs
                             ){
 
   options.polyOptionsVec.clear();
-  
+
   polyOptions opt; // Each polygon file will have one such entry
-  
+
   // Skip argv[0] as that's the program name
   extractWindowDims(argc - 1, argv + 1, windowWidX, windowWidY);
 
@@ -115,12 +115,12 @@ void utils::parseCmdOptions(//inputs
       printUsage(exeName);
       exit(0);
     }
-    
+
     if ( strcmp(currArg, "-p") == 0 || strcmp(currArg, "-points") == 0 ){
       opt.plotAsPoints = !opt.plotAsPoints;
       continue;
     }
-    
+
     if ( strcmp(currArg, "-f") == 0 || strcmp(currArg, "-filledpoly") == 0 ){
       opt.isPolyFilled = true;
       continue;
@@ -193,7 +193,7 @@ void utils::parseCmdOptions(//inputs
     }
 
     if ( strcmp(currArg, "-gridcolor") == 0  &&
-         argIter < argc - 1         
+         argIter < argc - 1
          ){
       opt.gridColor = argv[argIter + 1];
       argIter++;
@@ -202,7 +202,7 @@ void utils::parseCmdOptions(//inputs
 
     if ( strcmp(currArg, "-grid") == 0  &&
          argIter < argc - 1             &&
-         strcmp(argv[argIter + 1], "on") == 0 
+         strcmp(argv[argIter + 1], "on") == 0
          ){
       opt.isGridOn = true;
       argIter++;
@@ -220,7 +220,7 @@ void utils::parseCmdOptions(//inputs
 
     // Other command line options are ignored
     if (currArg[0] == '-') continue;
-    
+
     opt.polyFileName = currArg;
 
     options.polyOptionsVec.push_back(opt);
@@ -230,7 +230,7 @@ void utils::parseCmdOptions(//inputs
   // non-empty even if no polygons were provided as input, and to make
   // sure we also parsed the options after the last polygon filename.
   options.polyOptionsVec.push_back(opt);
-  
+
   return;
 }
 
@@ -248,15 +248,15 @@ std::string utils::inFileToOutFile(const std::string & inFile){
     }else{
       outFile = currChar + outFile;
     }
-    
+
   }
 
   if (outFile.length() == 0){
     cerr << "Invalid filename" << endl;
   }
-  
+
   return outFile;
-  
+
 }
 
 std::string utils::getFilenameExtension(std::string filename){
@@ -268,10 +268,10 @@ std::string utils::getFilenameExtension(std::string filename){
   else                         return "";
 }
 
-std::string utils::replaceAll(std::string result, 
-                              const std::string & replaceWhat, 
+std::string utils::replaceAll(std::string result,
+                              const std::string & replaceWhat,
                               const std::string & replaceWithWhat){
-  
+
   while(1){
     const int pos = result.find(replaceWhat);
     if (pos == -1) break;
@@ -279,4 +279,3 @@ std::string utils::replaceAll(std::string result,
   }
   return result;
 }
-

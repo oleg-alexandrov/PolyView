@@ -26,7 +26,7 @@
 #include <cassert>
 #include <limits>
 #include <algorithm>
-#include "dPoly.h"
+#include <dPoly.h>
 
 using namespace std;
 using namespace utils;

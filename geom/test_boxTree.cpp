@@ -26,8 +26,8 @@
 #include <cassert>
 #include <limits>
 #include <ctime>
-#include "dTree.h"
-#include "dPoly.h"
+#include <dTree.h>
+#include <dPoly.h>
 
 using namespace std;
 using namespace utils;

@@ -33,8 +33,8 @@
 #include <QWidget>
 #include <vector>
 #include <map>
-#include "utils.h"
-#include "chooseFilesDlg.h"
+#include <utils.h>
+#include <chooseFilesDlg.h>
 
 struct cmdLineOptions;
 

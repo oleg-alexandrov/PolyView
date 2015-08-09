@@ -27,9 +27,9 @@
 #include <cmath>
 #include <set>
 #include <map>
-#include "dPoly.h"
-#include "geomUtils.h"
-#include "dTree.h"
+#include <dPoly.h>
+#include <geomUtils.h>
+#include <dTree.h>
 
 namespace utils{
 

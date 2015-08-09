@@ -34,10 +34,10 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
-#include "appWindow.h"
-#include "chooseFilesDlg.h"
-#include "polyView.h"
-#include "utils.h"
+#include <appWindow.h>
+#include <chooseFilesDlg.h>
+#include <polyView.h>
+#include <utils.h>
 
 using namespace std;
 
@@ -280,7 +280,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   Q3PopupMenu* help = new Q3PopupMenu( menu );
   menu->insertItem("Help", help);
   help->insertItem("Show documentation", this, SLOT(showDoc()));
-  help->insertItem("About", this, SLOT(about()));
+  //help->insertItem("About", this, SLOT(about()));
 
   return;
 }

@@ -26,8 +26,8 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 #include <QWidget>
-#include "chooseFilesDlg.h"
-#include "utils.h"
+#include <chooseFilesDlg.h>
+#include <utils.h>
 using namespace std;
 
 // Allow the user to choose which files to hide/show in the GUI.

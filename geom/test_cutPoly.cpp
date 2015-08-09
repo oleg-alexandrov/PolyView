@@ -25,8 +25,8 @@
 #include <cassert>
 #include <limits>
 #include <fstream>
-#include "dPoly.h"
-#include "cutPoly.h"
+#include <dPoly.h>
+#include <cutPoly.h>
 
 using namespace std;
 using namespace utils;

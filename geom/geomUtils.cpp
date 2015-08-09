@@ -26,12 +26,18 @@
 #include <cfloat>
 #include <cstring>
 #include <cassert>
-#include "baseUtils.h"
-#include "geomUtils.h"
-#include "edgeUtils.h"
+#include <baseUtils.h>
+#include <geomUtils.h>
+#include <edgeUtils.h>
 
 using namespace std;
 using namespace utils;
+
+std::ostream& operator<<(std::ostream& os, const anno& A){
+  os << A.x << ' ' << A.y << ' ' << A.label << std::endl;
+  return os;
+}
+
 void utils::snapPolyLineTo45DegAngles(bool isClosedPolyLine,
                                       int numVerts, double * xv, double * yv){
 

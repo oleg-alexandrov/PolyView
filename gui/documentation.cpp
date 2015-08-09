@@ -1,17 +1,17 @@
 // MIT License Terms (http://en.wikipedia.org/wiki/MIT_License)
-// 
+//
 // Copyright (C) 2011 by Oleg Alexandrov
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,7 +26,7 @@
 #include <vector>
 #include <cassert>
 #include <cstring>
-#include "utils.h"
+#include <gui/utils.h>
 using namespace std;
 
 std::string utils::getDocText(){
@@ -34,34 +34,16 @@ std::string utils::getDocText(){
   // Begin auto-generated text
 char docText[] ="<div style=\"color:rgb(0, 0, 0)\">\n"
 "<div dir=\"ltr\">\n"
-"<div style=\"background-color:rgb(255, 255, 255)\" align=\"center\"><a href=\":pvLogo.png?attredirects=0\" imageanchor=\"1\"><img alt=\"PolyView logo\" src=\":pvLogo.png\" border=\"0\"></a></div>\n"
+"<div style=\"background-color:rgb(255, 255, 255)\" align=\"center\"><a href=:pvLogo.png imageanchor=\"1\"><img alt=\"PolyView logo\" src=:pvLogo.png border=\"0\"></a></div>\n"
 "<div style=\"background-color:rgb(255, 255, 255)\" align=\"left\">\n"
 "<br>\n"
 "<br>\n"
-"<b>PolyView</b> is a free and open source software program for Linux designed to quickly load and visualize multiple sets of polygon files from the command line. It can zoom and pan, show polygons as edges, points, and filled, display text labels, print the coordinates of vertices and measure distances, change the order in which polygons are displayed, choose which polygons to show, etc.<br>\n"
+"<b>PolyView</b> is a program designed to quickly load and visualize multiple sets of polygon files from the command line. It can zoom and pan, show polygons as edges, points, and filled, display text labels, print the coordinates of vertices and measure distances, change the order in which polygons are displayed, choose which polygons to show, etc.<br>\n"
 "<br>\n"
 "PolyView can also do basic polygon editing, such as creating/deleting/moving/rotating/scaling polygons, adding/removing/modifying vertices, as well as cutting polygons to a box.<br>\n"
 "<br>\n"
-"PolyView accepts a lengthy list of command line arguments, and the view can be also manipulated interactively from the GUI once the polygons are loaded. A complete list of features and functions is shown below.<br>\n"
-"<br>\n"
-"PolyView is implemented in C++ using Qt 4. Its source code is freely available under the MIT license and can be used for any purpose, academic or commercial.\n"
+"PolyView accepts a lengthy list of command line arguments, and the view can be also manipulated interactively from the GUI once the polygons are loaded. A complete list of features and functions is shown below.\n"
 "\n"
-"<h2>Download</h2>\n"
-"<ul>\n"
-"<li><a href=\"https://sites.google.com/site/polyview2d/polyview_0.5.deb?attredirects=0\">polyview_0.5.deb</a> - Ubuntu 10.10 Debian package</li>\n"
-"<ul><li>depends on the Qt4 run-time libraries</li>\n"
-"<li>install with: dpkg -i polyview_0.5.deb</li>\n"
-"<li>path to executable is /usr/bin/polyview</li>\n"
-"<li>remove with: <span>dpkg -r polyview</span></li></ul></ul>\n"
-"</div>\n"
-"<div style=\"background-color:rgb(255, 255, 255)\" align=\"left\">\n"
-"<ul><li><a href=\"https://sites.google.com/site/polyview2d/polyview.tgz?attredirects=0\">polyview.tgz</a><span> - C++ source code</span></li>\n"
-"<ul><li><span>can be compiled on Linux and Mac OS X, and in principle on Microsoft Windows as well</span></li>\n"
-"<li><span>depends on the Qt4 development libraries, which can be installed on Ubuntu with command: apt-get install qmake\n"
-"</span></li></ul>\n"
-"</ul>\n"
-"</div>\n"
-"<div style=\"background-color:rgb(255, 255, 255)\" align=\"left\">\n"
 "<h2>Documentation</h2>\n"
 "<h3>File format</h3>\n"
 "PolyView was inspired by <a href=\"http://www.xgraph.org/xgraph.html\">xgraph</a>,\n"
@@ -328,7 +310,6 @@ char docText[] ="<div style=\"color:rgb(0, 0, 0)\">\n"
 "</tr>\n"
 "</tbody>\n"
 "</table>\n"
-"<b>Author:</b> Oleg Alexandrov &lt;<a href=\"mailto:oleg.alexandrov@gmail.com\">oleg.alexandrov@gmail.com</a>&gt;\n"
 "</div>\n"
 "\n"
 "</div>\n"

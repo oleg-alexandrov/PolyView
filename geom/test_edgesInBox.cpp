@@ -25,9 +25,9 @@
 #include <cstdlib>
 #include <cassert>
 #include <limits>
-#include "dPoly.h"
-#include "dTree.h"
-#include "geomUtils.h"
+#include <dPoly.h>
+#include <dTree.h>
+#include <geomUtils.h>
 
 using namespace std;
 using namespace utils;

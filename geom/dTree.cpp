@@ -26,10 +26,10 @@
 #include <vector>
 #include <cassert>
 #include <cstring>
-#include "edgeUtils.h"
-#include "dTree.h"
-#include "geomUtils.h"
-#include "dPoly.h"
+#include <edgeUtils.h>
+#include <dTree.h>
+#include <geomUtils.h>
+#include <dPoly.h>
 using namespace std;
 using namespace utils;
 

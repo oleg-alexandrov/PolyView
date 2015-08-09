@@ -26,9 +26,9 @@
 #include <vector>
 #include <cassert>
 #include <cfloat> // defines DBL_MAX
-#include "kdTree.h"
-#include "baseUtils.h"
-#include "geomUtils.h"
+#include <kdTree.h>
+#include <baseUtils.h>
+#include <geomUtils.h>
 
 using namespace std;
 using namespace utils;

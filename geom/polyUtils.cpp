@@ -27,12 +27,12 @@
 #include <cstring>
 #include <cassert>
 #include <algorithm>
-#include "edgeUtils.h"
-#include "dPoly.h"
-#include "polyUtils.h"
-#include "geomUtils.h"
-#include "kdTree.h"
-#include "dTree.h"
+#include <edgeUtils.h>
+#include <dPoly.h>
+#include <polyUtils.h>
+#include <geomUtils.h>
+#include <kdTree.h>
+#include <dTree.h>
 
 using namespace std;
 using namespace utils;

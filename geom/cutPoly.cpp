@@ -23,9 +23,9 @@
 #include <algorithm>
 #include <fstream>
 #include <cfloat>
-#include "cutPoly.h"
-#include "baseUtils.h"
-#include "edgeUtils.h"
+#include <cutPoly.h>
+#include <baseUtils.h>
+#include <edgeUtils.h>
 
 using namespace std;
 using namespace utils;

@@ -24,8 +24,8 @@
 
 #include <vector>
 #include <map>
-#include "baseUtils.h"
-#include "geomUtils.h"
+#include <baseUtils.h>
+#include <geomUtils.h>
 
 
 // A class holding a set of polygons in double precision

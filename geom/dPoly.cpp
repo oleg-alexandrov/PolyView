@@ -28,8 +28,8 @@
 #include <cstring>
 #include <string>
 #include <map>
-#include "cutPoly.h"
-#include "dPoly.h"
+#include <cutPoly.h>
+#include <dPoly.h>
 using namespace std;
 using namespace utils;
 
@@ -391,12 +391,14 @@ void dPoly::scale(double scale){
 
   vector<anno> annotations;
   for (int annoType = 0; annoType < 3; annoType++){
+
     get_annoByType(annotations, annoType);
     for (int i = 0; i < (int)annotations.size(); i++){
       anno & A = annotations[i]; // alias
       A.x *= scale;
       A.y *= scale;
     }
+
     set_annoByType(annotations, annoType);
   }
 
@@ -520,6 +522,8 @@ void dPoly::get_annotations (std::vector<anno> & annotations) const{
 
 void dPoly::set_annotations(const std::vector<anno> & A){
   m_annotations = A;
+  for (size_t i=0 ; i < m_annotations.size();i++){
+  }
 }
 
 void dPoly::set_vertIndexAnno(const std::vector<anno> & annotations){

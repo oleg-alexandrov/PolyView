@@ -90,6 +90,12 @@ zooms out.  Dragging the mouse while keeping the Control key pressed
 creates a highlight which can be used to cut the polygons to the
 highlight or to paste/move/delete them.
 
+### Keyboard shortcuts
+
+Panning is accomplished by using the arrow keys, zooming is done with
++ and -. Many other actions are bound to keyboard keys, as can be seen
+when invoking them from the menu.
+
 ### Command box
 
 Many GUI operations (such as zoom) echo their action as a command in
