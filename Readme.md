@@ -17,7 +17,8 @@ cutting polygons to a box.
 * https://github.com/oleg-alexandrov/PolyView/releases
 
 On Linux and OSX the PolyView program is installed in the bin/
-directory.  On Windows it is in the base directory.
+directory.  On Windows it is in the base directory. The Windows
+version is large because of the size of the Qt libraries.
 
 # License
 
@@ -81,21 +82,21 @@ above shows how to place a text label, with its coordinates and text.
 ### Mouse buttons
 
 The left mouse button snaps to the closest polygon vertex and prints
-its coordinates. A subsequent click also prints the distance from the
-previous vertex to the current one.  The middle mouse button prints
-the coordinates of where the mouse clicked, without snapping to the
-closest vertex.  Dragging the mouse from lower-left to upper-right
-zooms in, and doing it in reverse zooms out.  Dragging the mouse while
-keeping the Control key pressed creates a highlight which can be used
-to cut the polygons to the highlight or to paste/move/delete them.
+its coordinates in the terminal used to start PolyView. A subsequent
+click also prints the distance from the previous vertex to the current
+one.  The middle mouse button prints the coordinates of where the
+mouse clicked, without snapping to the closest vertex.  Dragging the
+mouse from lower-left to upper-right zooms in, and doing it in reverse
+zooms out.  Dragging the mouse while keeping the Control key pressed
+creates a highlight which can be used to cut the polygons to the
+highlight or to paste/move/delete them.
 
 ### Command box
 
 Many GUI operations (such as zoom) echo their action as a command in
-the terminal used to start PolyView. That command can be pasted in the
-command box at the bottom of the PolyView GUI to reproduce the
-original operation. This provides a basic level of scripting and
-reproducibility.
+the terminal. That command can be pasted in the command box at the
+bottom of the PolyView GUI to reproduce the original operation. This
+provides a basic level of scripting and reproducibility.
 
 ### Menu functions 
 
