@@ -76,7 +76,7 @@ polygons, when the last vertex need not equal the first one. The last line
 above shows how to place a text label, with its coordinates and text.
 
 
-## GUI functionality
+## Functionality
 
 ### Mouse buttons
 

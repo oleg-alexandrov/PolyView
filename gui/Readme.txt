@@ -1,4 +1,3 @@
-The directory containing the gui and the compiled executable.
+This directory contains all GUI-related code.
 
-See ../Readme.txt for more information.
 
