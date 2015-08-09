@@ -1,22 +1,21 @@
 ![ScreenShot](pvLogo.png)
 
 PolyView is a free and open source cross-platform program designed to
-quickly load and visualize multiple files containing polygons. It can
-zoom and pan, show polygons as edges, points, and filled, display text
-labels, print the coordinates of vertices and measure distances,
+quickly load, view, and edit multiple files containing polygons. It
+can zoom and pan, show polygons as edges, points, and filled, display
+text labels, print the coordinates of vertices and measure distances,
 change the order in which polygons are displayed, choose which
 polygons to show, etc.
 
-PolyView can also do basic polygon editing, such as adding,
-deleting, moving, rotating, and scaling polygons, adding, deleting,
-and moving vertices, adding and deleting text labels, as well as
-cutting polygons to a box.
+PolyView can add, delete, move, rotate, and scale polygons, add,
+delete, and move vertices and edges, add and delete text labels, and
+cut polygons to a box.
 
 # Download
 
 * https://github.com/oleg-alexandrov/PolyView/releases
 
-On Linux and OSX the PolyView program is installed in the bin/
+On Linux and OSX the PolyView program is installed in the *bin*
 directory.  On Windows it is in the base directory. The Windows
 version is large because of the size of the Qt libraries.
 
@@ -27,8 +26,8 @@ purpose, academic or commercial.
 
 # Compiling
 
-PolyView is written in C++. It was successfully compiled on Linux and
-OSX using g++ and on Windows with MinGW. It was written with
+PolyView is written in C++. It was successfully compiled on Linux with
+g++, on OSX with clang, and on Windows with MinGW. It was written with
 portability in mind and it should be possible to compile it on any
 platform and compiler.
 
