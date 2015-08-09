@@ -93,8 +93,8 @@ highlight or to paste/move/delete them.
 ### Keyboard shortcuts
 
 Panning is accomplished by using the arrow keys, zooming is done with
-+ and -. Many other actions are bound to keyboard keys, as can be seen
-when invoking them from the menu.
+the plus and minus keys. Many other actions are bound to keyboard
+keys, as can be seen when invoking them from the menu.
 
 ### Command box
 
@@ -191,19 +191,19 @@ polygons are displayed.
 
 * -h | -help	Show the available command line options
 * -geo[metry] `width`x`height`	The window size in pixels (for example, 800x800)
-* -bg | -backgroundColor`color`	Color of the background (the default is black)
-* -c | -color`color`	All polygons after this option will show up in the given color (the default is to use the colors specified in the polygon files) 
-* -fs | -fontSize`integer`	The text font size in pixels
-* -lw | -lineWidth`integer`	All polygons after this option will show up with given linewidth
+* -bg | -backgroundColor `color`	Color of the background (the default is black)
+* -c | -color `color`	All polygons after this option will show up in the given color (the default is to use the colors specified in the polygon files) 
+* -fs | -fontSize `integer`	The text font size in pixels
+* -lw | -lineWidth `integer`	All polygons after this option will show up with given linewidth
 * -p | -points	All polygons after this option will show up as vertices rather than edges (a subsequent -p option undoes this behavior)
 * -cp | -closedPoly	All polygons after this option will show up as closed (the last vertex is connected to the first one)
 * -nc | -nonClosedPoly	Interpret the polygons after this option as polygonal lines (the last vertex is not connected to the first one)
 * -f | -filledPoly	All polygons after this option will show up as filled
 * -nf | -nonFilledPoly	All polygons after this option will show up as not filled
 * -grid on | off	Turn on/off the grid display
-* -gridSize`integer`	Grid size
-* -gridWidth`integer`	Grid width in pixels
-* -gridColor`color`	Grid color
+* -gridSize `integer`	Grid size
+* -gridWidth `integer`	Grid width in pixels
+* -gridColor `color`	Grid color
 
 # Compiling Qt 
 
