@@ -118,8 +118,8 @@ if __name__ == '__main__':
     parser.add_option('--debug',       dest='loglevel',  default=logging.INFO, action='store_const', const=logging.DEBUG, help='Turn on debug messages')
     parser.add_option('--include',     dest='include',   default='./whitelist', help='A file that lists the binaries for the dist')
     parser.add_option('--keep-temp',   dest='keeptemp',  default=False, action='store_true', help='Keep tmp distdir around for debugging')
-    parser.add_option('--set-version', dest='version',   default=None, help='Set the version number to use for the generated tarball')
-    parser.add_option('--set-name',    dest='name',      default='StereoPipeline', help='Tarball name for this dist')
+    parser.add_option('--set-version', dest='version',   default="1.0", help='Set the version number to use for the generated tarball')
+    parser.add_option('--set-name',    dest='name',      default='polyview', help='Tarball name for this dist')
 #     parser.add_option('--isisroot',    dest='isisroot',  default=None, help='Use a locally-installed isis at this root')
 
     global opt

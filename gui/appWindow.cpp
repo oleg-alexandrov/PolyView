@@ -1,17 +1,17 @@
 // MIT License Terms (http://en.wikipedia.org/wiki/MIT_License)
-// 
+//
 // Copyright (C) 2011 by Oleg Alexandrov
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -45,7 +45,7 @@ cmdLine::cmdLine(QWidget* parent): QLineEdit(parent){}
 cmdLine::~cmdLine(){}
 
 appWindow::appWindow(QWidget* parent, std::string progName,
-                     const cmdLineOptions & options, 
+                     const cmdLineOptions & options,
                      int windowWidX, int windowWidY
                      ): QMainWindow(parent, progName.c_str()), m_poly(NULL){
 
@@ -55,7 +55,7 @@ appWindow::appWindow(QWidget* parent, std::string progName,
   resize(windowWidX, windowWidY);
 
   createMenusAndMainWidget(options);
-  
+
   // Command line
   m_cmdLine = new cmdLine(this);
   m_cmdLine->setAlignment(Qt::AlignLeft);
@@ -79,7 +79,7 @@ void appWindow::closeEvent(QCloseEvent *){
 void appWindow::forceQuit(){
   exit(0); // A fix for an older buggy version of Qt
 }
-                     
+
 bool appWindow::eventFilter(QObject *obj, QEvent *event){
 
   // If the alt or control key is hit, and the focus is on the command
@@ -104,7 +104,7 @@ bool appWindow::eventFilter(QObject *obj, QEvent *event){
       return true;
     }
   }
-  
+
   //cout << "Other event: " << (int)event->type() << endl;
   return QWidget::eventFilter(obj, event);
 }
@@ -112,7 +112,7 @@ bool appWindow::eventFilter(QObject *obj, QEvent *event){
 appWindow::~appWindow(){
 
   if (m_poly != NULL){ delete m_poly; m_poly = NULL; }
-  
+
 }
 
 void appWindow::procCmdLine(){
@@ -129,7 +129,7 @@ void appWindow::insertCmdFromHist(){
   int numHistItems = m_cmdHist.size();
   m_histPos = min(m_histPos, numHistItems);
   m_histPos = max(0, m_histPos);
-  
+
   if (m_histPos < numHistItems){
     m_cmdLine->setText(m_cmdHist[m_histPos].c_str());
   }else{
@@ -147,7 +147,7 @@ void appWindow::shiftUp (){
     m_histPos--;
     insertCmdFromHist();
   }
-  
+
 }
 
 void appWindow::shiftDown (){
@@ -158,7 +158,7 @@ void appWindow::shiftDown (){
     m_histPos++;
     insertCmdFromHist();
   }
-  
+
 }
 
 void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
@@ -168,7 +168,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   // This is a workaround for a bug in a certain versions of Qt. If
   // the main widget is created before the menus then it gets
   // incorrect geometry.
-  
+
   QMenuBar* menu = menuBar();
   Q3PopupMenu* file = new Q3PopupMenu( menu );
   menu->insertItem("File", file);
@@ -213,7 +213,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   menu->insertItem("Edit", edit);
   edit->insertItem("Undo",  m_poly, SLOT(undo()), Qt::Key_Z);
   edit->insertItem("Redo",  m_poly, SLOT(redo()), Qt::ALT + Qt::Key_Z);
-  
+
   edit->insertItem("Create poly with int vertices and 45x deg angles",
                    m_poly, SLOT(create45DegreeIntPoly()), Qt::Key_N);
   edit->insertItem("Enforce int vertices and 45x deg angles", m_poly, SLOT(enforce45()),
@@ -280,7 +280,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   Q3PopupMenu* help = new Q3PopupMenu( menu );
   menu->insertItem("Help", help);
   help->insertItem("Show documentation", this, SLOT(showDoc()));
-  //help->insertItem("About", this, SLOT(about()));
+  help->insertItem("About", this, SLOT(about()));
 
   return;
 }
@@ -307,8 +307,8 @@ void appWindow::about(){
 
 docWindow::docWindow(QWidget *){
   resize(900, 800);
-  m_textArea = new QTextEdit (this); 
-  setCentralWidget (m_textArea); 
+  m_textArea = new QTextEdit (this);
+  setCentralWidget (m_textArea);
 }
 
 docWindow::~docWindow(){
@@ -323,9 +323,9 @@ void docWindow::setText(const std::string & docText){
                                       QUrl("pvLogo.png" ), img);
   m_textArea->clear();
   m_textArea->setReadOnly(true);
-  m_textArea->setCurrentFont(QFont("Monospace", 10)); 
+  m_textArea->setCurrentFont(QFont("Monospace", 10));
   m_textArea->insertHtml(docText.c_str());
   m_textArea->moveCursor(QTextCursor::Start);
-  
+
   return;
 }
