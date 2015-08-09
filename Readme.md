@@ -14,7 +14,7 @@ cutting polygons to a box.
 
 # Download
 
- https://github.com/oleg-alexandrov/PolyView/releases
+* https://github.com/oleg-alexandrov/PolyView/releases
 
 # License
 
@@ -209,17 +209,12 @@ apt-get install qmake
 
 To compile Qt 4.8 from source, get the source code from:
 
-``` 
-https://download.qt.io/archive/qt/4.8/
-```
+*  https://download.qt.io/archive/qt/4.8/
 
 After unzipping the archive and ensuring that the compiler is in the
 path, run:
 
-configure -opensource -fast -confirm-license -nomake demos -nomake examples -nomake docs -nomake translations -no-webkit -no-script -no-scripttools -no-openssl -no-libjpeg -no-libmng -no-libpng  -no-libtiff -no-cups -no-nis -no-opengl -no-openvg -no-phonon -no-phonon-backend -no-sql-psql -no-dbus
-
-
-
+* configure -opensource -fast -confirm-license -nomake demos -nomake examples -nomake docs -nomake translations -no-webkit -no-script -no-scripttools -no-openssl -no-libjpeg -no-libmng -no-libpng  -no-libtiff -no-cups -no-nis -no-opengl -no-openvg -no-phonon -no-phonon-backend -no-sql-psql -no-dbus
 
 # Author
 
