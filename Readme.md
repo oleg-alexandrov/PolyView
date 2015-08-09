@@ -207,8 +207,7 @@ polygons are displayed.
 
 # Compiling Qt 
 
-PolyView depends on Qt 4. It was tested to compile on Linux, OSX, and
-Windows (on the latter with MinGW) with Qt 4.8. 
+PolyView was tested to compile on Linux, OSX, and Windows with Qt 4.8 but other 4.x versions should work as well.
 
 Qt can be installed on Ubuntu with the command:
 

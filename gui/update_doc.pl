@@ -38,10 +38,16 @@ MAIN:{
   my $text = join("", <FILE>);
   close(FILE);
 
-  my $tag = 'char docText[] =' . $docText . ";\n";
+  $docText = 'char docText[] =' . $docText . ";\n";
 
-  $text =~ s!(^.*?[ ]*//[ ]* Begin.*?\n).*?([ ]*//[ ]*End.*?)$! $1 . $tag . $2 !egs;
-  $text =~ s/\s*$/\n/g;
+  if ($text =~ /(^.*?\/\/\s*Begin.*?\n).*?([ ]*\/\/\s*End.*?)$/s){
+    $text = $1 . $docText . $2;
+    $text =~ s/\s*$/\n/g;
+    print "Success updating the doc.\n";
+  }else{
+    print "Failed updating the doc.\n";
+    exit(1);
+  }
 
   open(FILE, ">$cppDocFile");
   print FILE $text;
