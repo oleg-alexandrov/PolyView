@@ -16,6 +16,9 @@ cutting polygons to a box.
 
 * https://github.com/oleg-alexandrov/PolyView/releases
 
+On Linux and OSX the PolyView program is installed in the bin/
+directory.  On Windows it is in the base directory.
+
 # License
 
 PolyView is available under the MIT license and can be used for any
@@ -29,7 +32,7 @@ portability in mind and it should be possible to compile it on any
 platform and compiler.
 
 Its only dependency is the Qt 4 library (e.g., Qt 4.8). Instructions
-on how to get Qt are given at the end of this document.
+on how to compile Qt are given at the end of this document.
 
 To compile PolyView on Linux or OSX, run:
 
