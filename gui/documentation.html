@@ -47,14 +47,31 @@ on how to compile Qt are given at the end of this document.</p>
 make
 </code></pre>
 
+<h1><a id="user-content-documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Comparison with XGRAPH</h1>
+
+<p>PolyView was inspired by xgraph (<a
+href="http://www.xgraph.org/">http://www.xgraph.org/</a>).  The latter
+is a general purpose data plotter and has a lot of features PolyView
+lacks. PolyView has extra features for viewing and editing polygons.
+
+<p>Most important (as of 2007), PolyView is much more responsive for
+polygons with very many vertices, and it can handle zooming to small
+regions and polygons with large floating point vertex coordinates
+without overflowing and showing incorrect results. Credit for
+responsiveness goes to Qt, and issues with overlow required careful
+handling.
+
+<p>Lastly, PolyView is open-source and under a liberal license, and can
+be improved in a collaborative manner.
+
 <h1><a id="user-content-documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h1>
 
 <h2><a id="user-content-file-format" class="anchor" href="#file-format" aria-hidden="true"><span class="octicon octicon-link"></span></a>File format</h2>
 
-<p>PolyView was inspired by xgraph (<a href="http://www.xgraph.org/">http://www.xgraph.org/</a>), and it uses the xgraph file format,
-in which the x and y coordinates of each polygon are stored as two
-columns in a plain text file followed by the "NEXT" statement. Here is
-a sample polygon file storing a rectangle and a triangle.</p>
+<p>PolyView uses the XGRAPH file format, in which the x and y
+coordinates of each polygon are stored as two columns in a plain text
+file followed by the "NEXT" statement. Here is a sample polygon file
+storing a rectangle and a triangle.</p>
 
 <pre><code>color = red
 6.5 5.0
