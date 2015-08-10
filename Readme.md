@@ -47,12 +47,11 @@ PolyView was inspired by XGRAPH (http://www.xgraph.org/). The latter
 is a general purpose data plotter and has a lot of features PolyView
 lacks. PolyView has extra features for viewing and editing polygons.
 
-Most important (as of 2007), PolyView is much more responsive for
-polygons with very many vertices, and it can handle zooming to small
-regions and polygons with large floating point vertex coordinates
-without overflowing and showing incorrect results. Credit for
-responsiveness goes to Qt, and issues with overlow required careful
-handling.
+PolyView is (as of 2007) more responsive for polygons with very many 
+vertices, and it can handle zooming to small regions of polygons with 
+large floating point vertex coordinates without overflowing and 
+showing incorrect results. Credit for responsiveness goes to Qt,
+and issues with overlow required careful handling.
 
 Lastly, PolyView is open-source and under a liberal license, and can
 be improved in a collaborative manner.
