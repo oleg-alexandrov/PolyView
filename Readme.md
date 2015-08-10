@@ -45,10 +45,11 @@ make
 
 ## File format
 
-PolyView was inspired by xgraph, and it uses the xgraph file format,
-in which the x and y coordinates of each polygon are stored as two
-columns in a plain text file followed by the "NEXT" statement. Here is
-a sample polygon file storing a rectangle and a triangle.
+PolyView was inspired by xgraph (http://www.xgraph.org/), and it uses
+the xgraph file format, in which the x and y coordinates of each
+polygon are stored as two columns in a plain text file followed by the
+"NEXT" statement. Here is a sample polygon file storing a rectangle
+and a triangle.
 
 ```
 color = red
