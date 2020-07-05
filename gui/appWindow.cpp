@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 #include <qapplication.h>
-#include <Q3PopupMenu>
+//#include <Q3PopupMenu>
 #include <qlabel.h>
 #include <QtGui>
 #include <qmenubar.h>
@@ -47,7 +47,7 @@ cmdLine::~cmdLine(){}
 appWindow::appWindow(QWidget* parent, std::string progName,
                      const cmdLineOptions & options,
                      int windowWidX, int windowWidY
-                     ): QMainWindow(parent, progName.c_str()), m_poly(NULL){
+                     ): QMainWindow(parent), m_poly(NULL){
 
   installEventFilter(this);
 
@@ -170,6 +170,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   // incorrect geometry.
 
   QMenuBar* menu = menuBar();
+#if 0  
   Q3PopupMenu* file = new Q3PopupMenu( menu );
   menu->insertItem("File", file);
 
@@ -247,6 +248,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
                         m_poly, SLOT(scaleSelectedPolys()) );
   transform->insertItem("Transform selected polygons", m_poly,
                         SLOT(transformSelectedPolys()) );
+#endif
 #if 0
   selection->addSeparator();
   transform->insertItem("Translate polygons", m_poly, SLOT(translatePolys()),
@@ -257,6 +259,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
                         Qt::CTRL+Qt::Key_X);
 #endif
 
+#if 0
   Q3PopupMenu* grid = new Q3PopupMenu( menu );
   menu->insertItem("Grid", grid);
   grid->insertItem("Toggle poly grid", m_poly, SLOT(toggleShowGrid()), Qt::Key_G);
@@ -281,24 +284,26 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   menu->insertItem("Help", help);
   help->insertItem("Show documentation", this, SLOT(showDoc()));
   help->insertItem("About", this, SLOT(about()));
-
+#endif
   return;
 }
 
 void appWindow::showDoc(){
   m_docWindow.setText(utils::getDocText());
-  m_docWindow.setCaption(this->caption()); // Borrow the caption from the parent
-  m_docWindow.show();
+//  m_docWindow.setCaption(this->caption()); // Borrow the caption from the parent
+   m_docWindow.show();
   return;
 }
 
 void appWindow::about(){
 
   string aboutStr = string("About ") + m_progName;
-  static QMessageBox* about
-    = new QMessageBox( aboutStr.c_str(),
+  static QMessageBox* about;
+#if 0
+  = new QMessageBox( aboutStr.c_str(),
                        "© Oleg Alexandrov        ", // extra space to make window bigger
-                       QMessageBox::NoIcon, 1, 0, 0, this, 0, FALSE );
+                       QMessageBox::NoIcon, 1, 0, 0, this, 0, false );
+#endif
   about->setButtonText( 1, "OK" );
   about->show();
 

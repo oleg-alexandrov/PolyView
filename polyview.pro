@@ -1,10 +1,10 @@
 # Build
 TEMPLATE     = app
 TARGET       = polyview
-QT          += qt3support
 RESOURCES    = polyview.qrc
 INCLUDEPATH += geom
 INCLUDEPATH += gui
+QT += widgets
 
 #TODO: See if compiling statically can reduce executable size
 #win32 {

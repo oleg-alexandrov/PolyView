@@ -201,7 +201,7 @@ private:
 
   void createHighlightWithRealInputs(double xll, double yll, double xur, double yur);
 
-  void printCurrCoords(const Qt::ButtonState & state, // input
+  void printCurrCoords(const Qt::MouseButtons & state, // input
                        int & currX, int  & currY      // in-out
                        );
   bool readOnePoly(// inputs

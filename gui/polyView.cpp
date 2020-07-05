@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 #include <QPolygon>
-#include <Q3PopupMenu>
+//#include <Q3PopupMenu>
 #include <QContextMenuEvent>
 #include <QEvent>
 #include <QFileDialog>
@@ -473,8 +473,9 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
     if (pIter > 0) start += numVerts[pIter - 1];
 
-    // Change the poly file color if it is the background color or invalid
+// Change the poly file color if it is the background color or invalid
     QColor color = QColor( colors[pIter].c_str() );
+#if 0
     if ( color == backgroundColor() || color == QColor::Invalid){
       if ( backgroundColor() != QColor("white") ){
         color = QColor("white");
@@ -482,6 +483,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
         color = QColor("black");
       }
     }
+#endif
 
     int pSize = numVerts[pIter];
 
@@ -518,7 +520,9 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
       if (plotFilled && isPolyClosed[pIter]){
         if (signedArea >= 0.0) paint->setBrush( color );
+#if 0		
         else                   paint->setBrush( backgroundColor() );
+#endif
         paint->setPen( Qt::NoPen );
       }else {
         paint->setBrush( Qt::NoBrush );
@@ -833,7 +837,7 @@ void polyView::mouseReleaseEvent ( QMouseEvent * E ){
       return;
     }
 
-    printCurrCoords(E->state(),              // input
+    printCurrCoords(E->buttons(),              // input
                     m_mouseRelX, m_mouseRelY // in-out
                     );
     return;
@@ -851,7 +855,7 @@ void polyView::wheelEvent(QWheelEvent *E){
 
   int delta = E->delta();
 
-  if (E->state() == Qt::ControlModifier){
+  if (E->buttons() == Qt::ControlModifier){
 
     // The control button was pressed. Zoom in/out around the current point.
 
@@ -870,7 +874,7 @@ void polyView::wheelEvent(QWheelEvent *E){
   }else{
 
     // Shift wheel goes left and right. Without shift we go up and down.
-    if (E->state() == Qt::ShiftModifier){
+    if (E->buttons() == Qt::ShiftModifier){
       if (delta > 0){
         shiftLeft();
       }else if (delta < 0){
@@ -920,7 +924,7 @@ void polyView::contextMenuEvent(QContextMenuEvent *E){
 
   int x = E->x(), y = E->y();
   pixelToWorldCoords(x, y, m_menuX, m_menuY);
-
+#if 0
   Q3PopupMenu menu(this);
 
   int id = 1;
@@ -979,7 +983,7 @@ void polyView::contextMenuEvent(QContextMenuEvent *E){
   menu.addSeparator();
 
   menu.exec(E->globalPos());
-
+#endif
   return;
 }
 
@@ -1382,10 +1386,12 @@ bool polyView::getStringFromGui(std::string title, std::string description,
   outputStr = "";
 
   bool ok = false;
-  QString text = QInputDialog::getText(title.c_str(), description.c_str(),
+  QString text;
+#if 0
+  = QInputDialog::getText(title.c_str(), description.c_str(),
                                        QLineEdit::Normal, inputStr.c_str(),
                                        &ok, this );
-
+#endif
   if (ok) outputStr = text.toStdString();
 
   return ok;
@@ -1549,7 +1555,9 @@ void polyView::setBgFgColorsFromPrefs(){
     bgColor   = "black";
     qtBgColor = QColor(bgColor.c_str()); // fallback color
   }
+#if 0  
   setBackgroundColor(qtBgColor);
+#endif
 
   string fgColor = m_prefs.fgColor;
   if ( QColor(fgColor.c_str()) == QColor::Invalid ){
@@ -1855,7 +1863,7 @@ void polyView::createHighlightWithRealInputs(double xll, double yll, double xur,
   return;
 }
 
-void polyView::printCurrCoords(const Qt::ButtonState & state, // input
+void polyView::printCurrCoords(const Qt::MouseButtons & state, // input
                                int & currX, int  & currY      // in-out
                                ){
 
@@ -2894,12 +2902,15 @@ void polyView::showFilesChosenByUser(){
 
 void polyView::openPoly(){
 
-  QString s = QFileDialog::getOpenFileName(QDir::currentDirPath(),
+  QString s;
+#if 0 
+ = QFileDialog::getOpenFileName(QDir::currentDirPath(),
                                            "(*.xg *.ly* *.pol)",
                                            this,
                                            "Open file dialog"
                                            "Choose a file"
                                            );
+#endif
 
   if (s.length() == 0) return;
 
