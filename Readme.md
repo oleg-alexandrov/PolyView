@@ -13,7 +13,13 @@ cut polygons to a box.
 
 # Download
 
+Older versions of PolyView which were compiled with Qt 4 can be found
+at:
+
 * https://github.com/oleg-alexandrov/PolyView/releases
+
+The newest version, compiled with Qt 5, should be compiled by the
+user.  The instructions are below.
 
 On Linux and OSX the PolyView program is installed in the *bin*
 directory.  On Windows it is in the base directory. The Windows
@@ -31,14 +37,18 @@ g++, on OSX with clang, and on Windows with MinGW. It was written with
 portability in mind and it should be possible to compile it on any
 platform and compiler.
 
-Its only dependency is the Qt 4 library (e.g., Qt 4.8). Instructions
-on how to compile Qt are given at the end of this document.
-
 To compile PolyView on Linux or OSX, run:
 
 ```
 qmake polyview.pro
 make
+```
+
+Its only dependency is the Qt 5 library (e.g., Qt 5.9). Qt can be
+installed on Ubuntu with the command:
+
+```
+apt-get install qmake
 ```
 
 # Comparison with XGRAPH
@@ -51,7 +61,7 @@ PolyView is (as of 2007) more responsive for polygons with very many
 vertices, and it can handle zooming to small regions of polygons with 
 large floating point vertex coordinates without overflowing and 
 showing incorrect results. Credit for responsiveness goes to Qt,
-and issues with overlow required careful handling.
+and issues with overflow required careful handling.
 
 Lastly, PolyView is open-source and under a liberal license, and can
 be improved in a collaborative manner.
@@ -165,7 +175,7 @@ provides a basic level of scripting and reproducibility.
 * Show/hide the grid
 * Enforce that all polygon edges have angles multiple of 45 degrees and snap the vertices to the grid
 * Set the grid size
-* Set the grid linewidth
+* Set the grid line width
 * Set the grid color
 
 #### Diff menu
@@ -176,7 +186,7 @@ provides a basic level of scripting and reproducibility.
 
 #### Options menu
 
-* Set the linewidth of polygon edges
+* Set the line width of polygon edges
 * Set the background color
 
 #### Right-click menu
@@ -209,7 +219,7 @@ polygons are displayed.
 * -bg | -backgroundColor `color`	Color of the background (the default is black)
 * -c | -color `color`	All polygons after this option will show up in the given color (the default is to use the colors specified in the polygon files) 
 * -fs | -fontSize `integer`	The text font size in pixels
-* -lw | -lineWidth `integer`	All polygons after this option will show up with given linewidth
+* -lw | -lineWidth `integer`	All polygons after this option will show up with given line width
 * -p | -points	All polygons after this option will show up as vertices rather than edges (a subsequent -p option undoes this behavior)
 * -cp | -closedPoly	All polygons after this option will show up as closed (the last vertex is connected to the first one)
 * -nc | -nonClosedPoly	Interpret the polygons after this option as polygonal lines (the last vertex is not connected to the first one)
@@ -220,27 +230,8 @@ polygons are displayed.
 * -gridWidth `integer`	Grid width in pixels
 * -gridColor `color`	Grid color
 
-# Compiling Qt 
-
-PolyView was tested to compile on Linux, OSX, and Windows with Qt 4.8 but other 4.x versions should work as well.
-
-The QT5v2 branch in this repository is an attempt at making the code compile with Qt 5. It compiles and runs, but some issues exist with refreshing the interface properly which need to be looked into.
-
-Qt can be installed on Ubuntu with the command:
-
-```
-apt-get install qmake
-```
-
-To compile Qt 4.8 from source, get the source code from:
-
-*  https://download.qt.io/archive/qt/4.8/
-
-After unzipping the archive and ensuring that the compiler is in the
-path, run:
-
-* configure -opensource -fast -confirm-license -nomake demos -nomake examples -nomake docs -nomake translations -no-webkit -no-script -no-scripttools -no-openssl -no-libjpeg -no-libmng  -no-libtiff -no-cups -no-nis -no-opengl -no-openvg -no-phonon -no-phonon-backend -no-sql-psql -no-dbus
-
 # Author
 
 Oleg Alexandrov (oleg.alexandrov@gmail.com)
+
+Many thanks to Anish Rasal Raj for porting PolyView to Qt 5.
