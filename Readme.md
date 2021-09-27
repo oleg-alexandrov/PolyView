@@ -224,6 +224,8 @@ polygons are displayed.
 
 PolyView was tested to compile on Linux, OSX, and Windows with Qt 4.8 but other 4.x versions should work as well.
 
+The QT5v2 branch in this repository is an attempt at making the code compile with Qt 5. It compiles and runs, but some issues exist with refreshing the interface properly which need to be looked into.
+
 Qt can be installed on Ubuntu with the command:
 
 ```
