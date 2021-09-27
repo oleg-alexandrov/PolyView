@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 #include <qapplication.h>
-#include <Q3PopupMenu>
+// #include <QMenu>
 #include <qlabel.h>
 #include <QtGui>
 #include <qmenubar.h>
@@ -47,7 +47,7 @@ cmdLine::~cmdLine(){}
 appWindow::appWindow(QWidget* parent, std::string progName,
                      const cmdLineOptions & options,
                      int windowWidX, int windowWidY
-                     ): QMainWindow(parent, progName.c_str()), m_poly(NULL){
+                     ): QMainWindow(parent, Qt::Window), m_poly(NULL){
 
   installEventFilter(this);
 
@@ -61,7 +61,7 @@ appWindow::appWindow(QWidget* parent, std::string progName,
   m_cmdLine->setAlignment(Qt::AlignLeft);
   m_cmdLine->setFocusPolicy(Qt::StrongFocus);
   connect( m_cmdLine, SIGNAL( returnPressed() ),
-           this, SLOT( procCmdLine() ) );
+          this, SLOT( procCmdLine() ) );
   QStatusBar * status = statusBar();
   QRect Rp = status->rect();
   m_cmdLine->setGeometry(Rp);
@@ -170,8 +170,8 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   // incorrect geometry.
 
   QMenuBar* menu = menuBar();
-  Q3PopupMenu* file = new Q3PopupMenu( menu );
-  menu->insertItem("File", file);
+  QMenu* file = new QMenu(QString("File"));
+  menu->addMenu(file);
 
   // Central widget
   m_poly = new polyView (this, opt);
@@ -179,73 +179,73 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   m_poly->setFocus();
   setCentralWidget(m_poly);
 
-  file->insertItem("Open", m_poly, SLOT(openPoly()), Qt::CTRL+Qt::Key_O);
-  file->insertItem("Save as a combined file", m_poly, SLOT(saveOnePoly()),
+  file->addAction("Open", m_poly, SLOT(openPoly()), Qt::CTRL+Qt::Key_O);
+  file->addAction("Save as a combined file", m_poly, SLOT(saveOnePoly()),
                    Qt::CTRL+Qt::Key_S);
-  file->insertItem("Save as individual files", m_poly,
+  file->addAction("Save as individual files", m_poly,
                    SLOT(saveAsMultiplePolys()), Qt::ALT+Qt::Key_S);
-  file->insertItem("Overwrite current files", m_poly,
+  file->addAction("Overwrite current files", m_poly,
                    SLOT(overwriteMultiplePolys()), Qt::CTRL+Qt::Key_W);
-  file->insertItem("Reload polygons from disk", m_poly,
+  file->addAction("Reload polygons from disk", m_poly,
                    SLOT(reloadPolys()), Qt::ALT+Qt::Key_R);
-  file->insertItem("Exit", this, SLOT(forceQuit()), Qt::Key_Q);
+  file->addAction("Exit", this, SLOT(forceQuit()), Qt::Key_Q);
 
-  Q3PopupMenu* view = new Q3PopupMenu( menu );
-  menu->insertItem("View", view);
-  view->insertItem(chooseFilesDlg::selectFilesTag(), m_poly, SLOT(chooseFilesToShow()));
-  view->insertItem("Zoom out",             m_poly, SLOT(zoomOut()),      Qt::Key_Minus);
-  view->insertItem("Zoom in",              m_poly, SLOT(zoomIn()),       Qt::Key_Equal);
-  view->insertItem("Move left",            m_poly, SLOT(shiftLeft()),    Qt::Key_Left);
-  view->insertItem("Move right",           m_poly, SLOT(shiftRight()),   Qt::Key_Right);
-  view->insertItem("Move up",              this,   SLOT(shiftUp()),      Qt::Key_Up);
-  view->insertItem("Move down",            this,   SLOT(shiftDown()),    Qt::Key_Down);
-  view->insertItem("Reset view",           m_poly, SLOT(resetView()),    Qt::Key_R);
-  view->insertItem("Change display order", m_poly, SLOT(changeOrder()),  Qt::Key_O);
-  view->insertItem("Toggle annotations",   m_poly, SLOT(toggleAnno()),   Qt::Key_A);
-  view->insertItem("Toggle filled",        m_poly, SLOT(toggleFilled()), Qt::Key_F);
-  view->insertItem("Toggle points display",
+  QMenu* view = new QMenu("View", menu );
+  menu->addMenu( view);
+  view->addAction(chooseFilesDlg::selectFilesTag(), m_poly, SLOT(chooseFilesToShow()));
+  view->addAction("Zoom out",             m_poly, SLOT(zoomOut()),      Qt::Key_Minus);
+  view->addAction("Zoom in",              m_poly, SLOT(zoomIn()),       Qt::Key_Equal);
+  view->addAction("Move left",            m_poly, SLOT(shiftLeft()),    Qt::Key_Left);
+  view->addAction("Move right",           m_poly, SLOT(shiftRight()),   Qt::Key_Right);
+  view->addAction("Move up",              this,   SLOT(shiftUp()),      Qt::Key_Up);
+  view->addAction("Move down",            this,   SLOT(shiftDown()),    Qt::Key_Down);
+  view->addAction("Reset view",           m_poly, SLOT(resetView()),    Qt::Key_R);
+  view->addAction("Change display order", m_poly, SLOT(changeOrder()),  Qt::Key_O);
+  view->addAction("Toggle annotations",   m_poly, SLOT(toggleAnno()),   Qt::Key_A);
+  view->addAction("Toggle filled",        m_poly, SLOT(toggleFilled()), Qt::Key_F);
+  view->addAction("Toggle points display",
                    m_poly, SLOT(togglePE()),          Qt::Key_P);
-  view->insertItem("Toggle show vertex indices",
+  view->addAction("Toggle show vertex indices",
                    m_poly, SLOT(toggleVertIndexAnno()), Qt::Key_V);
-  view->insertItem("Toggle show layers", m_poly, SLOT(toggleLayerAnno()), Qt::Key_L);
+  view->addAction("Toggle show layers", m_poly, SLOT(toggleLayerAnno()), Qt::Key_L);
 
-  Q3PopupMenu* edit = new Q3PopupMenu( menu );
-  menu->insertItem("Edit", edit);
-  edit->insertItem("Undo",  m_poly, SLOT(undo()), Qt::Key_Z);
-  edit->insertItem("Redo",  m_poly, SLOT(redo()), Qt::ALT + Qt::Key_Z);
+  QMenu* edit = new QMenu("Edit", menu );
+  menu->addMenu( edit);
+  edit->addAction("Undo",  m_poly, SLOT(undo()), Qt::Key_Z);
+  edit->addAction("Redo",  m_poly, SLOT(redo()), Qt::ALT + Qt::Key_Z);
 
-  edit->insertItem("Create poly with int vertices and 45x deg angles",
+  edit->addAction("Create poly with int vertices and 45x deg angles",
                    m_poly, SLOT(create45DegreeIntPoly()), Qt::Key_N);
-  edit->insertItem("Enforce int vertices and 45x deg angles", m_poly, SLOT(enforce45()),
+  edit->addAction("Enforce int vertices and 45x deg angles", m_poly, SLOT(enforce45()),
                    Qt::CTRL+Qt::Key_4);
-  edit->insertItem("Create arbitrary polygon",
+  edit->addAction("Create arbitrary polygon",
                    m_poly, SLOT(createArbitraryPoly()), Qt::CTRL+Qt::Key_N);
-  edit->insertItem("Merge polygons (buggy)",
+  edit->addAction("Merge polygons (buggy)",
                    m_poly, SLOT(mergePolys()), Qt::CTRL+Qt::Key_M);
 
-  Q3PopupMenu* selection = new Q3PopupMenu( menu );
-  menu->insertItem("Selection", selection);
-  selection->insertItem("Create highlight", m_poly, SLOT(createHlt()));
-  selection->insertItem("Cut polygons to highlight",
+  QMenu* selection = new QMenu("Selection", menu );
+  menu->addMenu( selection);
+  selection->addAction("Create highlight", m_poly, SLOT(createHlt()));
+  selection->addAction("Cut polygons to highlight",
                         m_poly, SLOT(cutToHlt()), Qt::Key_C);
-  selection->insertItem("Delete selected polygons",
+  selection->addAction("Delete selected polygons",
                         m_poly, SLOT(deleteSelectedPolys()), Qt::CTRL+Qt::Key_D);
-  selection->insertItem("Paste selected polygons",
+  selection->addAction("Paste selected polygons",
                         m_poly, SLOT(pasteSelectedPolys()), Qt::CTRL+Qt::Key_V);
-  selection->insertItem("Move selected polygons",
+  selection->addAction("Move selected polygons",
                         m_poly, SLOT(moveSelectedPolys()));
-  selection->insertItem("Deselect polygons/delete highlights",  m_poly,
+  selection->addAction("Deselect polygons/delete highlights",  m_poly,
                         SLOT(deselectPolysDeleteHlts()));
 
-  Q3PopupMenu* transform = new Q3PopupMenu( menu );
-  menu->insertItem("Transform", transform);
-  transform->insertItem("Translate selected polygons", m_poly,
+  QMenu* transform = new QMenu("Transform", menu );
+  menu->addMenu( transform);
+  transform->addAction("Translate selected polygons", m_poly,
                         SLOT(translateSelectedPolys()), Qt::CTRL+Qt::Key_T );
-  transform->insertItem("Rotate selected polygons",    m_poly,
+  transform->addAction("Rotate selected polygons",    m_poly,
                         SLOT(rotateSelectedPolys()), Qt::CTRL+Qt::Key_R );
-  transform->insertItem("Scale selected polygons",
+  transform->addAction("Scale selected polygons",
                         m_poly, SLOT(scaleSelectedPolys()) );
-  transform->insertItem("Transform selected polygons", m_poly,
+  transform->addAction("Transform selected polygons", m_poly,
                         SLOT(transformSelectedPolys()) );
 #if 0
   selection->addSeparator();
@@ -257,37 +257,38 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
                         Qt::CTRL+Qt::Key_X);
 #endif
 
-  Q3PopupMenu* grid = new Q3PopupMenu( menu );
-  menu->insertItem("Grid", grid);
-  grid->insertItem("Toggle poly grid", m_poly, SLOT(toggleShowGrid()), Qt::Key_G);
-  grid->insertItem("Enforce 45x deg angles and snap to grid", m_poly, SLOT(enforce45AndSnapToGrid()));
-  grid->insertItem("Set grid size", m_poly, SLOT(setGridSize()));
-  grid->insertItem("Set grid linewidth", m_poly, SLOT(setGridWidth()));
-  grid->insertItem("Set grid color", m_poly, SLOT(setGridColor()));
+  QMenu* grid = new QMenu("Grid", menu );
+  menu->addMenu( grid);
+  grid->addAction("Toggle poly grid", m_poly, SLOT(toggleShowGrid()), Qt::Key_G);
+  grid->addAction("Enforce 45x deg angles and snap to grid", m_poly, SLOT(enforce45AndSnapToGrid()));
+  grid->addAction("Set grid size", m_poly, SLOT(setGridSize()));
+  grid->addAction("Set grid linewidth", m_poly, SLOT(setGridWidth()));
+  grid->addAction("Set grid color", m_poly, SLOT(setGridColor()));
 
-  Q3PopupMenu* diff = new Q3PopupMenu( menu );
-  menu->insertItem("Diff", diff);
-  diff->insertItem("Toggle different colors", m_poly, SLOT(toggleDifferentColors()), Qt::SHIFT + Qt::Key_D);
-  diff->insertItem("Toggle show poly diff", m_poly, SLOT(toggleShowPolyDiff()), Qt::Key_D);
-  diff->insertItem("Show next diff", m_poly, SLOT(plotNextDiff()), Qt::Key_K);
-  diff->insertItem("Show prev diff", m_poly, SLOT(plotPrevDiff()), Qt::Key_J);
+  QMenu* diff = new QMenu("Diff", menu );
+  menu->addMenu( diff);
+  diff->addAction("Toggle different colors", m_poly, SLOT(toggleDifferentColors()), Qt::SHIFT + Qt::Key_D);
+  diff->addAction("Toggle show poly diff", m_poly, SLOT(toggleShowPolyDiff()), Qt::Key_D);
+  diff->addAction("Show next diff", m_poly, SLOT(plotNextDiff()), Qt::Key_K);
+  diff->addAction("Show prev diff", m_poly, SLOT(plotPrevDiff()), Qt::Key_J);
 
-  Q3PopupMenu* options = new Q3PopupMenu( menu );
-  menu->insertItem("Options", options);
-  options->insertItem("Set line width", m_poly, SLOT(setLineWidth()));
-  options->insertItem("Set background color", m_poly, SLOT(setBgColor()));
+  QMenu* options = new QMenu("Options", menu );
+  menu->addMenu( options);
+  options->addAction("Set line width", m_poly, SLOT(setLineWidth()));
+  options->addAction("Set background color", m_poly, SLOT(setBgColor()));
 
-  Q3PopupMenu* help = new Q3PopupMenu( menu );
-  menu->insertItem("Help", help);
-  help->insertItem("Show documentation", this, SLOT(showDoc()));
-  help->insertItem("About", this, SLOT(about()));
+  QMenu* help = new QMenu("Help", menu );
+  menu->addMenu( help);
+  help->addAction("Show documentation", this, SLOT(showDoc()));
+  help->addAction("About", this, SLOT(about()));
 
   return;
 }
 
 void appWindow::showDoc(){
   m_docWindow.setText(utils::getDocText());
-  m_docWindow.setCaption(this->caption()); // Borrow the caption from the parent
+  // TODO(oalexan1): Make this work in QT5
+  //m_docWindow.setCaption(this->caption()); // Borrow the caption from the parent
   m_docWindow.show();
   return;
 }
@@ -296,9 +297,12 @@ void appWindow::about(){
 
   string aboutStr = string("About ") + m_progName;
   static QMessageBox* about
-    = new QMessageBox( aboutStr.c_str(),
-                       "© Oleg Alexandrov        ", // extra space to make window bigger
-                       QMessageBox::NoIcon, 1, 0, 0, this, 0, FALSE );
+    = new QMessageBox();
+  // TODO(oalexan1): Make this work in Qt5
+  //= new QMessageBox( aboutStr.c_str(),
+  //                     "© Oleg Alexandrov        ", // extra space to make window bigger
+  //                     QMessageBox::NoIcon, 1, 0, 0, this, 0, FALSE );
+  
   about->setButtonText( 1, "OK" );
   about->show();
 

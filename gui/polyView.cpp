@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 #include <QPolygon>
-#include <Q3PopupMenu>
+// #include <QMenu>
 #include <QContextMenuEvent>
 #include <QEvent>
 #include <QFileDialog>
@@ -44,6 +44,7 @@
 #include <qinputdialog.h>
 #include <qpainter.h>
 #include <qmessagebox.h>
+#include <QTableWidgetItem>
 
 #include <gui/polyView.h>
 #include <gui/utils.h>
@@ -475,8 +476,10 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
     // Change the poly file color if it is the background color or invalid
     QColor color = QColor( colors[pIter].c_str() );
-    if ( color == backgroundColor() || color == QColor::Invalid){
-      if ( backgroundColor() != QColor("white") ){
+    
+    QPalette pal(palette());
+    if (color == pal.color(QPalette::Background) || color == QColor::Invalid){
+      if ( pal.color(QPalette::Background) != QColor("white") ){
         color = QColor("white");
       }else{
         color = QColor("black");
@@ -518,7 +521,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
       if (plotFilled && isPolyClosed[pIter]){
         if (signedArea >= 0.0) paint->setBrush( color );
-        else                   paint->setBrush( backgroundColor() );
+        else                   paint->setBrush( pal.color(QPalette::Background) );
         paint->setPen( Qt::NoPen );
       }else {
         paint->setBrush( Qt::NoBrush );
@@ -833,7 +836,7 @@ void polyView::mouseReleaseEvent ( QMouseEvent * E ){
       return;
     }
 
-    printCurrCoords(E->state(),              // input
+    printCurrCoords(E->button(),              // input
                     m_mouseRelX, m_mouseRelY // in-out
                     );
     return;
@@ -851,7 +854,7 @@ void polyView::wheelEvent(QWheelEvent *E){
 
   int delta = E->delta();
 
-  if (E->state() == Qt::ControlModifier){
+  if (E->buttons() == Qt::ControlModifier){
 
     // The control button was pressed. Zoom in/out around the current point.
 
@@ -870,7 +873,7 @@ void polyView::wheelEvent(QWheelEvent *E){
   }else{
 
     // Shift wheel goes left and right. Without shift we go up and down.
-    if (E->state() == Qt::ShiftModifier){
+    if (E->buttons() == Qt::ShiftModifier){
       if (delta > 0){
         shiftLeft();
       }else if (delta < 0){
@@ -916,12 +919,13 @@ void polyView::keyPressEvent( QKeyEvent *K ){
 
 }
 
+#if 0
 void polyView::contextMenuEvent(QContextMenuEvent *E){
 
   int x = E->x(), y = E->y();
   pixelToWorldCoords(x, y, m_menuX, m_menuY);
 
-  Q3PopupMenu menu(this);
+  QMenu menu();
 
   int id = 1;
 
@@ -982,6 +986,8 @@ void polyView::contextMenuEvent(QContextMenuEvent *E){
 
   return;
 }
+
+#endif
 
 void polyView::copyPoly(){
 
@@ -1382,9 +1388,9 @@ bool polyView::getStringFromGui(std::string title, std::string description,
   outputStr = "";
 
   bool ok = false;
-  QString text = QInputDialog::getText(title.c_str(), description.c_str(),
+  QString text = QInputDialog::getText(this, title.c_str(), description.c_str(),
                                        QLineEdit::Normal, inputStr.c_str(),
-                                       &ok, this );
+                                       &ok);
 
   if (ok) outputStr = text.toStdString();
 
@@ -1549,7 +1555,8 @@ void polyView::setBgFgColorsFromPrefs(){
     bgColor   = "black";
     qtBgColor = QColor(bgColor.c_str()); // fallback color
   }
-  setBackgroundColor(qtBgColor);
+  QPalette pal(palette());
+  pal.setColor(QPalette::Background, qtBgColor);
 
   string fgColor = m_prefs.fgColor;
   if ( QColor(fgColor.c_str()) == QColor::Invalid ){
@@ -1855,7 +1862,7 @@ void polyView::createHighlightWithRealInputs(double xll, double yll, double xur,
   return;
 }
 
-void polyView::printCurrCoords(const Qt::ButtonState & state, // input
+void polyView::printCurrCoords(const Qt::MouseButton & state, // input
                                int & currX, int  & currY      // in-out
                                ){
 
@@ -2894,11 +2901,10 @@ void polyView::showFilesChosenByUser(){
 
 void polyView::openPoly(){
 
-  QString s = QFileDialog::getOpenFileName(QDir::currentDirPath(),
-                                           "(*.xg *.ly* *.pol)",
-                                           this,
-                                           "Open file dialog"
-                                           "Choose a file"
+  QString s = QFileDialog::getOpenFileName( this,
+                                            "Open file dialog, Choose a file",
+                                            QDir::currentPath(),
+                                           tr("(*.xg *.ly* *.pol)")
                                            );
 
   if (s.length() == 0) return;

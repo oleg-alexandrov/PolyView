@@ -50,7 +50,7 @@ int main(int argc, char** argv){
   string progName = "PolyView";
   
   appWindow m(NULL, progName, options, windowWidX, windowWidY);
-  m.setCaption(progName.c_str());
+  // m.setCaption(progName.c_str());
   m.show();
   
   QObject::connect( qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit()) );

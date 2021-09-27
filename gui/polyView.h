@@ -162,7 +162,7 @@ protected:
   void mouseReleaseEvent ( QMouseEvent * E );
   bool isShiftLeftMouse(QMouseEvent * E);
   void wheelEvent(QWheelEvent *E);
-  void contextMenuEvent(QContextMenuEvent *E);
+  // void contextMenuEvent(QContextMenuEvent *E);
 
 private slots:
  void showFilesChosenByUser();
@@ -201,7 +201,7 @@ private:
 
   void createHighlightWithRealInputs(double xll, double yll, double xur, double yur);
 
-  void printCurrCoords(const Qt::ButtonState & state, // input
+  void printCurrCoords(const Qt::MouseButton & state, // input
                        int & currX, int  & currY      // in-out
                        );
   bool readOnePoly(// inputs

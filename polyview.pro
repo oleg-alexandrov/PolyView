@@ -1,7 +1,9 @@
 # Build
 TEMPLATE     = app
 TARGET       = polyview
-QT          += qt3support
+QT          += widgets
+#QT          += core
+QT          += gui
 RESOURCES    = polyview.qrc
 INCLUDEPATH += geom
 INCLUDEPATH += gui
@@ -28,6 +30,6 @@ macx {
 INSTALLS += polyview
 
 # Install Readme.md
-readme.path = $$(INSTALL_DIR) # install directory
-readme.files = Readme.md
-INSTALLS += readme
+#readme.path = $$(INSTALL_DIR) # install directory
+#readme.files = Readme.md
+#INSTALLS += readme
