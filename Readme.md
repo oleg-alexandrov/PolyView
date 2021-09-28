@@ -13,10 +13,11 @@ cut polygons to a box.
 
 # Download
 
-The newest version of PolyView, compiled with Qt 5, should be compiled
+The newest version of PolyView, which uses Qt 5, should be compiled
 by the user. The instructions are further down.
 
-Older versions, which were compiled with Qt 4, can be found at:
+Ready-to-run binaries for older versions, which were compiled with Qt
+4, can be found at:
 
 * https://github.com/oleg-alexandrov/PolyView/releases
 
