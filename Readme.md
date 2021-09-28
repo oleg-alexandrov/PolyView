@@ -13,13 +13,13 @@ cut polygons to a box.
 
 # Download
 
+The newest version, compiled with Qt 5, should be compiled by the
+user. The instructions are further down.
+
 Older versions of PolyView which were compiled with Qt 4 can be found
 at:
 
 * https://github.com/oleg-alexandrov/PolyView/releases
-
-The newest version, compiled with Qt 5, should be compiled by the
-user.  The instructions are below.
 
 On Linux and OSX the PolyView program is installed in the *bin*
 directory.  On Windows it is in the base directory. The Windows
