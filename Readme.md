@@ -34,7 +34,7 @@ purpose, academic or commercial.
 
 PolyView is written in C++. It was successfully compiled on Linux with
 g++, on OSX with clang, and on Windows with MinGW. It was written with
-portability in mind and it should be possible to compile it on any
+portability in mind and it should be possible to build it on any
 platform and compiler.
 
 To compile PolyView on Linux or OSX, run:
@@ -118,7 +118,7 @@ highlight or to paste/move/delete them.
 ### Keyboard shortcuts
 
 Panning is accomplished by using the arrow keys, zooming is done with
-the plus and minus keys. Many other actions are bound to keyboard
+the mouse wheel and the +/- keys. Many other actions are bound to keyboard
 keys, as can be seen when invoking them from the menu.
 
 ### Command box
