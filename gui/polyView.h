@@ -23,6 +23,7 @@
 #define POLYVIEW_H
 
 #include <QPolygon>
+#include <QMenu>
 #include <QContextMenuEvent>
 #include <QEvent>
 #include <QKeyEvent>
@@ -110,9 +111,8 @@ public slots:
   // Right-click menu
   void saveMark();
   void plotMark(double x, double y);
-  void toggleNmScale();
   void turnOnMovePolys();
-  void turnOnMoveVertices();
+  void handleMoveVertices();
   void turnOnMoveEdges();
   void toggleAlignMode();
   void insertLabel();
@@ -162,7 +162,7 @@ protected:
   void mouseReleaseEvent ( QMouseEvent * E );
   bool isShiftLeftMouse(QMouseEvent * E);
   void wheelEvent(QWheelEvent *E);
-  // void contextMenuEvent(QContextMenuEvent *E);
+  void contextMenuEvent(QContextMenuEvent *E);
 
 private slots:
  void showFilesChosenByUser();
@@ -294,6 +294,10 @@ private:
 
   bool m_zoomToMouseSelection, m_viewChanged;
 
+  // For the right-click menu
+  QMenu  * m_ContextMenu;
+  QAction* m_moveVertex;
+
   double m_menuX, m_menuY;
 
   // If the current point on the polygon being created is closer than
@@ -303,12 +307,6 @@ private:
   int m_pixelTol;
 
   std::vector<int> m_polyVecOrder;
-
-  // To print point coordinates at the nm scale as opposed to the database unit
-  // (dbu) scale.
-  bool m_useNmScale;
-  double m_nmScale;
-  std::string m_nmScaleFile;
 
   // For plotting in diff mode
   bool                        m_diffColorsMode;

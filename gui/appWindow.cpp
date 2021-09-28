@@ -279,7 +279,11 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
 
   QMenu* help = new QMenu("Help", menu );
   menu->addMenu( help);
-  help->addAction("Show documentation", this, SLOT(showDoc()));
+  
+  // Hide the doc as it is hard to regenerate the html each
+  // time. GitHub has the latest documentation.
+  //help->addAction("Show documentation", this, SLOT(showDoc()));
+
   help->addAction("About", this, SLOT(about()));
 
   return;
@@ -287,24 +291,18 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
 
 void appWindow::showDoc(){
   m_docWindow.setText(utils::getDocText());
-  // TODO(oalexan1): Make this work in QT5
-  //m_docWindow.setCaption(this->caption()); // Borrow the caption from the parent
   m_docWindow.show();
   return;
 }
 
 void appWindow::about(){
 
-  string aboutStr = string("About ") + m_progName;
-  static QMessageBox* about
-    = new QMessageBox();
-  // TODO(oalexan1): Make this work in Qt5
-  //= new QMessageBox( aboutStr.c_str(),
-  //                     "© Oleg Alexandrov        ", // extra space to make window bigger
-  //                     QMessageBox::NoIcon, 1, 0, 0, this, 0, FALSE );
-  
-  about->setButtonText( 1, "OK" );
-  about->show();
+  QMessageBox msgBox;
+  msgBox.setText("Author: Oleg Alexandrov");
+  msgBox.setInformativeText("See the documentation on GitHub.");
+  msgBox.setStandardButtons(QMessageBox::Ok);
+  msgBox.setDefaultButton(QMessageBox::Ok);
+  msgBox.exec();
 
   return;
 }

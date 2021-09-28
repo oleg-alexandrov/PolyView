@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 #include <QPolygon>
-// #include <QMenu>
+#include <QMenu>
 #include <QContextMenuEvent>
 #include <QEvent>
 #include <QFileDialog>
@@ -127,14 +127,6 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   // Points closer than this are in some situations considered equal
   m_pixelTol = 6;
 
-  m_useNmScale  = false;
-  m_nmScale     = 1.0;
-#ifdef SCALE_FILE
-  m_nmScaleFile = SCALE_FILE;
-#else
-  m_nmScaleFile = "scale.txt";
-#endif
-
   // Used for undo
   m_polyVecStack.clear();
   m_polyOptionsVecStack.clear();
@@ -168,6 +160,18 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   // Align mode
   m_alignMode = false;
 
+  // Right-click context menu
+  m_ContextMenu = new QMenu();
+
+  // Move vertices
+  m_moveVertex = m_ContextMenu->addAction("Move vertices (Shift + Left mouse)");
+  m_moveVertex->setCheckable(true);
+  m_moveVertex->setChecked(false);
+  connect(m_moveVertex, SIGNAL(triggered()), this, SLOT(handleMoveVertices()));
+
+  // TODO(oalexan1): Move here and enable all the functionality from
+  //  polyView::contextMenuEvent(QContextMenuEvent *E).
+
   resetTransformSettings();
 
   // This statement must be towards the end
@@ -177,7 +181,6 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
 }
 
 bool polyView::eventFilter(QObject *obj, QEvent *E){
-
 
   QHoverEvent * H = dynamic_cast<QHoverEvent*>(E);
 
@@ -662,6 +665,7 @@ void polyView::mousePressEvent( QMouseEvent *E){
                                      isShiftLeftMouse(E)                            &&
                                      !m_createPoly && !m_deletingPolyNow
                                      );
+  
   m_movingPolysInHlts = false;
   if (m_movingVertsOrEdgesOrPolysNow){
 
@@ -854,40 +858,13 @@ void polyView::wheelEvent(QWheelEvent *E){
 
   int delta = E->delta();
 
-  if (E->buttons() == Qt::ControlModifier){
-
-    // The control button was pressed. Zoom in/out around the current point.
-
-    int pixelx = E->x();
-    int pixely = E->y();
-    double x, y;
-    pixelToWorldCoords(pixelx, pixely, x, y);
-    centerViewAtPoint(x, y);
-
-    if (delta > 0){
-      zoomIn();
-    }else if (delta < 0){
-      zoomOut();
-    }
-
-  }else{
-
-    // Shift wheel goes left and right. Without shift we go up and down.
-    if (E->buttons() == Qt::ShiftModifier){
-      if (delta > 0){
-        shiftLeft();
-      }else if (delta < 0){
-        shiftRight();
-      }
-    }else{
-      if (delta > 0){
-        shiftUp();
-      }else if (delta < 0){
-        shiftDown();
-      }
-    }
+  // Zoom in/out
+  if (delta > 0){
+    zoomIn();
+  }else if (delta < 0){
+    zoomOut();
   }
-
+  
   E->accept();
 }
 
@@ -919,26 +896,45 @@ void polyView::keyPressEvent( QKeyEvent *K ){
 
 }
 
-#if 0
 void polyView::contextMenuEvent(QContextMenuEvent *E){
-
+  
   int x = E->x(), y = E->y();
+  m_mousePrsX = x;
+  m_mousePrsY = y;
+  
   pixelToWorldCoords(x, y, m_menuX, m_menuY);
+  
+#if 0
 
-  QMenu menu();
+  // TODO(oalexan1): Move all this logic to the constructor, where
+  // m_ContextMenu is used.
+  
+  QMenu menu(this);
+
+//     menu.insertItem("Create arbitrary polygon", this,
+//                   SLOT(createArbitraryPoly()));
+
+  // Actions for right-click menu
+  QAction* createPoly = menu.addAction("Create arbitrary polygon");
+  connect(createPoly, SIGNAL(triggered()), this, SLOT(createArbitraryPoly()));
+  createPoly->setCheckable(false);
+  //createPoly->setChecked(false);
+
+  QAction* moveEdges = menu.addAction("Create arbitrary polygon");
+  connect(moveEdges, SIGNAL(triggered()), this, SLOT(createArbitraryPoly()));
+  moveEdges->setCheckable(false);
+  moveEdges->setChecked(false);
+
+  menu.insertItem("Move edges (Shift-Mouse)", this,
+                  SLOT(turnOnMoveEdges()), 0, id);
+  menu.setItemChecked(id, m_moveEdges);
 
   int id = 1;
 
   menu.insertItem("Save mark at point", this, SLOT(saveMark()));
 
-  menu.insertItem("Use nm scale", this, SLOT(toggleNmScale()), 0, id);
-  menu.setItemChecked(id, m_useNmScale);
-  id++;
-
   menu.insertItem("Create 45-degree integer polygon", this,
                   SLOT(create45DegreeIntPoly()));
-  menu.insertItem("Create arbitrary polygon", this,
-                  SLOT(createArbitraryPoly()));
   menu.insertItem("Delete polygon (Alt-Shift-Mouse)", this, SLOT(deletePoly()));
 
   menu.insertItem("Move polygons (Shift-Mouse)", this,
@@ -947,13 +943,10 @@ void polyView::contextMenuEvent(QContextMenuEvent *E){
   id++;
 
   menu.insertItem("Move vertices (Shift-Mouse)", this,
-                  SLOT(turnOnMoveVertices()), 0, id);
+                  SLOT(handleMoveVertices()), 0, id);
   menu.setItemChecked(id, m_moveVertices);
   id++;
 
-  menu.insertItem("Move edges (Shift-Mouse)", this,
-                  SLOT(turnOnMoveEdges()), 0, id);
-  menu.setItemChecked(id, m_moveEdges);
   id++;
 
   menu.insertItem("Insert vertex on edge", this, SLOT(insertVertex()));
@@ -979,15 +972,17 @@ void polyView::contextMenuEvent(QContextMenuEvent *E){
     menu.insertItem("Guess alignment", this,
                     SLOT(performAlignmentOfClosePolys()));
   }
+#endif
 
-  menu.addSeparator();
+//   menu.addSeparator();
 
-  menu.exec(E->globalPos());
+//   menu.exec(E->globalPos());
 
+  m_ContextMenu->popup(mapToGlobal(QPoint(x,y)));
+  
   return;
 }
 
-#endif
 
 void polyView::copyPoly(){
 
@@ -1285,7 +1280,7 @@ void polyView::refreshPixmap(){
   // whenever possible for reasons of speed.
 
   m_pixmap = QPixmap(size());
-  m_pixmap.fill(this, 0, 0);
+  m_pixmap.fill(QColor("black"));
 
   QPainter paint(&m_pixmap);
   paint.initFrom(this);
@@ -1869,16 +1864,6 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
   // Snap or not the current point to the closest polygon vertex
   // and print its coordinates.
 
-  double s;
-  string unit;
-  if (m_useNmScale){
-    s    = m_nmScale;
-    unit = " (nm):";
-  }else{
-    s    = 1.0;
-    unit = ":     ";
-  }
-
   int prec = 6, wid = prec + 6;
   cout.precision(prec);
   cout.setf(ios::floatfield);
@@ -1924,18 +1909,18 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
 
   }
 
-  cout << "Point" << unit << " ("
-       << setw(wid) << s*wx << ", "
-       << setw(wid) << s*wy << ")";
+  cout << "Point" << " ("
+       << setw(wid) << wx << ", "
+       << setw(wid) << wy << ")";
   if (m_prevClickExists){
     cout  << " dist from prev: ("
-          << setw(wid) << s*(wx - m_prevClickedX) << ", "
-          << setw(wid) << s*(wy - m_prevClickedY)
+          << setw(wid) << (wx - m_prevClickedX) << ", "
+          << setw(wid) << (wy - m_prevClickedY)
           << ") Euclidean: "
-          << setw(wid) << s*sqrt( (wx - m_prevClickedX)*(wx - m_prevClickedX)
-                                  +
-                                  (wy - m_prevClickedY)*(wy - m_prevClickedY)
-                                  );
+          << setw(wid) << sqrt( (wx - m_prevClickedX)*(wx - m_prevClickedX)
+                                +
+                                (wy - m_prevClickedY)*(wy - m_prevClickedY)
+                                );
   }
   cout << endl;
 
@@ -2290,10 +2275,9 @@ void polyView::turnOnMovePolys(){
   return;
 }
 
-void polyView::turnOnMoveVertices(){
-
+void polyView::handleMoveVertices(){
   m_movePolys    = false;
-  m_moveVertices = true;
+  m_moveVertices = m_moveVertex->isChecked();
   m_moveEdges    = false;
   m_alignMode    = false;
 
@@ -2499,7 +2483,7 @@ void polyView::insertVertex(){
 
   if (m_polyVec.size() == 0) return;
 
-  turnOnMoveVertices();
+  //handleMoveVertices();
 
   double min_x, min_y, min_dist;
   findClosestPolyEdge(// inputs
@@ -2530,7 +2514,7 @@ void polyView::deleteVertex(){
 
   if (m_polyVec.size() == 0) return;
 
-  turnOnMoveVertices();
+  //handleMoveVertices();
 
   double min_x, min_y, min_dist;
   findClosestPolyVertex(// inputs
@@ -2608,41 +2592,6 @@ void polyView::plotMark(double x, double y){
   m_markX.resize(1); m_markX[0] = x;
   m_markY.resize(1); m_markY[0] = y;
   refreshPixmap();
-  return;
-}
-
-void polyView::toggleNmScale(){
-
-  m_useNmScale = !m_useNmScale;
-  if (!m_useNmScale){
-    cout << "Using the dbu scale" << endl;
-    return;
-  }
-
-  ifstream scaleHandle(m_nmScaleFile.c_str());
-  if (!scaleHandle){
-    cerr << "File " << m_nmScaleFile << " does not exist" << endl;
-    m_useNmScale = false;
-    return;
-  }
-
-  string dummy;
-  if (! (scaleHandle >> dummy >> m_nmScale) ){
-    cerr << "Could not read the nm scale factor from "
-         << m_nmScaleFile << endl;
-    cerr << "Syntax is: scale 1.5" << endl;
-    m_useNmScale = false;
-    return;
-  }
-
-  if (m_nmScale <= 0.0){
-    cerr << "The nm scale factor must be greater than 0" << endl;
-    m_useNmScale = false;
-    return;
-  }
-
-  cout << "Using the nm scale factor " << m_nmScale << endl;
-
   return;
 }
 
