@@ -204,7 +204,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   view->addAction("Toggle annotations",   m_poly, SLOT(toggleAnno()),   Qt::Key_A);
   view->addAction("Toggle filled",        m_poly, SLOT(toggleFilled()), Qt::Key_F);
   view->addAction("Toggle points display",
-                   m_poly, SLOT(togglePE()),          Qt::Key_P);
+                   m_poly, SLOT(toggleShowPointsEdges()),          Qt::Key_P);
   view->addAction("Toggle show vertex indices",
                    m_poly, SLOT(toggleVertIndexAnno()), Qt::Key_V);
   view->addAction("Toggle show layers", m_poly, SLOT(toggleLayerAnno()), Qt::Key_L);
@@ -214,14 +214,12 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   edit->addAction("Undo",  m_poly, SLOT(undo()), Qt::Key_Z);
   edit->addAction("Redo",  m_poly, SLOT(redo()), Qt::ALT + Qt::Key_Z);
 
+  edit->addAction("Create polygon",
+                   m_poly, SLOT(createArbitraryPoly()), Qt::CTRL+Qt::Key_N);
   edit->addAction("Create poly with int vertices and 45x deg angles",
-                   m_poly, SLOT(create45DegreeIntPoly()), Qt::Key_N);
+                   m_poly, SLOT(create45DegIntPoly()), Qt::Key_N);
   edit->addAction("Enforce int vertices and 45x deg angles", m_poly, SLOT(enforce45()),
                    Qt::CTRL+Qt::Key_4);
-  edit->addAction("Create arbitrary polygon",
-                   m_poly, SLOT(createArbitraryPoly()), Qt::CTRL+Qt::Key_N);
-  edit->addAction("Merge polygons (buggy)",
-                   m_poly, SLOT(mergePolys()), Qt::CTRL+Qt::Key_M);
 
   QMenu* selection = new QMenu("Selection", menu );
   menu->addMenu( selection);

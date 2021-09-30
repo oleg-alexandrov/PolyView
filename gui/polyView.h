@@ -76,16 +76,15 @@ public slots:
   void plotNextDiff();
   void plotPrevDiff();
   void plotDiff(int direction);
-  void togglePE();
+  void toggleShowPointsEdges();
   void toggleVertIndexAnno();
   void toggleLayerAnno();
 
   // Edit menu
   void undo();
   void redo();
-  void create45DegreeIntPoly();
+  void create45DegIntPoly();
   void createArbitraryPoly();
-  void mergePolys();
 
   // Transform menu
   void enforce45();
@@ -285,7 +284,7 @@ private:
 
   std::vector<dPoly> m_highlights;
 
-  int m_showEdges, m_showPoints, m_showPointsEdges, m_toggleShowPointsEdges;
+  int m_showEdges, m_showPoints, m_showPointsEdges, m_displayMode;
   bool m_changeDisplayOrder, m_showVertIndexAnno, m_showLayerAnno;
 
   bool m_createPoly, m_snapPolyTo45DegreeIntGrid;
@@ -296,9 +295,16 @@ private:
 
   // For the right-click menu
   QMenu  * m_ContextMenu;
+  double   m_menuX, m_menuY;
+  QAction* m_createArbitraryPoly;
+  QAction* m_create45DegIntPoly;
+  QAction* m_insertVertex;
   QAction* m_moveVertex;
-
-  double m_menuX, m_menuY;
+  QAction* m_deleteVertex;
+  QAction* m_showIndices;
+  QAction* m_saveScreenshot;
+  QAction* m_deleteVertices;
+  QAction* m_showPolysFilled;
 
   // If the current point on the polygon being created is closer than
   // this distance (in pixels) from the first point of the polygon, we
@@ -328,7 +334,7 @@ private:
   bool   m_movePolys;
   bool   m_movingVertsOrEdgesOrPolysNow;
   bool   m_deletingPolyNow;
-  int    m_toggleShowPointsEdgesBk;
+  int    m_displayModeBk;
   int    m_polyVecIndex;
   int    m_polyIndexInCurrPoly;
   int    m_vertIndexInCurrPoly;

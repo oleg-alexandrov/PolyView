@@ -111,7 +111,7 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   m_showEdges               = 1;
   m_showPointsEdges         = 2;
   m_showPoints              = 3;
-  m_toggleShowPointsEdges   = m_showEdges;
+  m_displayMode   = m_showEdges;
 
   m_createPoly                = false;
   m_snapPolyTo45DegreeIntGrid = false;
@@ -152,7 +152,7 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   m_moveVertices            = false;
   m_moveEdges               = false;
   m_movePolys               = true;
-  m_toggleShowPointsEdgesBk = m_showEdges;
+  m_displayModeBk = m_showEdges;
   m_polyVecIndex            = -1;
   m_polyIndexInCurrPoly     = -1;
   m_vertIndexInCurrPoly     = -1;
@@ -163,14 +163,100 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   // Right-click context menu
   m_ContextMenu = new QMenu();
 
+  // Actions for right-click menu
+
+  m_createArbitraryPoly = m_ContextMenu->addAction("Create polygon (left mouse click)");
+  connect(m_createArbitraryPoly, SIGNAL(triggered()), this, SLOT(createArbitraryPoly()));
+  
+  m_create45DegIntPoly
+    = m_ContextMenu->addAction("Create poly with int vertices and 45x deg angles");
+  connect(m_create45DegIntPoly, SIGNAL(triggered()), this, SLOT(create45DegIntPoly()));
+
+  // Polygon editing mode, they will be visible only when editing happens
+  m_insertVertex = m_ContextMenu->addAction("Insert vertex");
+  connect(m_insertVertex, SIGNAL(triggered()), this, SLOT(insertVertex()));
+
   // Move vertices
-  m_moveVertex = m_ContextMenu->addAction("Move vertices (Shift + Left mouse)");
+  m_moveVertex = m_ContextMenu->addAction("Move vertices (Shift + left mouse drag)");
   m_moveVertex->setCheckable(true);
   m_moveVertex->setChecked(false);
   connect(m_moveVertex, SIGNAL(triggered()), this, SLOT(handleMoveVertices()));
-
+  
+  // Delete vertex
+  m_deleteVertex = m_ContextMenu->addAction("Delete nearest vertex");
+  connect(m_deleteVertex, SIGNAL(triggered()), this, SLOT(deleteVertex()));
+  
+  m_showPolysFilled = m_ContextMenu->addAction("Show polygons filled");
+  m_showPolysFilled->setCheckable(true);
+  m_showPolysFilled->setChecked(false);
+  connect(m_showPolysFilled, SIGNAL(triggered()), this, SLOT(toggleFilled()));
+  
+  m_showIndices = m_ContextMenu->addAction("Show vertex indices");
+  m_showIndices->setCheckable(true);
+  m_showIndices->setChecked(false);
+  connect(m_showIndices, SIGNAL(triggered()), this, SLOT(toggleVertIndexAnno()));
+  
+#if 0
   // TODO(oalexan1): Move here and enable all the functionality from
   //  polyView::contextMenuEvent(QContextMenuEvent *E).
+
+  m_saveScreenshot     = m_ContextMenu->addAction("Save screenshot");
+
+  connect(m_saveScreenshot,        SIGNAL(triggered()), this, SLOT(saveScreenshot()));
+  connect(m_deleteVertex,          SIGNAL(triggered()), this, SLOT(deleteVertex()));
+  connect(m_deleteVertices,        SIGNAL(triggered()), this, SLOT(deleteVertices()));
+  
+  QAction* moveEdges = menu.addAction("Create arbitrary polygon");
+  connect(moveEdges, SIGNAL(triggered()), this, SLOT(createArbitraryPoly()));
+  moveEdges->setCheckable(false);
+  moveEdges->setChecked(false);
+
+  menu.insertItem("Move edges (Shift-Mouse)", this,
+                  SLOT(turnOnMoveEdges()), 0, id);
+  menu.setItemChecked(id, m_moveEdges);
+
+  int id = 1;
+
+  menu.insertItem("Save mark at point", this, SLOT(saveMark()));
+
+  menu.insertItem("Delete polygon (Alt-Shift-Mouse)", this, SLOT(deletePoly()));
+
+  menu.insertItem("Move polygons (Shift-Mouse)", this,
+                  SLOT(turnOnMovePolys()), 0, id);
+  menu.setItemChecked(id, m_movePolys);
+  id++;
+
+  menu.insertItem("Move vertices (Shift-Mouse)", this,
+                  SLOT(handleMoveVertices()), 0, id);
+  menu.setItemChecked(id, m_moveVertices);
+  id++;
+
+  id++;
+
+  menu.insertItem("Insert vertex on edge", this, SLOT(insertVertex()));
+  menu.insertItem("Delete vertex",         this, SLOT(deleteVertex()));
+  menu.insertItem("Copy polygon",          this, SLOT(copyPoly()));
+  menu.insertItem("Paste polygon",         this, SLOT(pastePoly()));
+  menu.insertItem("Reverse orientation",   this, SLOT(reversePoly()));
+  menu.insertItem("Insert text label",     this, SLOT(insertLabel()));
+  menu.insertItem("Delete text label",     this, SLOT(deleteLabel()));
+
+  menu.addSeparator();
+
+  menu.insertItem("Align mode", this, SLOT(toggleAlignMode()), 0, id);
+  menu.setItemChecked(id, m_alignMode);
+  id++;
+
+  if (m_alignMode){
+    menu.insertItem("Rotate  90 degrees",  this, SLOT(align_rotate90()));
+    menu.insertItem("Rotate 180 degrees",  this, SLOT(align_rotate180()));
+    menu.insertItem("Rotate 270 degrees",  this, SLOT(align_rotate270()));
+    menu.insertItem("Flip against x axis", this, SLOT(align_flip_against_x_axis()));
+    menu.insertItem("Flip against y axis", this, SLOT(align_flip_against_y_axis()));
+    menu.insertItem("Guess alignment", this,
+                    SLOT(performAlignmentOfClosePolys()));
+  }
+#endif
 
   resetTransformSettings();
 
@@ -345,10 +431,13 @@ void polyView::displayData( QPainter *paint ){
     // Note: plotFilled, plotEdges, and plotPoints are not mutually exclusive.
     bool plotFilled = m_polyOptionsVec[vecIter].isPolyFilled || m_showFilledPolys;
     bool plotEdges  = (!m_polyOptionsVec[vecIter].plotAsPoints) &&
-      (m_toggleShowPointsEdges != m_showPoints);
+      (m_displayMode != m_showPoints);
+    if (plotFilled)
+      plotEdges = true; // this is a bugfix, otherwise polygons with no interior do not show up
+    
     bool plotPoints = m_polyOptionsVec[vecIter].plotAsPoints  ||
-      ( m_toggleShowPointsEdges == m_showPoints )             ||
-      ( m_toggleShowPointsEdges == m_showPointsEdges);
+      ( m_displayMode == m_showPoints )             ||
+      ( m_displayMode == m_showPointsEdges);
 
     if (plotPoints) drawVertIndex++;
 
@@ -525,7 +614,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       if (plotFilled && isPolyClosed[pIter]){
         if (signedArea >= 0.0) paint->setBrush( color );
         else                   paint->setBrush( pal.color(QPalette::Background) );
-        paint->setPen( Qt::NoPen );
+        paint->setPen(color);
       }else {
         paint->setBrush( Qt::NoBrush );
         paint->setPen( QPen(color, lineWidth) );
@@ -701,7 +790,7 @@ void polyView::mousePressEvent( QMouseEvent *E){
   return;
 }
 
-void polyView::mouseMoveEvent( QMouseEvent *E){
+void polyView::mouseMoveEvent(QMouseEvent *E){
 
   QPoint Q = E->pos();
   int x = Q.x(), y = Q.y();
@@ -896,6 +985,8 @@ void polyView::keyPressEvent( QKeyEvent *K ){
 
 }
 
+// When right-clicking, this will show a menu with a handful of options.
+// Those are created in the constructor. 
 void polyView::contextMenuEvent(QContextMenuEvent *E){
   
   int x = E->x(), y = E->y();
@@ -903,80 +994,6 @@ void polyView::contextMenuEvent(QContextMenuEvent *E){
   m_mousePrsY = y;
   
   pixelToWorldCoords(x, y, m_menuX, m_menuY);
-  
-#if 0
-
-  // TODO(oalexan1): Move all this logic to the constructor, where
-  // m_ContextMenu is used.
-  
-  QMenu menu(this);
-
-//     menu.insertItem("Create arbitrary polygon", this,
-//                   SLOT(createArbitraryPoly()));
-
-  // Actions for right-click menu
-  QAction* createPoly = menu.addAction("Create arbitrary polygon");
-  connect(createPoly, SIGNAL(triggered()), this, SLOT(createArbitraryPoly()));
-  createPoly->setCheckable(false);
-  //createPoly->setChecked(false);
-
-  QAction* moveEdges = menu.addAction("Create arbitrary polygon");
-  connect(moveEdges, SIGNAL(triggered()), this, SLOT(createArbitraryPoly()));
-  moveEdges->setCheckable(false);
-  moveEdges->setChecked(false);
-
-  menu.insertItem("Move edges (Shift-Mouse)", this,
-                  SLOT(turnOnMoveEdges()), 0, id);
-  menu.setItemChecked(id, m_moveEdges);
-
-  int id = 1;
-
-  menu.insertItem("Save mark at point", this, SLOT(saveMark()));
-
-  menu.insertItem("Create 45-degree integer polygon", this,
-                  SLOT(create45DegreeIntPoly()));
-  menu.insertItem("Delete polygon (Alt-Shift-Mouse)", this, SLOT(deletePoly()));
-
-  menu.insertItem("Move polygons (Shift-Mouse)", this,
-                  SLOT(turnOnMovePolys()), 0, id);
-  menu.setItemChecked(id, m_movePolys);
-  id++;
-
-  menu.insertItem("Move vertices (Shift-Mouse)", this,
-                  SLOT(handleMoveVertices()), 0, id);
-  menu.setItemChecked(id, m_moveVertices);
-  id++;
-
-  id++;
-
-  menu.insertItem("Insert vertex on edge", this, SLOT(insertVertex()));
-  menu.insertItem("Delete vertex",         this, SLOT(deleteVertex()));
-  menu.insertItem("Copy polygon",          this, SLOT(copyPoly()));
-  menu.insertItem("Paste polygon",         this, SLOT(pastePoly()));
-  menu.insertItem("Reverse orientation",   this, SLOT(reversePoly()));
-  menu.insertItem("Insert text label",     this, SLOT(insertLabel()));
-  menu.insertItem("Delete text label",     this, SLOT(deleteLabel()));
-
-  menu.addSeparator();
-
-  menu.insertItem("Align mode", this, SLOT(toggleAlignMode()), 0, id);
-  menu.setItemChecked(id, m_alignMode);
-  id++;
-
-  if (m_alignMode){
-    menu.insertItem("Rotate  90 degrees",  this, SLOT(align_rotate90()));
-    menu.insertItem("Rotate 180 degrees",  this, SLOT(align_rotate180()));
-    menu.insertItem("Rotate 270 degrees",  this, SLOT(align_rotate270()));
-    menu.insertItem("Flip against x axis", this, SLOT(align_flip_against_x_axis()));
-    menu.insertItem("Flip against y axis", this, SLOT(align_flip_against_y_axis()));
-    menu.insertItem("Guess alignment", this,
-                    SLOT(performAlignmentOfClosePolys()));
-  }
-#endif
-
-//   menu.addSeparator();
-
-//   menu.exec(E->globalPos());
 
   m_ContextMenu->popup(mapToGlobal(QPoint(x,y)));
   
@@ -1290,7 +1307,7 @@ void polyView::refreshPixmap(){
   //F.setStyleStrategy(QFont::NoAntialias);
   paint.setFont(F);
 
-  displayData( &paint );
+  displayData(&paint);
   update();
 
   return;
@@ -2268,8 +2285,8 @@ void polyView::turnOnMovePolys(){
   m_moveVertices = false;
   m_moveEdges    = false;
   m_alignMode    = false;
-  if (m_toggleShowPointsEdges == m_showPointsEdges)
-    m_toggleShowPointsEdges = m_toggleShowPointsEdgesBk;
+  if (m_displayMode == m_showPointsEdges)
+    m_displayMode = m_displayModeBk;
 
   refreshPixmap();
   return;
@@ -2281,11 +2298,15 @@ void polyView::handleMoveVertices(){
   m_moveEdges    = false;
   m_alignMode    = false;
 
-  if (m_toggleShowPointsEdges != m_showPointsEdges){
-    m_toggleShowPointsEdgesBk = m_toggleShowPointsEdges;
-    m_toggleShowPointsEdges   = m_showPointsEdges;
-  }
-
+  if (m_moveVertices) {
+    // Put a little circle at each vertex
+    m_displayModeBk = m_displayMode;
+    m_displayMode   = m_showPointsEdges;
+  } else {
+    // Undo the little circle, use whatever behavior was there before
+    m_displayMode = m_displayModeBk;
+  }    
+  
   refreshPixmap();
   return;
 }
@@ -2297,9 +2318,9 @@ void polyView::turnOnMoveEdges(){
   m_moveEdges    = true;
   m_alignMode    = false;
 
-  if (m_toggleShowPointsEdges != m_showPointsEdges){
-    m_toggleShowPointsEdgesBk = m_toggleShowPointsEdges;
-    m_toggleShowPointsEdges   = m_showPointsEdges;
+  if (m_displayMode != m_showPointsEdges){
+    m_displayModeBk = m_displayMode;
+    m_displayMode   = m_showPointsEdges;
   }
 
   refreshPixmap();
@@ -2318,8 +2339,8 @@ void polyView::toggleAlignMode(){
       return;
     }
 
-    if (m_toggleShowPointsEdges == m_showPointsEdges)
-      m_toggleShowPointsEdges = m_toggleShowPointsEdgesBk;
+    if (m_displayMode == m_showPointsEdges)
+      m_displayMode = m_displayModeBk;
 
     m_movePolys    = false;
     m_moveVertices = false;
@@ -2396,7 +2417,7 @@ void polyView::performAlignmentOfClosePolys(){
   refreshPixmap();
 }
 
-void polyView::create45DegreeIntPoly(){
+void polyView::create45DegIntPoly(){
 
   // This flag will change the behavior of mouseReleaseEvent() so that
   // we can start adding points to the polygon with the mouse.
@@ -2483,8 +2504,6 @@ void polyView::insertVertex(){
 
   if (m_polyVec.size() == 0) return;
 
-  //handleMoveVertices();
-
   double min_x, min_y, min_dist;
   findClosestPolyEdge(// inputs
                       m_menuX, m_menuY, m_polyVec,
@@ -2502,7 +2521,7 @@ void polyView::insertVertex(){
   // Need +1 below as we insert AFTER current vertex.
   m_polyVec[m_polyVecIndex].insertVertex(m_polyIndexInCurrPoly,
                                          m_vertIndexInCurrPoly + 1,
-                                         min_x, min_y
+                                         m_menuX, m_menuY
                                          );
 
   saveDataForUndo(false);
@@ -2977,9 +2996,9 @@ void polyView::writeMultiplePolys(bool overwrite){
   return;
 }
 
-void polyView::togglePE(){
+void polyView::toggleShowPointsEdges(){
 
-  m_toggleShowPointsEdges = m_toggleShowPointsEdges%3 + 1;
+  m_displayMode = m_displayMode%3 + 1;
   refreshPixmap();
 
 }
@@ -3283,71 +3302,6 @@ double polyView::calcGrid(double widx, double widy){
   grid = v*round(grid/v);
 
   return grid;
-}
-
-void polyView::mergePolys(){
-
-  // Merge all polygons.
-
-  // Highly buggy and incomplete function. Work in progress.
-  // To do: Move this to utilities.
-
-  // Combine all polygons into one poly structure
-  dPoly poly;
-  poly.reset();
-  for (int s = 0; s < (int)m_polyVec.size(); s++) poly.appendPolygons(m_polyVec[s]);
-
-  bool stillMerging = true;
-
-  while (stillMerging){
-
-    stillMerging = false;
-
-    // Pairwise merge of polygons
-    for (int i = 0; i < poly.get_numPolys(); i++){
-      for (int j = i + 1; j < poly.get_numPolys(); j++){
-
-        // Need these since the polygons may have changed in the meantime
-        if (i >= poly.get_numPolys()) break;
-        if (j >= poly.get_numPolys()) break;
-
-        // Merge i-th and j-th polygons
-        const int * numV = poly.get_numVerts();
-        int start_i = 0; for (int pIter = 0; pIter < i; pIter++) start_i += numV[pIter];
-        int start_j = 0; for (int pIter = 0; pIter < j; pIter++) start_j += numV[pIter];
-        vector<double> mx, my;
-        bool success = utils::mergePolys(// Inputs
-                                         numV[i],
-                                         poly.get_xv() + start_i,
-                                         poly.get_yv() + start_i,
-                                         numV[j],
-                                         poly.get_xv() + start_j,
-                                         poly.get_yv() + start_j,
-                                         // Outputs
-                                         mx, my
-                                         );
-        if (!success) continue;
-
-        stillMerging = true;
-
-        // Replace i-th poly with the merged poly, and erase j-th poly.
-        // Decrement j since we have one less polygon.
-        poly.replaceOnePoly(i, mx.size(), vecPtr(mx), vecPtr(my));
-        poly.eraseOnePoly(j);
-        j--;
-      }
-    }
-
-  }
-
-  if (m_polyVec.empty()) return;
-  m_polyVec.resize(1);
-  m_polyOptionsVec.resize(1);
-  m_polyVec[0] = poly;
-  saveDataForUndo(false);
-
-  refreshPixmap();
-  return;
 }
 
 void polyView::deleteSelectedPolys(){
