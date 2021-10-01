@@ -110,9 +110,9 @@ public slots:
   // Right-click menu
   void saveMark();
   void plotMark(double x, double y);
-  void turnOnMovePolys();
-  void handleMoveVertices();
-  void turnOnMoveEdges();
+  void toggleMovePolys();
+  void toggleMoveVertices();
+  void toggleMoveEdges();
   void toggleAlignMode();
   void insertLabel();
   void deleteLabel();
@@ -299,7 +299,9 @@ private:
   QAction* m_createArbitraryPoly;
   QAction* m_create45DegIntPoly;
   QAction* m_insertVertex;
-  QAction* m_moveVertex;
+  QAction* m_moveVertices;
+  QAction* m_moveEdges;
+  QAction* m_movePolys;
   QAction* m_deleteVertex;
   QAction* m_showIndices;
   QAction* m_saveScreenshot;
@@ -329,9 +331,6 @@ private:
   std::set<std::string> m_filesToHide;
 
   // Edit mode
-  bool   m_moveVertices;
-  bool   m_moveEdges;
-  bool   m_movePolys;
   bool   m_movingVertsOrEdgesOrPolysNow;
   bool   m_deletingPolyNow;
   int    m_displayModeBk;

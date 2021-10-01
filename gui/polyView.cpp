@@ -112,6 +112,7 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   m_showPointsEdges         = 2;
   m_showPoints              = 3;
   m_displayMode   = m_showEdges;
+  m_displayModeBk = m_showEdges;
 
   m_createPoly                = false;
   m_snapPolyTo45DegreeIntGrid = false;
@@ -149,10 +150,6 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   m_smallLen = 2; // Used for plotting the points
 
   // Edit mode
-  m_moveVertices            = false;
-  m_moveEdges               = false;
-  m_movePolys               = true;
-  m_displayModeBk = m_showEdges;
   m_polyVecIndex            = -1;
   m_polyIndexInCurrPoly     = -1;
   m_vertIndexInCurrPoly     = -1;
@@ -177,10 +174,22 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   connect(m_insertVertex, SIGNAL(triggered()), this, SLOT(insertVertex()));
 
   // Move vertices
-  m_moveVertex = m_ContextMenu->addAction("Move vertices (Shift + left mouse drag)");
-  m_moveVertex->setCheckable(true);
-  m_moveVertex->setChecked(false);
-  connect(m_moveVertex, SIGNAL(triggered()), this, SLOT(handleMoveVertices()));
+  m_moveVertices = m_ContextMenu->addAction("Move vertices (Shift + left mouse drag)");
+  m_moveVertices->setCheckable(true);
+  m_moveVertices->setChecked(false);
+  connect(m_moveVertices, SIGNAL(triggered()), this, SLOT(toggleMoveVertices()));
+
+  // Move edges
+  m_moveEdges = m_ContextMenu->addAction("Move edges (Shift + left mouse drag)");
+  connect(m_moveEdges, SIGNAL(triggered()), this, SLOT(toggleMoveEdges()));
+  m_moveEdges->setCheckable(true);
+  m_moveEdges->setChecked(false);
+
+  // Move polygons
+  m_movePolys = m_ContextMenu->addAction("Move polygons (Shift + left mouse drag)");
+  connect(m_movePolys, SIGNAL(triggered()), this, SLOT(toggleMovePolys()));
+  m_movePolys->setCheckable(true);
+  m_movePolys->setChecked(false);
   
   // Delete vertex
   m_deleteVertex = m_ContextMenu->addAction("Delete nearest vertex");
@@ -203,38 +212,16 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   m_saveScreenshot     = m_ContextMenu->addAction("Save screenshot");
 
   connect(m_saveScreenshot,        SIGNAL(triggered()), this, SLOT(saveScreenshot()));
-  connect(m_deleteVertex,          SIGNAL(triggered()), this, SLOT(deleteVertex()));
   connect(m_deleteVertices,        SIGNAL(triggered()), this, SLOT(deleteVertices()));
   
-  QAction* moveEdges = menu.addAction("Create arbitrary polygon");
-  connect(moveEdges, SIGNAL(triggered()), this, SLOT(createArbitraryPoly()));
-  moveEdges->setCheckable(false);
-  moveEdges->setChecked(false);
-
-  menu.insertItem("Move edges (Shift-Mouse)", this,
-                  SLOT(turnOnMoveEdges()), 0, id);
-  menu.setItemChecked(id, m_moveEdges);
-
-  int id = 1;
 
   menu.insertItem("Save mark at point", this, SLOT(saveMark()));
 
   menu.insertItem("Delete polygon (Alt-Shift-Mouse)", this, SLOT(deletePoly()));
 
-  menu.insertItem("Move polygons (Shift-Mouse)", this,
-                  SLOT(turnOnMovePolys()), 0, id);
-  menu.setItemChecked(id, m_movePolys);
-  id++;
-
-  menu.insertItem("Move vertices (Shift-Mouse)", this,
-                  SLOT(handleMoveVertices()), 0, id);
-  menu.setItemChecked(id, m_moveVertices);
-  id++;
-
   id++;
 
   menu.insertItem("Insert vertex on edge", this, SLOT(insertVertex()));
-  menu.insertItem("Delete vertex",         this, SLOT(deleteVertex()));
   menu.insertItem("Copy polygon",          this, SLOT(copyPoly()));
   menu.insertItem("Paste polygon",         this, SLOT(pastePoly()));
   menu.insertItem("Reverse orientation",   this, SLOT(reversePoly()));
@@ -750,8 +737,10 @@ void polyView::mousePressEvent( QMouseEvent *E){
     m_T.reset();
   }
 
-  m_movingVertsOrEdgesOrPolysNow = ( (m_moveVertices || m_moveEdges || m_movePolys) &&
-                                     isShiftLeftMouse(E)                            &&
+  m_movingVertsOrEdgesOrPolysNow = ( (m_moveVertices->isChecked() ||
+                                      m_moveEdges->isChecked()    ||
+                                      m_movePolys->isChecked())      &&
+                                     isShiftLeftMouse(E)             &&
                                      !m_createPoly && !m_deletingPolyNow
                                      );
   
@@ -759,7 +748,7 @@ void polyView::mousePressEvent( QMouseEvent *E){
   if (m_movingVertsOrEdgesOrPolysNow){
 
     double min_x, min_y, min_dist;
-    if (m_moveVertices){
+    if (m_moveVertices->isChecked()){
       findClosestPolyVertex(// inputs
                             m_mousePressWorldX, m_mousePressWorldY, m_polyVec,
                             // outputs
@@ -768,11 +757,12 @@ void polyView::mousePressEvent( QMouseEvent *E){
                             m_vertIndexInCurrPoly,
                             min_x, min_y, min_dist
                             );
-    }else if (m_movePolys && getNumElements(m_selectedPolyIndices) > 0 ){
+    }else if (m_movePolys->isChecked() && getNumElements(m_selectedPolyIndices) > 0 ){
       m_highlights.clear(); // No need for these anymore
       m_polyVecBeforeShift = m_polyVec;
       m_movingPolysInHlts = true;
-    }else if (m_moveEdges || m_movePolys ){
+    }else if (m_moveEdges->isChecked() ||
+              m_movePolys->isChecked() ){
       findClosestPolyEdge(// inputs
                           m_mousePressWorldX, m_mousePressWorldY, m_polyVec,
                           // outputs
@@ -825,19 +815,19 @@ void polyView::mouseMoveEvent(QMouseEvent *E){
         m_polyIndexInCurrPoly < 0 ||
         m_vertIndexInCurrPoly < 0) return;
 
-    if (m_moveVertices){
+    if (m_moveVertices->isChecked()){
       m_polyVec[m_polyVecIndex].changeVertexValue(m_polyIndexInCurrPoly,
                                                   m_vertIndexInCurrPoly,
                                                   wx, wy
                                                   );
-    }else if ( (m_moveEdges || m_movePolys) && m_polyVecIndex >= 0){
+    }else if ( (m_moveEdges->isChecked() || m_movePolys->isChecked()) && m_polyVecIndex >= 0){
       m_polyVec[m_polyVecIndex] = m_polyBeforeShift;
-      if (m_moveEdges){
+      if (m_moveEdges->isChecked()){
         m_polyVec[m_polyVecIndex].shiftEdge(m_polyIndexInCurrPoly,
                                             m_vertIndexInCurrPoly,
                                             shift_x, shift_y
                                             );
-      }else if (m_movePolys){
+      }else if (m_movePolys->isChecked()){
         m_polyVec[m_polyVecIndex].shiftOnePoly(m_polyIndexInCurrPoly,
                                                shift_x, shift_y
                                                );
@@ -1868,7 +1858,7 @@ void polyView::createHighlightWithRealInputs(double xll, double yll, double xur,
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
                   m_selectedPolyIndices    // Outputs
                   );
-  turnOnMovePolys();
+  toggleMovePolys();
   saveDataForUndo(false);
 
   return;
@@ -2279,29 +2269,40 @@ void polyView::plotDistBwPolyClips( QPainter *paint ){
   return;
 }
 
-void polyView::turnOnMovePolys(){
+void polyView::toggleMovePolys(){
 
-  m_movePolys    = true;
-  m_moveVertices = false;
-  m_moveEdges    = false;
+  m_moveVertices->setChecked(false);
+  m_moveEdges->setChecked(false);
   m_alignMode    = false;
-  if (m_displayMode == m_showPointsEdges)
+  
+  if (m_movePolys->isChecked()) {
+    if (m_displayMode != m_showPointsEdges) {
+      // Put a little circle at each vertex
+      m_displayModeBk = m_displayMode;
+      m_displayMode   = m_showPointsEdges;
+    }
+  } else {
+    // Undo the little circle, use whatever behavior was there before
     m_displayMode = m_displayModeBk;
+  }    
 
   refreshPixmap();
   return;
 }
 
-void polyView::handleMoveVertices(){
-  m_movePolys    = false;
-  m_moveVertices = m_moveVertex->isChecked();
-  m_moveEdges    = false;
+void polyView::toggleMoveVertices(){
+  
+  m_movePolys->setChecked(false);
+  m_moveEdges->setChecked(false);
+
   m_alignMode    = false;
 
-  if (m_moveVertices) {
-    // Put a little circle at each vertex
-    m_displayModeBk = m_displayMode;
-    m_displayMode   = m_showPointsEdges;
+  if (m_moveVertices->isChecked()) {
+    if (m_displayMode != m_showPointsEdges) {
+      // Put a little circle at each vertex
+      m_displayModeBk = m_displayMode;
+      m_displayMode   = m_showPointsEdges;
+    }
   } else {
     // Undo the little circle, use whatever behavior was there before
     m_displayMode = m_displayModeBk;
@@ -2311,17 +2312,23 @@ void polyView::handleMoveVertices(){
   return;
 }
 
-void polyView::turnOnMoveEdges(){
+void polyView::toggleMoveEdges(){
 
-  m_movePolys    = false;
-  m_moveVertices = false;
-  m_moveEdges    = true;
+  m_movePolys->setChecked(false);
+  m_moveVertices->setChecked(false);
+  
   m_alignMode    = false;
 
-  if (m_displayMode != m_showPointsEdges){
-    m_displayModeBk = m_displayMode;
-    m_displayMode   = m_showPointsEdges;
-  }
+  if (m_moveEdges->isChecked()) {
+    if (m_displayMode != m_showPointsEdges) {
+      // Put a little circle at each vertex
+      m_displayModeBk = m_displayMode;
+      m_displayMode   = m_showPointsEdges;
+    }
+  } else {
+    // Undo the little circle, use whatever behavior was there before
+    m_displayMode = m_displayModeBk;
+  }    
 
   refreshPixmap();
   return;
@@ -2341,10 +2348,10 @@ void polyView::toggleAlignMode(){
 
     if (m_displayMode == m_showPointsEdges)
       m_displayMode = m_displayModeBk;
-
-    m_movePolys    = false;
-    m_moveVertices = false;
-    m_moveEdges    = false;
+    
+    m_movePolys->setChecked(false);
+    m_moveVertices->setChecked(false);
+    m_moveEdges->setChecked(false);
 
     m_highlights.clear();
     markPolysInHlts(m_polyVec, m_highlights, // Inputs
@@ -2532,8 +2539,6 @@ void polyView::insertVertex(){
 void polyView::deleteVertex(){
 
   if (m_polyVec.size() == 0) return;
-
-  //handleMoveVertices();
 
   double min_x, min_y, min_dist;
   findClosestPolyVertex(// inputs
