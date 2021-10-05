@@ -307,6 +307,8 @@ private:
   QAction* m_saveScreenshot;
   QAction* m_deleteVertices;
   QAction* m_showPolysFilled;
+  QAction* m_deletePoly;
+  QAction* m_reversePoly;
 
   // If the current point on the polygon being created is closer than
   // this distance (in pixels) from the first point of the polygon, we

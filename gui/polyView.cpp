@@ -162,14 +162,28 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
 
   // Actions for right-click menu
 
+  // Show poly filled
+  m_showPolysFilled = m_ContextMenu->addAction("Show polygons filled");
+  m_showPolysFilled->setCheckable(true);
+  m_showPolysFilled->setChecked(false);
+  connect(m_showPolysFilled, SIGNAL(triggered()), this, SLOT(toggleFilled()));
+
+  // Show vertex indices
+  m_showIndices = m_ContextMenu->addAction("Show vertex indices");
+  m_showIndices->setCheckable(true);
+  m_showIndices->setChecked(false);
+  connect(m_showIndices, SIGNAL(triggered()), this, SLOT(toggleVertIndexAnno()));
+  
+  // Create arbitrary poly
   m_createArbitraryPoly = m_ContextMenu->addAction("Create polygon (left mouse click)");
   connect(m_createArbitraryPoly, SIGNAL(triggered()), this, SLOT(createArbitraryPoly()));
-  
+
+  // Create poly with int vertices and 45x angle
   m_create45DegIntPoly
     = m_ContextMenu->addAction("Create poly with int vertices and 45x deg angles");
   connect(m_create45DegIntPoly, SIGNAL(triggered()), this, SLOT(create45DegIntPoly()));
 
-  // Polygon editing mode, they will be visible only when editing happens
+  // Insert vertex
   m_insertVertex = m_ContextMenu->addAction("Insert vertex");
   connect(m_insertVertex, SIGNAL(triggered()), this, SLOT(insertVertex()));
 
@@ -194,17 +208,15 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   // Delete vertex
   m_deleteVertex = m_ContextMenu->addAction("Delete nearest vertex");
   connect(m_deleteVertex, SIGNAL(triggered()), this, SLOT(deleteVertex()));
-  
-  m_showPolysFilled = m_ContextMenu->addAction("Show polygons filled");
-  m_showPolysFilled->setCheckable(true);
-  m_showPolysFilled->setChecked(false);
-  connect(m_showPolysFilled, SIGNAL(triggered()), this, SLOT(toggleFilled()));
-  
-  m_showIndices = m_ContextMenu->addAction("Show vertex indices");
-  m_showIndices->setCheckable(true);
-  m_showIndices->setChecked(false);
-  connect(m_showIndices, SIGNAL(triggered()), this, SLOT(toggleVertIndexAnno()));
-  
+
+  // Delete poly
+  m_deletePoly = m_ContextMenu->addAction("Delete nearest polygon");
+  connect(m_deletePoly, SIGNAL(triggered()), this, SLOT(deletePoly()));
+
+  // Reverse poly
+  m_reversePoly = m_ContextMenu->addAction("Reverse nearest polygon orientation");
+  connect(m_reversePoly, SIGNAL(triggered()), this, SLOT(reversePoly()));
+
 #if 0
   // TODO(oalexan1): Move here and enable all the functionality from
   //  polyView::contextMenuEvent(QContextMenuEvent *E).
@@ -217,14 +229,8 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
 
   menu.insertItem("Save mark at point", this, SLOT(saveMark()));
 
-  menu.insertItem("Delete polygon (Alt-Shift-Mouse)", this, SLOT(deletePoly()));
-
-  id++;
-
-  menu.insertItem("Insert vertex on edge", this, SLOT(insertVertex()));
   menu.insertItem("Copy polygon",          this, SLOT(copyPoly()));
   menu.insertItem("Paste polygon",         this, SLOT(pastePoly()));
-  menu.insertItem("Reverse orientation",   this, SLOT(reversePoly()));
   menu.insertItem("Insert text label",     this, SLOT(insertLabel()));
   menu.insertItem("Delete text label",     this, SLOT(deleteLabel()));
 
@@ -329,8 +335,8 @@ void polyView::setupViewingWindow(){
   }else if (m_viewChanged){
 
     // Modify the view for given shift or zoom
-    xll  = m_viewXll + m_viewWidX*( (1 - m_zoomFactor)/2.0 + m_shiftX );
-    yll  = m_viewYll + m_viewWidY*( (1 - m_zoomFactor)/2.0 + m_shiftY );
+    xll  = m_viewXll + m_viewWidX*((1 - m_zoomFactor)/2.0 + m_shiftX);
+    yll  = m_viewYll + m_viewWidY*((1 - m_zoomFactor)/2.0 + m_shiftY);
     widx = m_viewWidX*m_zoomFactor;
     widy = m_viewWidY*m_zoomFactor;
 
@@ -367,7 +373,7 @@ void polyView::setupViewingWindow(){
   return;
 }
 
-void polyView::displayData( QPainter *paint ){
+void polyView::displayData(QPainter *paint){
 
   setupViewingWindow(); // Must happen before anything else
 
@@ -404,7 +410,7 @@ void polyView::displayData( QPainter *paint ){
   int drawVertIndex = -1;
   // Use a grid to not draw text too densely as that's slow
   initTextOnScreenGrid(textOnScreenGrid);
-  assert( m_polyVec.size() == m_polyOptionsVec.size() );
+  assert(m_polyVec.size() == m_polyOptionsVec.size());
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++){
 
     int vecIter = m_polyVecOrder[vi];
@@ -423,8 +429,8 @@ void polyView::displayData( QPainter *paint ){
       plotEdges = true; // this is a bugfix, otherwise polygons with no interior do not show up
     
     bool plotPoints = m_polyOptionsVec[vecIter].plotAsPoints  ||
-      ( m_displayMode == m_showPoints )             ||
-      ( m_displayMode == m_showPointsEdges);
+      (m_displayMode == m_showPoints)             ||
+      (m_displayMode == m_showPointsEdges);
 
     if (plotPoints) drawVertIndex++;
 
@@ -432,7 +438,7 @@ void polyView::displayData( QPainter *paint ){
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
               drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter]
               );
-    if ( !plotFilled && !m_selectedPolyIndices[vecIter].empty() ){
+    if (!plotFilled && !m_selectedPolyIndices[vecIter].empty()){
       // Plot the selected polys on top with thicker lines
       dPoly lPolys;
       int lineWidth2 = 2*lineWidth;
@@ -554,11 +560,11 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     if (pIter > 0) start += numVerts[pIter - 1];
 
     // Change the poly file color if it is the background color or invalid
-    QColor color = QColor( colors[pIter].c_str() );
+    QColor color = QColor(colors[pIter].c_str());
     
     QPalette pal(palette());
     if (color == pal.color(QPalette::Background) || color == QColor::Invalid){
-      if ( pal.color(QPalette::Background) != QColor("white") ){
+      if (pal.color(QPalette::Background) != QColor("white")){
         color = QColor("white");
       }else{
         color = QColor("black");
@@ -586,10 +592,10 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       // draw a small shape.
       int tol = 4; // This is a bug fix for missing points. I don't understand
       //           // why this is necessary and why the number 4 is right.
-      if ( plotPoints                                                      &&
-           x0 > m_screenXll - tol && x0 < m_screenXll + m_screenWidX + tol &&
-           y0 > m_screenYll - tol && y0 < m_screenYll + m_screenWidY + tol
-           ){
+      if (plotPoints                                                      &&
+          x0 > m_screenXll - tol && x0 < m_screenXll + m_screenWidX + tol &&
+          y0 > m_screenYll - tol && y0 < m_screenYll + m_screenWidY + tol
+          ){
         drawOneVertex(x0, y0, color, lineWidth, drawVertIndex, paint);
       }
     }
@@ -599,15 +605,15 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     if (plotEdges){
 
       if (plotFilled && isPolyClosed[pIter]){
-        if (signedArea >= 0.0) paint->setBrush( color );
-        else                   paint->setBrush( pal.color(QPalette::Background) );
+        if (signedArea >= 0.0) paint->setBrush(color);
+        else                   paint->setBrush(pal.color(QPalette::Background));
         paint->setPen(color);
       }else {
-        paint->setBrush( Qt::NoBrush );
-        paint->setPen( QPen(color, lineWidth) );
+        paint->setBrush(Qt::NoBrush);
+        paint->setPen(QPen(color, lineWidth));
       }
 
-      if ( isPolyZeroDim(pa) ){
+      if (isPolyZeroDim(pa)){
         // Treat the case of polygons which are made up of just one point
         int l_drawVertIndex = -1;
         drawOneVertex(pa[0].x(), pa[0].y(), color, lineWidth, l_drawVertIndex,
@@ -615,7 +621,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       }else if (isPolyClosed[pIter]){
 
         if (plotFilled){
-          paint->drawPolygon( pa );
+          paint->drawPolygon(pa);
         }else{
           // In some versions of Qt, drawPolygon is buggy when not
           // called to fill polygons. Don't use it, just draw the
@@ -625,12 +631,12 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
             QPolygon pb;
             int x0, y0; pa.point(k, &x0, &y0);       pb << QPoint(x0, y0);
             int x1, y1; pa.point((k+1)%n, &x1, &y1); pb << QPoint(x1, y1);
-            paint->drawPolyline( pb );
+            paint->drawPolyline(pb);
           }
         }
 
       }else{
-        paint->drawPolyline( pa ); // don't join the last vertex to the first
+        paint->drawPolyline(pa); // don't join the last vertex to the first
       }
 
     }
@@ -644,7 +650,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     worldToPixelCoords(A.x, A.y, // inputs
                        x0, y0    // outputs
                        );
-    paint->setPen( QPen(QColor("gold"), lineWidth) );
+    paint->setPen(QPen(QColor("gold"), lineWidth));
     if (isClosestGridPtFree(textOnScreenGrid, x0, y0)){
       paint->drawText(x0, y0, (A.label).c_str());
     }
@@ -708,7 +714,7 @@ void polyView::resetTransformSettings(){
   m_shiftX     = 0.0; m_shiftY = 0.0;
 }
 
-void polyView::mousePressEvent( QMouseEvent *E){
+void polyView::mousePressEvent(QMouseEvent *E){
 
   const QPoint Q = E->pos();
   m_mousePrsX = Q.x();
@@ -726,23 +732,23 @@ void polyView::mousePressEvent( QMouseEvent *E){
   m_rubberBand = m_emptyRubberBand;
 
   // This must happen before m_movingVertsOrEdgesOrPolysNow is declared.
-  m_deletingPolyNow = ( ( E->modifiers() & Qt::AltModifier   ) &&
-                        ( E->modifiers() & Qt::ShiftModifier )
-                        );
+  m_deletingPolyNow = ((E->modifiers() & Qt::AltModifier  ) &&
+                       (E->modifiers() & Qt::ShiftModifier)
+                       );
 
-  m_aligningPolysNow = ( m_alignMode && isShiftLeftMouse(E) && !m_createPoly );
+  m_aligningPolysNow = (m_alignMode && isShiftLeftMouse(E) && !m_createPoly);
   if (m_aligningPolysNow){
     assert(m_polyVec.size() >= 1);
     m_polyBeforeShift = m_polyVec[0];
     m_T.reset();
   }
 
-  m_movingVertsOrEdgesOrPolysNow = ( (m_moveVertices->isChecked() ||
-                                      m_moveEdges->isChecked()    ||
-                                      m_movePolys->isChecked())      &&
-                                     isShiftLeftMouse(E)             &&
-                                     !m_createPoly && !m_deletingPolyNow
-                                     );
+  m_movingVertsOrEdgesOrPolysNow = ((m_moveVertices->isChecked() ||
+                                     m_moveEdges->isChecked()    ||
+                                     m_movePolys->isChecked())      &&
+                                    isShiftLeftMouse(E)             &&
+                                    !m_createPoly && !m_deletingPolyNow
+                                    );
   
   m_movingPolysInHlts = false;
   if (m_movingVertsOrEdgesOrPolysNow){
@@ -757,12 +763,12 @@ void polyView::mousePressEvent( QMouseEvent *E){
                             m_vertIndexInCurrPoly,
                             min_x, min_y, min_dist
                             );
-    }else if (m_movePolys->isChecked() && getNumElements(m_selectedPolyIndices) > 0 ){
+    }else if (m_movePolys->isChecked() && getNumElements(m_selectedPolyIndices) > 0){
       m_highlights.clear(); // No need for these anymore
       m_polyVecBeforeShift = m_polyVec;
       m_movingPolysInHlts = true;
     }else if (m_moveEdges->isChecked() ||
-              m_movePolys->isChecked() ){
+              m_movePolys->isChecked()){
       findClosestPolyEdge(// inputs
                           m_mousePressWorldX, m_mousePressWorldY, m_polyVec,
                           // outputs
@@ -820,7 +826,7 @@ void polyView::mouseMoveEvent(QMouseEvent *E){
                                                   m_vertIndexInCurrPoly,
                                                   wx, wy
                                                   );
-    }else if ( (m_moveEdges->isChecked() || m_movePolys->isChecked()) && m_polyVecIndex >= 0){
+    }else if ((m_moveEdges->isChecked() || m_movePolys->isChecked()) && m_polyVecIndex >= 0){
       m_polyVec[m_polyVecIndex] = m_polyBeforeShift;
       if (m_moveEdges->isChecked()){
         m_polyVec[m_polyVecIndex].shiftEdge(m_polyIndexInCurrPoly,
@@ -839,14 +845,14 @@ void polyView::mouseMoveEvent(QMouseEvent *E){
 
   // Standard Qt rubberband trick (kind of confusing as to how it works).
   updateRubberBand(m_rubberBand);
-  m_rubberBand = QRect( min(m_mousePrsX, x), min(m_mousePrsY, y),
-                        abs(x - m_mousePrsX), abs(y - m_mousePrsY) );
+  m_rubberBand = QRect(min(m_mousePrsX, x), min(m_mousePrsY, y),
+                       abs(x - m_mousePrsX), abs(y - m_mousePrsY));
   updateRubberBand(m_rubberBand);
 
   return;
 }
 
-void polyView::mouseReleaseEvent ( QMouseEvent * E ){
+void polyView::mouseReleaseEvent (QMouseEvent * E){
 
   const QPoint Q = E->pos();
   m_mouseRelX = Q.x();
@@ -860,7 +866,7 @@ void polyView::mouseReleaseEvent ( QMouseEvent * E ){
 
   pixelToWorldCoords(m_mouseRelX, m_mouseRelY, m_menuX, m_menuY);
 
-  if ( m_deletingPolyNow ){
+  if (m_deletingPolyNow){
     // To do: consolidate this with the other call to this function.
     // See if can pass the relevant variables as input arguments.
     deletePoly();
@@ -883,7 +889,7 @@ void polyView::mouseReleaseEvent ( QMouseEvent * E ){
   m_rubberBand = m_emptyRubberBand;
   updateRubberBand(m_rubberBand);
 
-  if ( E->modifiers() & Qt::ControlModifier ){
+  if (E->modifiers() & Qt::ControlModifier){
     // Draw a  highlight with control + left mouse button
     // ending at the current point
     createHighlightWithPixelInputs(m_mousePrsX, m_mousePrsY, m_mouseRelX, m_mouseRelY);
@@ -903,7 +909,7 @@ void polyView::mouseReleaseEvent ( QMouseEvent * E ){
     return;
 
   }else if (m_mouseRelX + tol < m_mousePrsX &&
-            m_mouseRelY + tol < m_mousePrsY ){
+            m_mouseRelY + tol < m_mousePrsY){
 
     zoomOut();
     return;
@@ -930,7 +936,7 @@ void polyView::mouseReleaseEvent ( QMouseEvent * E ){
 
 bool polyView::isShiftLeftMouse(QMouseEvent * E){
   // This does not work in mouseReleaseEvent.
-  return ( E->buttons() & Qt::LeftButton  ) && ( E->modifiers() & Qt::ShiftModifier );
+  return (E->buttons() & Qt::LeftButton ) && (E->modifiers() & Qt::ShiftModifier);
 }
 
 void polyView::wheelEvent(QWheelEvent *E){
@@ -947,9 +953,9 @@ void polyView::wheelEvent(QWheelEvent *E){
   E->accept();
 }
 
-void polyView::keyPressEvent( QKeyEvent *K ){
+void polyView::keyPressEvent(QKeyEvent *K){
 
-  switch ( K->key() ) {
+  switch (K->key()) {
   case Qt::Key_Minus:
     zoomOut();
     break;
@@ -1026,13 +1032,13 @@ void polyView::translateSelectedPolys(){
 
   vector<double> inputVec, shiftVec;
   inputVec.clear();
-  if ( ! getRealValuesFromGui(// Inputs
-                              "Translate selected polygons",
-                              "Enter shift_x shift_y", inputVec,
-                              // Outputs
-                              shiftVec
-                              )
-       ) return;
+  if (! getRealValuesFromGui(// Inputs
+                             "Translate selected polygons",
+                             "Enter shift_x shift_y", inputVec,
+                             // Outputs
+                             shiftVec
+                             )
+      ) return;
 
   translateSelectedPolys(shiftVec);
 
@@ -1078,14 +1084,14 @@ void polyView::rotateSelectedPolys(){
 
   vector<double> inputVec, angle;
   inputVec.clear();
-  if ( ! getRealValuesFromGui(// Inputs
-                              "Rotate selected polygons",
-                              "Enter rotation angle in degrees",
-                              inputVec,
-                              // Outputs
-                              angle
-                              )
-       ) return;
+  if (! getRealValuesFromGui(// Inputs
+                             "Rotate selected polygons",
+                             "Enter rotation angle in degrees",
+                             inputVec,
+                             // Outputs
+                             angle
+                             )
+      ) return;
 
   rotateSelectedPolys(angle);
 
@@ -1130,13 +1136,13 @@ void polyView::scaleSelectedPolys(){
 
   vector<double> inputVec, scale;
   inputVec.clear();
-  if ( ! getRealValuesFromGui(// Inputs
-                              "Scale selected polygons", "Enter scale",
-                              inputVec,
-                              // Outputs
-                              scale
-                              )
-       ) return;
+  if (! getRealValuesFromGui(// Inputs
+                             "Scale selected polygons", "Enter scale",
+                             inputVec,
+                             // Outputs
+                             scale
+                             )
+      ) return;
 
   scaleSelectedPolys(scale);
 
@@ -1157,11 +1163,11 @@ void polyView::scaleSelectedPolys(std::vector<double> & scale){
   scale.resize(1);
 
   scaleMarkedPolysAroundCtr(// Inputs
-                             m_selectedPolyIndices,
-                             scale[0],
-                             // Inputs-outputs
-                             m_polyVec
-                             );
+                            m_selectedPolyIndices,
+                            scale[0],
+                            // Inputs-outputs
+                            m_polyVec
+                            );
 
   printCmd("scale_selected", scale);
 
@@ -1181,14 +1187,14 @@ void polyView::transformSelectedPolys(){
 
   vector<double> inputVec, T;
   inputVec.clear();
-  if ( ! getRealValuesFromGui(// Inputs
-                              "Transform selected polygons",
-                              "Enter transform matrix a11 a12 a21 a22",
-                              inputVec,
-                              // Outputs
-                              T
-                              )
-       ) return;
+  if (! getRealValuesFromGui(// Inputs
+                             "Transform selected polygons",
+                             "Enter transform matrix a11 a12 a21 a22",
+                             inputVec,
+                             // Outputs
+                             T
+                             )
+      ) return;
 
   transformSelectedPolys(T);
 
@@ -1324,8 +1330,8 @@ void polyView::paintEvent(QPaintEvent *){
   // Plot the mouse clicks (snapped or not snapped to closest vertex).
   // Do it here since those are temporary, they are supposed
   // to go away when the display changes such as on zoom.
-  paint.setPen( QPen(fgColor, m_prefs.lineWidth) );
-  paint.setBrush( Qt::NoBrush );
+  paint.setPen(QPen(fgColor, m_prefs.lineWidth));
+  paint.setBrush(Qt::NoBrush);
   for (int p = 0; p < (int)m_snappedPoints.size(); p++){
     const QPoint & P = m_snappedPoints[p];
     paint.drawEllipse(P.x() - m_smallLen, P.y() - m_smallLen,
@@ -1351,8 +1357,8 @@ void polyView::drawPolyBeingPlotted(const std::vector<double> & polyX,
   assert(polyX.size() == polyY.size());
 
   // Draw the current polygon being plotted
-  paint->setPen( QPen(QColor((m_prefs.fgColor).c_str()), m_prefs.lineWidth) );
-  paint->setBrush( Qt::NoBrush );
+  paint->setPen(QPen(QColor((m_prefs.fgColor).c_str()), m_prefs.lineWidth));
+  paint->setBrush(Qt::NoBrush);
   drawPolyLine(polyX, polyY, paint);
 
   // Draw a small rectangle at the start of the polygon to make it easier
@@ -1361,8 +1367,8 @@ void polyView::drawPolyBeingPlotted(const std::vector<double> & polyX,
   worldToPixelCoords(polyX[0], polyY[0], // inputs
                      px, py // outputs
                      );
-  paint->setPen( QPen(QColor((m_prefs.fgColor).c_str()), m_prefs.lineWidth) );
-  paint->setBrush( Qt::NoBrush );
+  paint->setPen(QPen(QColor((m_prefs.fgColor).c_str()), m_prefs.lineWidth));
+  paint->setBrush(Qt::NoBrush);
   paint->drawRect(px - m_pixelTol, py - m_pixelTol,
                   2*m_pixelTol, 2*m_pixelTol
                   );
@@ -1450,10 +1456,10 @@ bool polyView::getStringVectorFromGui(std::string title,
 void polyView::setLineWidth(){
 
   vector<double> inputVec, lineWidth;
-  if ( !getRealValuesFromGui("Line width", "Enter line width", inputVec,
-                             lineWidth) ) return;
+  if (!getRealValuesFromGui("Line width", "Enter line width", inputVec,
+                            lineWidth)) return;
 
-  if ( !lineWidth.empty() && lineWidth[0] >= 1.0 ){
+  if (!lineWidth.empty() && lineWidth[0] >= 1.0){
 
     int lw = (int) round(lineWidth[0]);
 
@@ -1473,10 +1479,10 @@ void polyView::setLineWidth(){
 void polyView::setGridWidth(){
 
   vector<double> inputVec, gridWidth;
-  if ( !getRealValuesFromGui("Grid linewidth", "Enter grid linewidth",
-                             inputVec, gridWidth) ) return;
+  if (!getRealValuesFromGui("Grid linewidth", "Enter grid linewidth",
+                            inputVec, gridWidth)) return;
 
-  if (!gridWidth.empty() && gridWidth[0] >= 1.0 ){
+  if (!gridWidth.empty() && gridWidth[0] >= 1.0){
 
     int gw = (int) round(gridWidth[0]);
     m_prefs.gridWidth = gw;
@@ -1497,10 +1503,10 @@ void polyView::setGridSize(){
   inputVec.clear();
   if (m_prefs.gridSize > 0) inputVec.push_back(m_prefs.gridSize);
 
-  if ( !getRealValuesFromGui("Grid size", "Enter grid size", inputVec,
-                             gridSize)) return;
+  if (!getRealValuesFromGui("Grid size", "Enter grid size", inputVec,
+                            gridSize)) return;
 
-  if ( !gridSize.empty() && gridSize[0] > 0 ){
+  if (!gridSize.empty() && gridSize[0] > 0){
 
     double gs = gridSize[0];
     m_prefs.gridSize = gs;
@@ -1521,7 +1527,7 @@ void polyView::setGridColor(){
 
   string gridColor = "";
   if (values.size() > 0) gridColor = values[0];
-  if ( QColor(gridColor.c_str()) != QColor::Invalid){
+  if (QColor(gridColor.c_str()) != QColor::Invalid){
     m_prefs.gridColor = gridColor;
     refreshPixmap();
   }else{
@@ -1538,7 +1544,7 @@ void polyView::setBgColor(){
 
   string bgColor = "";
   if (values.size() > 0) bgColor = values[0];
-  if ( QColor(bgColor.c_str()) != QColor::Invalid){
+  if (QColor(bgColor.c_str()) != QColor::Invalid){
     m_prefs.bgColor = bgColor;
     setBgFgColorsFromPrefs();
     refreshPixmap();
@@ -1561,7 +1567,7 @@ void polyView::setBgFgColorsFromPrefs(){
   pal.setColor(QPalette::Background, qtBgColor);
 
   string fgColor = m_prefs.fgColor;
-  if ( QColor(fgColor.c_str()) == QColor::Invalid ){
+  if (QColor(fgColor.c_str()) == QColor::Invalid){
     fgColor = "white";
   }
 
@@ -1589,9 +1595,9 @@ void polyView::setBgFgColorsFromPrefs(){
 void polyView::translatePolys(){
 
   vector<double> inputVec, shiftVec;
-  if ( getRealValuesFromGui("Translate polygons", "Enter shift_x and shift_y",
-                            inputVec,
-                            shiftVec) ){
+  if (getRealValuesFromGui("Translate polygons", "Enter shift_x and shift_y",
+                           inputVec,
+                           shiftVec)){
     translatePolys(shiftVec);
   }
   return;
@@ -1600,10 +1606,10 @@ void polyView::translatePolys(){
 void polyView::rotatePolys(){
 
   vector<double> inputVec, angle;
-  if ( getRealValuesFromGui("Rotate polygons",
-                            "Enter rotation angle in degrees",
-                            inputVec,
-                            angle) ){
+  if (getRealValuesFromGui("Rotate polygons",
+                           "Enter rotation angle in degrees",
+                           inputVec,
+                           angle)){
     rotatePolys(angle);
   }
   return;
@@ -1612,9 +1618,9 @@ void polyView::rotatePolys(){
 void polyView::scalePolys(){
 
   vector<double> inputVec, scale;
-  if ( getRealValuesFromGui("Scale polygons", "Enter scale factor",
-                            inputVec,
-                            scale) ){
+  if (getRealValuesFromGui("Scale polygons", "Enter scale factor",
+                           inputVec,
+                           scale)){
     scalePolys(scale);
   }
   return;
@@ -1902,7 +1908,7 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
     m_snappedPoints.push_back(QPoint(currX, currY));
     update(currX - len, currY - len, 2*len, 2*len);
 
-  }else if (state == ( (int)Qt::LeftButton | (int)Qt::AltModifier )
+  }else if (state == ((int)Qt::LeftButton | (int)Qt::AltModifier)
             ||
             state == ((int)Qt::MidButton)
             ){
@@ -1924,10 +1930,10 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
           << setw(wid) << (wx - m_prevClickedX) << ", "
           << setw(wid) << (wy - m_prevClickedY)
           << ") Euclidean: "
-          << setw(wid) << sqrt( (wx - m_prevClickedX)*(wx - m_prevClickedX)
-                                +
-                                (wy - m_prevClickedY)*(wy - m_prevClickedY)
-                                );
+          << setw(wid) << sqrt((wx - m_prevClickedX)*(wx - m_prevClickedX)
+                               +
+                               (wy - m_prevClickedY)*(wy - m_prevClickedY)
+                               );
   }
   cout << endl;
 
@@ -1942,10 +1948,10 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
 void polyView::updateRubberBand(QRect & R){
 
   QRect rect = R.normalized();
-  update(rect.left(), rect.top(),    rect.width(), 1             );
-  update(rect.left(), rect.top(),    1,            rect.height() );
-  update(rect.left(), rect.bottom(), rect.width(), 1             );
-  update(rect.right(), rect.top(),   1,            rect.height() );
+  update(rect.left(), rect.top(),    rect.width(), 1            );
+  update(rect.left(), rect.top(),    1,            rect.height());
+  update(rect.left(), rect.bottom(), rect.width(), 1            );
+  update(rect.right(), rect.top(),   1,            rect.height());
 
   return;
 }
@@ -1984,7 +1990,7 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
   int len = 3*(drawVertIndex+1);
   len = min(len, 8); // limit how big this can get
 
-  paint->setPen( QPen(color, lineWidth) );
+  paint->setPen(QPen(color, lineWidth));
 
   int numTypes = 4;
   if (drawVertIndex < 0){
@@ -1992,25 +1998,25 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
     // This will be reached only for the case when a polygon
     // is so small that it collapses into a point.
     len = lineWidth;
-    paint->setBrush( color );
+    paint->setBrush(color);
     paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
 
   } else if (drawVertIndex%numTypes == 0){
 
     // Draw a small empty ellipse
-    paint->setBrush( Qt::NoBrush );
+    paint->setBrush(Qt::NoBrush);
     paint->drawEllipse(x0 - len, y0 - len, 2*len, 2*len);
 
   }else if (drawVertIndex%numTypes == 1){
 
     // Draw an empty square
-    paint->setBrush( Qt::NoBrush );
+    paint->setBrush(Qt::NoBrush);
     paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
 
   }else if (drawVertIndex%numTypes == 2){
 
     // Draw an empty triangle
-    paint->setBrush( Qt::NoBrush );
+    paint->setBrush(Qt::NoBrush);
     paint->drawLine(x0 - len, y0 - len, x0 + len, y0 - len);
     paint->drawLine(x0 - len, y0 - len, x0 + 0,   y0 + len);
     paint->drawLine(x0 + len, y0 - len, x0 + 0,   y0 + len);
@@ -2018,7 +2024,7 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
   }else{
 
     // Draw an empty reversed triangle
-    paint->setBrush( Qt::NoBrush );
+    paint->setBrush(Qt::NoBrush);
     paint->drawLine(x0 - len, y0 + len, x0 + len, y0 + len);
     paint->drawLine(x0 - len, y0 + len, x0 + 0,   y0 - len);
     paint->drawLine(x0 + len, y0 + len, x0 + 0,   y0 - len);
@@ -2033,8 +2039,8 @@ void polyView::drawMark(int x0, int y0, QColor color, int lineWidth,
 
   int len = 6;
 
-  paint->setBrush( Qt::NoBrush );
-  paint->setPen( QPen(color, lineWidth) );
+  paint->setBrush(Qt::NoBrush);
+  paint->setPen(QPen(color, lineWidth));
 
   // Draw a cross
   paint->drawLine(x0 - len, y0 - len, x0 + len, y0 + len);
@@ -2092,7 +2098,7 @@ void polyView::toggleDifferentColors(){
   // First turn off diff mode
   if (m_polyDiffMode) toggleShowPolyDiff();
 
-  assert( m_polyVec.size() == m_polyOptionsVec.size() );
+  assert(m_polyVec.size() == m_polyOptionsVec.size());
 
   m_diffColorsMode = true;
 
@@ -2139,7 +2145,7 @@ void polyView::toggleShowPolyDiff(){
   // First turn off diff color mode
   if (m_diffColorsMode) toggleDifferentColors();
 
-  assert( m_polyVec.size() == m_polyOptionsVec.size() );
+  assert(m_polyVec.size() == m_polyOptionsVec.size());
 
   if (m_polyVec.size() < 2){
     popUp("Must have two polygon files to diff.");
@@ -2209,15 +2215,15 @@ void polyView::plotDiff(int direction){
   // order and store them in m_distVec. The user will navigate over
   // these segments to see how different the polygon clips are.
 
-  if ( !m_polyDiffMode ) return;
+  if (!m_polyDiffMode) return;
 
   // The current segment to plot
   m_segX.clear(); m_segY.clear();
 
   assert(direction == 1 || direction == -1);
 
-  if (m_distVec.size() == 0 ){
-    assert( m_polyVec.size() >= 2);
+  if (m_distVec.size() == 0){
+    assert(m_polyVec.size() >= 2);
     findDistanceBwPolys(// inputs
                         m_polyVec[0], m_polyVec[1],
                         // outputs
@@ -2258,13 +2264,13 @@ void polyView::plotDiff(int direction){
 }
 
 
-void polyView::plotDistBwPolyClips( QPainter *paint ){
+void polyView::plotDistBwPolyClips(QPainter *paint){
 
   // This is to be called in poly diff mode only. Plot the current
   // segment/distance between clips of polygons. See
   // polyView::plotDiff() for more info.
 
-  if ( !m_polyDiffMode ) return;
+  if (!m_polyDiffMode) return;
   drawPolyLine(m_segX, m_segY, paint);
   return;
 }
@@ -2645,7 +2651,7 @@ void polyView::cutToHlt(){
 
   // Cut to the last highlight
   int numH = m_highlights.size();
-  if ( numH == 0){
+  if (numH == 0){
     popUp("No highlights are present. Create one with Control-Mouse.");
     return;
   }
@@ -2654,7 +2660,7 @@ void polyView::cutToHlt(){
   assert(H.get_totalNumVerts() == 4);
   double xl, yl, xh, yh;
   H.bdBox(xl, yl, xh, yh);
-  printCmd( "clip", xl, yl, xh - xl, yh - yl );
+  printCmd("clip", xl, yl, xh - xl, yh - yl);
 
   dPoly clippedPoly;
   for (int vecIter = 0; vecIter < (int)m_polyVec.size(); vecIter++){
@@ -2874,9 +2880,9 @@ void polyView::showFilesChosenByUser(){
 
 void polyView::openPoly(){
 
-  QString s = QFileDialog::getOpenFileName( this,
-                                            "Open file dialog, Choose a file",
-                                            QDir::currentPath(),
+  QString s = QFileDialog::getOpenFileName(this,
+                                           "Open file dialog, Choose a file",
+                                           QDir::currentPath(),
                                            tr("(*.xg *.ly* *.pol)")
                                            );
 
@@ -2884,7 +2890,7 @@ void polyView::openPoly(){
 
   string fileName = s.toStdString();
 
-  assert ( (int)m_polyVec.size() == (int)m_polyOptionsVec.size() );
+  assert ((int)m_polyVec.size() == (int)m_polyOptionsVec.size());
 
   m_polyOptionsVec.push_back(m_prefs);
   m_polyOptionsVec.back().polyFileName     = fileName;
@@ -2927,13 +2933,13 @@ bool polyView::readOnePoly(// inputs
   string type = getFilenameExtension(filename);
 
   if (type == "pol" || type == "cnt"){
-     if ( poly.read_pol_or_cnt_format(filename, type, plotPointsOnly) ) return true;
-     string msg = string("Invalid .") + type + " format for " + filename
-       + ". Trying to read it in .xg format.";
-     cerr << msg << endl;
+    if (poly.read_pol_or_cnt_format(filename, type, plotPointsOnly)) return true;
+    string msg = string("Invalid .") + type + " format for " + filename
+      + ". Trying to read it in .xg format.";
+    cerr << msg << endl;
   }
 
-  if ( ! poly.readPoly(filename, plotPointsOnly) ){
+  if (! poly.readPoly(filename, plotPointsOnly)){
     return false;
   }
 
@@ -3300,10 +3306,10 @@ double polyView::calcGrid(double widx, double widy){
 
   // Values bigger than 1 are snapped to grid of 1, bigger than 2^n
   // to grid of 2^n.
-  int k = (int)round( log(grid)/log(2.0) );
+  int k = (int)round(log(grid)/log(2.0));
   double v;
-  if (k >= 0) v = round( pow(2.0, k) );
-  else        v = 1.0/round( pow(2.0, -k) );
+  if (k >= 0) v = round(pow(2.0, k));
+  else        v = 1.0/round(pow(2.0, -k));
   grid = v*round(grid/v);
 
   return grid;
