@@ -114,8 +114,8 @@ public slots:
   void toggleMoveVertices();
   void toggleMoveEdges();
   void toggleAlignMode();
-  void insertLabel();
-  void deleteLabel();
+  void addAnno();
+  void deleteAnno();
   void insertVertex();
   void deleteVertex();
   void deletePoly();
@@ -304,11 +304,22 @@ private:
   QAction* m_movePolys;
   QAction* m_deleteVertex;
   QAction* m_showIndices;
-  QAction* m_saveScreenshot;
-  QAction* m_deleteVertices;
   QAction* m_showPolysFilled;
   QAction* m_deletePoly;
   QAction* m_reversePoly;
+  QAction* m_copyPoly;
+  QAction* m_pastePoly;
+  QAction* m_saveMark;
+  QAction* m_addAnno;
+  QAction* m_deleteAnno;
+  QAction* m_alignModeAction;
+
+  QAction* m_align_rotate90;
+  QAction* m_align_rotate180;
+  QAction* m_align_rotate270;
+  QAction* m_align_flip_against_x_axis;
+  QAction* m_align_flip_against_y_axis;
+  QAction* m_performAlignmentOfClosePolys;
 
   // If the current point on the polygon being created is closer than
   // this distance (in pixels) from the first point of the polygon, we

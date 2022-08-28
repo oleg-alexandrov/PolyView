@@ -217,39 +217,51 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   m_reversePoly = m_ContextMenu->addAction("Reverse nearest polygon orientation");
   connect(m_reversePoly, SIGNAL(triggered()), this, SLOT(reversePoly()));
 
-#if 0
-  // TODO(oalexan1): Move here and enable all the functionality from
-  //  polyView::contextMenuEvent(QContextMenuEvent *E).
+  // Copy poly
+  m_copyPoly = m_ContextMenu->addAction("Copy nearest polygon");
+  connect(m_copyPoly, SIGNAL(triggered()), this, SLOT(copyPoly()));
 
-  m_saveScreenshot     = m_ContextMenu->addAction("Save screenshot");
+  // Paste poly
+  m_pastePoly = m_ContextMenu->addAction("Paste polygon");
+  connect(m_pastePoly, SIGNAL(triggered()), this, SLOT(pastePoly()));
 
-  connect(m_saveScreenshot,        SIGNAL(triggered()), this, SLOT(saveScreenshot()));
-  connect(m_deleteVertices,        SIGNAL(triggered()), this, SLOT(deleteVertices()));
+  // Save mark
+  m_saveMark = m_ContextMenu->addAction("Save mark");
+  connect(m_saveMark, SIGNAL(triggered()), this, SLOT(saveMark()));
   
+  // Add anno
+  m_addAnno = m_ContextMenu->addAction("Add annotation");
+  connect(m_addAnno, SIGNAL(triggered()), this, SLOT(addAnno()));
 
-  menu.insertItem("Save mark at point", this, SLOT(saveMark()));
+  // Delete anno
+  m_deleteAnno = m_ContextMenu->addAction("Delete annotation");
+  connect(m_deleteAnno, SIGNAL(triggered()), this, SLOT(deleteAnno()));
 
-  menu.insertItem("Copy polygon",          this, SLOT(copyPoly()));
-  menu.insertItem("Paste polygon",         this, SLOT(pastePoly()));
-  menu.insertItem("Insert text label",     this, SLOT(insertLabel()));
-  menu.insertItem("Delete text label",     this, SLOT(deleteLabel()));
+  // Align polygons
+  m_alignModeAction = m_ContextMenu->addAction("Align mode");
+  connect(m_alignModeAction, SIGNAL(triggered()), this, SLOT(toggleAlignMode()));
+  m_alignModeAction->setCheckable(true);
+  m_alignModeAction->setChecked(false);
 
-  menu.addSeparator();
+  m_alignMode = false;
+  m_align_rotate90 =  m_ContextMenu->addAction("Rotate  90 degrees");
+  connect(m_align_rotate90, SIGNAL(triggered()), this, SLOT(align_rotate90()));
+  m_align_rotate180 =  m_ContextMenu->addAction("Rotate  180 degrees");
+  connect(m_align_rotate180, SIGNAL(triggered()), this, SLOT(align_rotate180()));
+  m_align_rotate270 =  m_ContextMenu->addAction("Rotate  270 degrees");
+  connect(m_align_rotate270, SIGNAL(triggered()), this, SLOT(align_rotate270()));
+  
+  m_align_flip_against_x_axis = m_ContextMenu->addAction("Flip against x axis");
+  connect(m_align_flip_against_x_axis, SIGNAL(triggered()),
+          this, SLOT(align_flip_against_x_axis()));
 
-  menu.insertItem("Align mode", this, SLOT(toggleAlignMode()), 0, id);
-  menu.setItemChecked(id, m_alignMode);
-  id++;
+  m_align_flip_against_y_axis = m_ContextMenu->addAction("Flip against y axis");
+  connect(m_align_flip_against_y_axis, SIGNAL(triggered()),
+          this, SLOT(align_flip_against_y_axis()));
 
-  if (m_alignMode){
-    menu.insertItem("Rotate  90 degrees",  this, SLOT(align_rotate90()));
-    menu.insertItem("Rotate 180 degrees",  this, SLOT(align_rotate180()));
-    menu.insertItem("Rotate 270 degrees",  this, SLOT(align_rotate270()));
-    menu.insertItem("Flip against x axis", this, SLOT(align_flip_against_x_axis()));
-    menu.insertItem("Flip against y axis", this, SLOT(align_flip_against_y_axis()));
-    menu.insertItem("Guess alignment", this,
-                    SLOT(performAlignmentOfClosePolys()));
-  }
-#endif
+  m_performAlignmentOfClosePolys = m_ContextMenu->addAction("Perform alignment of close polys");
+  connect(m_performAlignmentOfClosePolys, SIGNAL(triggered()),
+          this, SLOT(performAlignmentOfClosePolys()));
 
   resetTransformSettings();
 
@@ -988,9 +1000,15 @@ void polyView::contextMenuEvent(QContextMenuEvent *E){
   int x = E->x(), y = E->y();
   m_mousePrsX = x;
   m_mousePrsY = y;
-  
   pixelToWorldCoords(x, y, m_menuX, m_menuY);
 
+  m_align_rotate90->setVisible(m_alignMode);
+  m_align_rotate180->setVisible(m_alignMode);
+  m_align_rotate270->setVisible(m_alignMode);
+  m_align_flip_against_x_axis->setVisible(m_alignMode);
+  m_align_flip_against_y_axis->setVisible(m_alignMode); 
+  m_performAlignmentOfClosePolys->setVisible(m_alignMode);
+  
   m_ContextMenu->popup(mapToGlobal(QPoint(x,y)));
   
   return;
@@ -1877,9 +1895,9 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
   // Snap or not the current point to the closest polygon vertex
   // and print its coordinates.
 
-  int prec = 6, wid = prec + 6;
+  int prec = 6;
   cout.precision(prec);
-  cout.setf(ios::floatfield);
+  //cout.setf(ios::floatfield);
 
   double wx, wy;
   pixelToWorldCoords(currX, currY, wx, wy);
@@ -1923,14 +1941,13 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
   }
 
   cout << "Point" << " ("
-       << setw(wid) << wx << ", "
-       << setw(wid) << wy << ")";
+       << wx << ", " << wy << ")";
   if (m_prevClickExists){
     cout  << " dist from prev: ("
-          << setw(wid) << (wx - m_prevClickedX) << ", "
-          << setw(wid) << (wy - m_prevClickedY)
+          << (wx - m_prevClickedX) << ", "
+          << (wy - m_prevClickedY)
           << ") Euclidean: "
-          << setw(wid) << sqrt((wx - m_prevClickedX)*(wx - m_prevClickedX)
+          << sqrt((wx - m_prevClickedX)*(wx - m_prevClickedX)
                                +
                                (wy - m_prevClickedY)*(wy - m_prevClickedY)
                                );
@@ -2345,7 +2362,6 @@ void polyView::toggleAlignMode(){
   m_alignMode = !m_alignMode;
 
   if (m_alignMode){
-
     if (m_polyVec.size() < 2){
       popUp("Must have two polygon files to align.");
       m_alignMode = false;
@@ -2452,10 +2468,10 @@ void polyView::createArbitraryPoly(){
   setPolyDrawCursor();
 }
 
-void polyView::insertLabel(){
+void polyView::addAnno(){
 
   string inputStr, outputStr;
-  bool ok = getStringFromGui("Text label", "Enter text label", inputStr,
+  bool ok = getStringFromGui("Annotation", "Enter annotation", inputStr,
                              outputStr // output
                              );
   if (!ok)
@@ -2491,7 +2507,7 @@ void polyView::insertLabel(){
   return;
 }
 
-void polyView::deleteLabel(){
+void polyView::deleteAnno(){
 
   int polyVecIndex, annoIndexInCurrPoly;
   double minDist;
