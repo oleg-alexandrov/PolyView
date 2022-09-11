@@ -43,15 +43,14 @@ void utils::findClosestAnnotation(// inputs
                                   // outputs
                                   int & polyVecIndex,
                                   int & annoIndexInCurrPoly,
-                                  double & minDist
-                                  ){
+                                  double & minDist) {
 
   // Find the closest annotation in a given vector of polygons to a given point.
 
   polyVecIndex = -1; annoIndexInCurrPoly = -1;
   minDist = DBL_MAX;
 
-  for (int s = 0; s < (int)polyVec.size(); s++){
+  for (int s = 0; s < (int)polyVec.size(); s++) {
 
     double minDist0;
     int annoIndex;
@@ -61,7 +60,7 @@ void utils::findClosestAnnotation(// inputs
                                      annoIndex, minDist0
                                      );
 
-    if (minDist0 <= minDist){
+    if (minDist0 <= minDist) {
       polyVecIndex  = s;
       annoIndexInCurrPoly = annoIndex;
       minDist       = minDist0;
@@ -81,14 +80,14 @@ void utils::findClosestPolyVertex(// inputs
                                   int & vertIndexInCurrPoly,
                                   double & minX, double & minY,
                                   double & minDist
-                                  ){
+                                  ) {
 
   // Find the closest point in a given vector of polygons to a given point.
 
   polyVecIndex = -1; polyIndexInCurrPoly = -1; vertIndexInCurrPoly = -1;
   minX = x0; minY = y0; minDist = DBL_MAX;
 
-  for (int s = 0; s < (int)polyVec.size(); s++){
+  for (int s = 0; s < (int)polyVec.size(); s++) {
 
     double minX0, minY0, minDist0;
     int polyIndex, vertIndex;
@@ -98,7 +97,7 @@ void utils::findClosestPolyVertex(// inputs
                                      polyIndex, vertIndex, minX0, minY0, minDist0
                                      );
 
-    if (minDist0 <= minDist){
+    if (minDist0 <= minDist) {
       polyVecIndex  = s;
       polyIndexInCurrPoly = polyIndex;
       vertIndexInCurrPoly = vertIndex;
@@ -119,7 +118,7 @@ void utils::findClosestPolyEdge(// inputs
                                 int & vecIndex, int & polyIndex,
                                 int & vertIndex,
                                 double & minX, double & minY, double & minDist
-                                ){
+                                ) {
 
   // Find the closest edge in a given vector of polygons to a given point.
 
@@ -130,7 +129,7 @@ void utils::findClosestPolyEdge(// inputs
   minY      = DBL_MAX;
   minDist   = DBL_MAX;
 
-  for (int vecIter = 0; vecIter < (int)polyVec.size(); vecIter++){
+  for (int vecIter = 0; vecIter < (int)polyVec.size(); vecIter++) {
 
     double lx, ly, ldist;
     int pIndex, vIndex;
@@ -138,7 +137,7 @@ void utils::findClosestPolyEdge(// inputs
                                          pIndex, vIndex, lx, ly, ldist  // out
                                          );
 
-    if (ldist <= minDist){
+    if (ldist <= minDist) {
       vecIndex  = vecIter;
       polyIndex = pIndex;
       vertIndex = vIndex;
@@ -155,7 +154,7 @@ void utils::findClosestPolyEdge(// inputs
 void utils::alignPoly1ToPoly2(dPoly       & poly1,
                               const dPoly & poly2,
                               utils::linTrans & T // save the applied transform
-                              ){
+                              ) {
 
   // Find the closest pair of vertices from poly1 to poly2. Shift poly1
   // so that the first vertex is on top of the second one.
@@ -180,7 +179,7 @@ void utils::findDistanceFromVertsOfPoly1ToVertsPoly2(// inputs
                                                      const dPoly & poly2,
                                                      // outputs
                                                      std::vector<segDist> & distVec
-                                                     ){
+                                                     ) {
 
   // Given two sets of polygons, for each vertex in the first set of
   // polygons find the distance to the closest vertex in the second
@@ -205,7 +204,7 @@ void utils::findDistanceFromVertsOfPoly1ToVertsPoly2(// inputs
   kdTree T;
   T.formTreeOfPoints(numVerts2, x2, y2);
 
-  for (int t = 0; t < numVerts1; t++){
+  for (int t = 0; t < numVerts1; t++) {
 
     double x = x1[t], y = y1[t];
     double closestDist;
@@ -229,7 +228,7 @@ void utils::findDistanceBwPolys(// inputs
                                 const dPoly & poly2,
                                 // outputs
                                 std::vector<segDist> & distVec
-                                ){
+                                ) {
 
   // Find the distances from poly1 to poly2, then from poly2 to poly1.
   // Sort them in decreasing order of their lengths. See
@@ -256,7 +255,7 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
                                          const dPoly & poly2,
                                          // outputs
                                          std::vector<segDist> & distVec
-                                         ){
+                                         ) {
 
   // Given two sets of polygons, for each vertex in the first set of
   // polygons find the distance to the closest point (may be on edge)
@@ -280,7 +279,7 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
   edgeTree T;
   T.putPolyEdgesInTree(poly2);
 
-  for (int t = 0; t < numVerts1; t++){
+  for (int t = 0; t < numVerts1; t++) {
 
     double x = x1[t], y = y1[t];
     double closestX, closestY, closestDist;
@@ -302,7 +301,7 @@ void utils::findDistanceBwPolysBruteForce(// inputs
                                           const dPoly & poly2,
                                           // outputs
                                           std::vector<segDist> & distVec
-                                          ){
+                                          ) {
 
   // A naive (but simple) implementation of findDistanceFromPoly1ToPoly2.
 
@@ -315,7 +314,7 @@ void utils::findDistanceBwPolysBruteForce(// inputs
 
   if (numVerts1 == 0 || numVerts2 == 0) return; // no vertices
 
-  for (int t  = 0; t < numVerts1; t++){
+  for (int t  = 0; t < numVerts1; t++) {
 
     int minPolyIndex, minVertIndex;
     double minX, minY, minDist = DBL_MAX;
@@ -333,14 +332,14 @@ void utils::findDistanceBwPolysBruteForce(// inputs
   return;
 }
 
-void utils::putPolyInMultiSet(const dPoly & P, std::multiset<dPoint> & mP){
+void utils::putPolyInMultiSet(const dPoly & P, std::multiset<dPoint> & mP) {
 
   const double * x  = P.get_xv();
   const double * y  = P.get_yv();
   int totalNumVerts = P.get_totalNumVerts();
 
   mP.clear();
-  for (int v = 0; v < totalNumVerts; v++){
+  for (int v = 0; v < totalNumVerts; v++) {
     dPoint P;
     P.x = x[v];
     P.y = y[v];
@@ -352,7 +351,7 @@ void utils::putPolyInMultiSet(const dPoly & P, std::multiset<dPoint> & mP){
 
 void utils::findPolyDiff(const dPoly & P, const dPoly & Q, // inputs
                          std::vector<dPoint> & vP, std::vector<dPoint> & vQ // outputs
-                         ){
+                         ) {
 
   // Compare two polygons point-by-point. We assume that the polygons
   // may have collinear points. If one polygon has a point repeated
@@ -369,30 +368,30 @@ void utils::findPolyDiff(const dPoly & P, const dPoly & Q, // inputs
   vector<dPoint> shared;
   shared.clear();
   multiset<dPoint>::iterator ip, iq;
-  for (ip = mP.begin(); ip != mP.end(); ip++){
+  for (ip = mP.begin(); ip != mP.end(); ip++) {
     iq = mQ.find(*ip);
-    if ( iq != mQ.end() ){
+    if ( iq != mQ.end() ) {
       shared.push_back(*ip);
       mQ.erase(iq); // Erase just the current instance of the given value
     }
   }
 
   // Wipe it from mP as well
-  for (int s = 0; s < (int)shared.size(); s++){
+  for (int s = 0; s < (int)shared.size(); s++) {
     ip = mP.find(shared[s]);
-    if ( ip != mP.end() ){
+    if ( ip != mP.end() ) {
       mP.erase(ip); // Erase just the current instance of the given value
     }
   }
 
   vP.clear(); vQ.clear();
-  for (ip = mP.begin(); ip != mP.end(); ip++){
+  for (ip = mP.begin(); ip != mP.end(); ip++) {
     dPoint p;
     p.x = ip->x;
     p.y = ip->y;
     vP.push_back(p);
   }
-  for (iq = mQ.begin(); iq != mQ.end(); iq++){
+  for (iq = mQ.begin(); iq != mQ.end(); iq++) {
     dPoint q;
     q.x = iq->x;
     q.y = iq->y;
@@ -406,11 +405,11 @@ void utils::bdBox(const std::vector<dPoly> & polyVec,
                   // outputs
                   double & xll, double & yll,
                   double & xur, double & yur
-                  ){
+                  ) {
 
   double big = DBL_MAX;
   xll = big; yll = big; xur = -big; yur = -big;
-  for (int p = 0; p < (int)polyVec.size(); p++){
+  for (int p = 0; p < (int)polyVec.size(); p++) {
     if (polyVec[p].get_totalNumVerts() == 0) continue;
     double xll0, yll0, xur0, yur0;
     polyVec[p].bdBox(xll0, yll0, xur0, yur0);
@@ -427,7 +426,7 @@ void utils::setUpViewBox(// inputs
                          // outputs
                          double & xll,  double & yll,
                          double & widx, double & widy
-                         ){
+                         ) {
 
   // Given a set of polygons, set up a box containing these polygons.
 
@@ -438,13 +437,13 @@ void utils::setUpViewBox(// inputs
         );
 
   // Treat the case of empty polygons
-  if (xur < xll || yur < yll){
+  if (xur < xll || yur < yll) {
     xll = 0.0; yll = 0.0; xur = 1000.0; yur = 1000.0;
   }
 
   // Treat the case when the polygons are degenerate
-  if (xur == xll){ xll -= 0.5; xur += 0.5; }
-  if (yur == yll){ yll -= 0.5; yur += 0.5; }
+  if (xur == xll) { xll -= 0.5; xur += 0.5; }
+  if (yur == yll) { yll -= 0.5; yur += 0.5; }
 
   widx = xur - xll; assert(widx > 0.0);
   widy = yur - yll; assert(widy > 0.0);
@@ -463,38 +462,48 @@ void utils::markPolysInHlts(// Inputs
                             const std::vector<dPoly> & polyVec,
                             const std::vector<dPoly> & highlights,
                             // Outputs
-                            std::map< int, std::map<int, int> > & markedPolyIndices){
+                            std::map<int, std::map<int, int>> & markedPolyIndices,
+                            std::map<int, std::map<int, int>> & markedAnnoIndices) {
 
   markedPolyIndices.clear();
-
-  for (int s = 0; s < (int)highlights.size(); s++){
+  markedAnnoIndices.clear();
+  
+  for (int s = 0; s < (int)highlights.size(); s++) {
 
     double xll, yll, xur, yur;
     assert(highlights[s].get_totalNumVerts() == 4);
     highlights[s].bdBox(xll, yll, xur, yur);
 
-    map<int, int> mark;
-    for (int t = 0; t < (int)polyVec.size(); t++){
+    map<int, int> mark, amark;
+    for (int t = 0; t < (int)polyVec.size(); t++) {
       polyVec[t].markPolysIntersectingBox(xll, yll, xur, yur, // Inputs
                                           mark);              // Outputs
-      
-      for (map<int, int>::iterator it = mark.begin(); it != mark.end(); it++){
+      for (map<int, int>::iterator it = mark.begin(); it != mark.end(); it++) {
         markedPolyIndices[t][it->first] = it->second;
       }
+
+      polyVec[t].markAnnosIntersectingBox(xll, yll, xur, yur, // Inputs
+                                          amark);             // Outputs
+      for (map<int, int>::iterator it = amark.begin(); it != amark.end(); it++) {
+        markedAnnoIndices[t][it->first] = it->second;
+      }
+      
     }
+
+    
   }
 
   return;
 }
 
 void utils::shiftMarkedPolys(// Inputs
-                             std::map< int, std::map<int, int> > & markedPolyIndices,
+                             std::map<int, std::map<int, int>> & markedPolyIndices,
                              double shift_x, double shift_y,
                              // Inputs-outputs
                              std::vector<dPoly> & polyVec
-                             ){
+                             ) {
 
-  for (int pIter = 0; pIter < (int)polyVec.size(); pIter++){
+  for (int pIter = 0; pIter < (int)polyVec.size(); pIter++) {
     polyVec[pIter].shiftMarkedPolys(markedPolyIndices[pIter], shift_x, shift_y);
   }
 
@@ -502,11 +511,11 @@ void utils::shiftMarkedPolys(// Inputs
 }
 
 void utils::scaleMarkedPolysAroundCtr(// Inputs
-                                       std::map< int, std::map<int, int> > & markedPolyIndices,
+                                       std::map<int, std::map<int, int>> & markedPolyIndices,
                                        double scale,
                                        // Inputs-outputs
                                        std::vector<dPoly> & polyVec
-                                       ){
+                                       ) {
 
   matrix2 M;
   M.a11 = scale; M.a12 = 0.0; M.a21 = 0.0; M.a22 = scale;
@@ -520,15 +529,15 @@ void utils::scaleMarkedPolysAroundCtr(// Inputs
 }
 
 void utils::rotateMarkedPolysAroundCtr(// Inputs
-                                       std::map< int, std::map<int, int> > & markedPolyIndices,
+                                       std::map<int, std::map<int, int>> & markedPolyIndices,
                                        double angle,
                                        // Inputs-outputs
                                        std::vector<dPoly> & polyVec
-                                       ){
+                                       ) {
 
   double a = angle*M_PI/180.0, c = cos(a), s= sin(a);
 
-  if (angle == round(angle) && int(angle)%90 == 0 ){
+  if (angle == round(angle) && int(angle)%90 == 0 ) {
     // The special case of angle multiple of 90 degrees
     c = round(c), s = round(s);
   }
@@ -544,11 +553,11 @@ void utils::rotateMarkedPolysAroundCtr(// Inputs
 }
 
 void utils::transformMarkedPolysAroundCtr(// Inputs
-                                         std::map< int, std::map<int, int> > & markedPolyIndices,
+                                         std::map<int, std::map<int, int>> & markedPolyIndices,
                                          const utils::matrix2 & M,
                                          // Inputs-outputs
                                          std::vector<dPoly> & polyVec
-                                         ){
+                                         ) {
 
   if (getNumElements(markedPolyIndices) == 0) return;
 
@@ -568,7 +577,7 @@ void utils::transformMarkedPolysAroundCtr(// Inputs
   P.x = (xll + xur)/2.0;
   P.y = (yll + yur)/2.0;
 
-  for (int pIter = 0; pIter < (int)polyVec.size(); pIter++){
+  for (int pIter = 0; pIter < (int)polyVec.size(); pIter++) {
     polyVec[pIter].transformMarkedPolysAroundPt(markedPolyIndices[pIter], M, P);
   }
 
@@ -576,12 +585,19 @@ void utils::transformMarkedPolysAroundCtr(// Inputs
 }
 
 void utils::eraseMarkedPolys(// Inputs
-                               std::map< int, std::map<int, int> > & markedPolyIndices,
+                               std::map<int, std::map<int, int>> const& markedPolyIndices,
+                               std::map<int, std::map<int, int>> const& markedAnnoIndices,
                                // Inputs-outputs
-                               std::vector<dPoly> & polyVec
-                               ){
-  for (int pIter = 0; pIter < (int)polyVec.size(); pIter++){
-    polyVec[pIter].eraseMarkedPolys(markedPolyIndices[pIter]);
+                               std::vector<dPoly> & polyVec) {
+  for (int pIter = 0; pIter < (int)polyVec.size(); pIter++) {
+
+    auto mark_it = markedPolyIndices.find(pIter);
+    if (mark_it != markedPolyIndices.end()) 
+      polyVec[pIter].eraseMarkedPolys(mark_it->second);
+
+    auto amark_it = markedAnnoIndices.find(pIter);
+    if (amark_it != markedAnnoIndices.end()) 
+      polyVec[pIter].eraseMarkedAnnos(amark_it->second);
   }
 
   return;
@@ -589,15 +605,15 @@ void utils::eraseMarkedPolys(// Inputs
 
 void utils::extractMarkedPolys(// Inputs
                                const std::vector<dPoly> & polyVec,
-                               std::map< int, std::map<int, int> > & markedPolyIndices,
+                               std::map<int, std::map<int, int>> & markedPolyIndices,
                                // Outputs
                                std::vector<dPoly> & extractedPolyVec
-                               ){
+                               ) {
 
   int pSize = polyVec.size();
   extractedPolyVec.resize(pSize);
 
-  for (int pIter = 0; pIter < pSize; pIter++){
+  for (int pIter = 0; pIter < pSize; pIter++) {
     polyVec[pIter].extractMarkedPolys(markedPolyIndices[pIter], // input
                                       extractedPolyVec[pIter]   // output
                                       );
@@ -606,11 +622,11 @@ void utils::extractMarkedPolys(// Inputs
   return;
 }
 
-int utils::getNumElements(std::map< int, std::map<int, int> > & Indices){
+int utils::getNumElements(std::map<int, std::map<int, int>> & Indices) {
 
   int num = 0;
   map< int, map<int, int> >::iterator it;
-  for (it = Indices.begin(); it != Indices.end(); it++){
+  for (it = Indices.begin(); it != Indices.end(); it++) {
     num += (it->second).size();
   }
 

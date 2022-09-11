@@ -62,7 +62,7 @@ using namespace utils;
 // To do: Replace cmdLineOptions directly with polyOptionsVec.
 // To do: Make font size a preference.
 
-polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(parent){
+polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(parent) {
 
 
   installEventFilter(this);
@@ -271,11 +271,11 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   return;
 }
 
-bool polyView::eventFilter(QObject *obj, QEvent *E){
+bool polyView::eventFilter(QObject *obj, QEvent *E) {
 
   QHoverEvent * H = dynamic_cast<QHoverEvent*>(E);
 
-  if (H && m_createPoly){
+  if (H && m_createPoly) {
 
     // The mouse is hovering and we are creating a new poly. Update
     // the screen and then draw on top of it the polygon being
@@ -303,7 +303,7 @@ bool polyView::eventFilter(QObject *obj, QEvent *E){
   return QWidget::eventFilter(obj, E);
 }
 
-void polyView::setupViewingWindow(){
+void polyView::setupViewingWindow() {
 
   // Dimensions of the plotting window in pixels exluding any window
   // frame/menu bar/status bar
@@ -315,7 +315,7 @@ void polyView::setupViewingWindow(){
   //cout << "geom is: " << m_screenXll << ' ' << m_screenYll << ' '
   //     << m_screenWidX << ' ' << m_screenWidY << endl;
 
-  if (m_resetView){
+  if (m_resetView) {
     setUpViewBox(// inputs
                  m_polyVec,
                  // outputs
@@ -335,7 +335,7 @@ void polyView::setupViewingWindow(){
   // Create the new view
   double xll, yll, xur, yur, widx, widy;
 
-  if (m_zoomToMouseSelection){
+  if (m_zoomToMouseSelection) {
 
     // Form a new view based on the rectangle selected with the mouse.
     // The call to pixelToWorldCoords uses the existing view internally.
@@ -344,7 +344,7 @@ void polyView::setupViewingWindow(){
     widx = xur - xll;
     widy = yur - yll;
 
-  }else if (m_viewChanged){
+  }else if (m_viewChanged) {
 
     // Modify the view for given shift or zoom
     xll  = m_viewXll + m_viewWidX*((1 - m_zoomFactor)/2.0 + m_shiftX);
@@ -356,10 +356,10 @@ void polyView::setupViewingWindow(){
 
   }
 
-  if (m_zoomToMouseSelection || m_viewChanged){
+  if (m_zoomToMouseSelection || m_viewChanged) {
 
     // If the view becomes too small, don't accept it
-    if (xll + widx <= xll || yll + widy <= yll){
+    if (xll + widx <= xll || yll + widy <= yll) {
       cerr << "Cannot zoom to requested view."  << endl;
     }else{
       // Enlarge this rectangle if necessary to keep the aspect ratio.
@@ -385,7 +385,7 @@ void polyView::setupViewingWindow(){
   return;
 }
 
-void polyView::displayData(QPainter *paint){
+void polyView::displayData(QPainter *paint) {
 
   setupViewingWindow(); // Must happen before anything else
 
@@ -393,7 +393,7 @@ void polyView::displayData(QPainter *paint){
   vector< vector<int> > textOnScreenGrid;
 
   // Build the grid if the user wants to
-  if (m_prefs.isGridOn && m_prefs.gridWidth > 0){
+  if (m_prefs.isGridOn && m_prefs.gridWidth > 0) {
 
     if (m_prefs.gridSize <= 0)
       m_prefs.gridSize = calcGrid(m_viewWidX, m_viewWidY);
@@ -423,7 +423,7 @@ void polyView::displayData(QPainter *paint){
   // Use a grid to not draw text too densely as that's slow
   initTextOnScreenGrid(textOnScreenGrid);
   assert(m_polyVec.size() == m_polyOptionsVec.size());
-  for (int vi  = 0; vi < (int)m_polyVec.size(); vi++){
+  for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
 
     int vecIter = m_polyVecOrder[vi];
 
@@ -450,7 +450,7 @@ void polyView::displayData(QPainter *paint){
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
               drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter]
               );
-    if (!plotFilled && !m_selectedPolyIndices[vecIter].empty()){
+    if (!plotFilled && !m_selectedPolyIndices[vecIter].empty()) {
       // Plot the selected polys on top with thicker lines
       dPoly lPolys;
       int lineWidth2 = 2*lineWidth;
@@ -467,7 +467,7 @@ void polyView::displayData(QPainter *paint){
   bool plotPoints = false, plotEdges = true, plotFilled = false;
   drawVertIndex = 0;
   textOnScreenGrid.clear();
-  for (int h = 0; h < (int)m_highlights.size(); h++){
+  for (int h = 0; h < (int)m_highlights.size(); h++) {
     m_highlights[h].set_color(m_prefs.fgColor.c_str());
     bool showAnno = false;
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, m_prefs.lineWidth,
@@ -479,7 +479,7 @@ void polyView::displayData(QPainter *paint){
   drawPolyBeingPlotted(m_currPolyX, m_currPolyY, paint);
 
   // Draw the mark if there
-  if (m_markX.size() > 0){
+  if (m_markX.size() > 0) {
     int x0, y0;
     worldToPixelCoords(m_markX[0], m_markY[0], // inputs
                        x0, y0                  // outputs
@@ -506,7 +506,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          std::vector< std::vector<int> > & textOnScreenGrid,
                          QPainter *paint,
                          dPoly currPoly // Make a local copy on purpose
-                         ){
+                         ) {
 
   // Plot a given dPoly with given options.
 
@@ -514,9 +514,9 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   // slow for large polygons.
   // The operations below must happen before cutting,
   // as cutting will inherit the result computed here.
-  if (m_showVertIndexAnno){
+  if (m_showVertIndexAnno) {
     currPoly.compVertIndexAnno();
-  }else if (m_showLayerAnno){
+  }else if (m_showLayerAnno) {
     currPoly.compLayerAnno();
   }
 
@@ -555,18 +555,18 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
   vector<anno> annotations;
   annotations.clear();
-  if (showAnno){
-    if (m_showVertIndexAnno){
+  if (showAnno) {
+    if (m_showVertIndexAnno) {
       clippedPoly.get_vertIndexAnno(annotations);
-    }else if (m_showLayerAnno){
+    }else if (m_showLayerAnno) {
       clippedPoly.get_layerAnno(annotations);
-    }else if (m_showAnnotations){
+    }else if (m_showAnnotations) {
       clippedPoly.get_annotations(annotations);
     }
   }
 
   int start = 0;
-  for (int pIter = 0; pIter < numPolys; pIter++){
+  for (int pIter = 0; pIter < numPolys; pIter++) {
 
     if (pIter > 0) start += numVerts[pIter - 1];
 
@@ -574,8 +574,8 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     QColor color = QColor(colors[pIter].c_str());
     
     QPalette pal(palette());
-    if (color == pal.color(QPalette::Background) || color == QColor::Invalid){
-      if (pal.color(QPalette::Background) != QColor("white")){
+    if (color == pal.color(QPalette::Background) || color == QColor::Invalid) {
+      if (pal.color(QPalette::Background) != QColor("white")) {
         color = QColor("white");
       }else{
         color = QColor("black");
@@ -586,12 +586,12 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
     // Determine the orientation of polygons
     double signedArea = 0.0;
-    if (plotFilled && isPolyClosed[pIter]){
+    if (plotFilled && isPolyClosed[pIter]) {
       signedArea = signedPolyArea(pSize, xv + start, yv + start);
     }
 
     QPolygon pa(pSize);
-    for (int vIter = 0; vIter < pSize; vIter++){
+    for (int vIter = 0; vIter < pSize; vIter++) {
 
       int x0, y0;
       worldToPixelCoords(xv[start + vIter], yv[start + vIter], // inputs
@@ -606,16 +606,16 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       if (plotPoints                                                      &&
           x0 > m_screenXll - tol && x0 < m_screenXll + m_screenWidX + tol &&
           y0 > m_screenYll - tol && y0 < m_screenYll + m_screenWidY + tol
-          ){
+          ) {
         drawOneVertex(x0, y0, color, lineWidth, drawVertIndex, paint);
       }
     }
 
     if (pa.size() <= 0) continue;
 
-    if (plotEdges){
+    if (plotEdges) {
 
-      if (plotFilled && isPolyClosed[pIter]){
+      if (plotFilled && isPolyClosed[pIter]) {
         if (signedArea >= 0.0) paint->setBrush(color);
         else                   paint->setBrush(pal.color(QPalette::Background));
         paint->setPen(color);
@@ -624,21 +624,21 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
         paint->setPen(QPen(color, lineWidth));
       }
 
-      if (isPolyZeroDim(pa)){
+      if (isPolyZeroDim(pa)) {
         // Treat the case of polygons which are made up of just one point
         int l_drawVertIndex = -1;
         drawOneVertex(pa[0].x(), pa[0].y(), color, lineWidth, l_drawVertIndex,
                       paint);
-      }else if (isPolyClosed[pIter]){
+      }else if (isPolyClosed[pIter]) {
 
-        if (plotFilled){
+        if (plotFilled) {
           paint->drawPolygon(pa);
         }else{
           // In some versions of Qt, drawPolygon is buggy when not
           // called to fill polygons. Don't use it, just draw the
           // edges one by one.
           int n = pa.size();
-          for (int k = 0; k < n; k++){
+          for (int k = 0; k < n; k++) {
             QPolygon pb;
             int x0, y0; pa.point(k, &x0, &y0);       pb << QPoint(x0, y0);
             int x1, y1; pa.point((k+1)%n, &x1, &y1); pb << QPoint(x1, y1);
@@ -655,14 +655,14 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
   // Plot the annotations
   int numAnno = annotations.size();
-  for (int aIter = 0; aIter < numAnno; aIter++){
+  for (int aIter = 0; aIter < numAnno; aIter++) {
     const anno & A = annotations[aIter];
     int x0, y0;
     worldToPixelCoords(A.x, A.y, // inputs
                        x0, y0    // outputs
                        );
     paint->setPen(QPen(QColor("gold"), lineWidth));
-    if (isClosestGridPtFree(textOnScreenGrid, x0, y0)){
+    if (isClosestGridPtFree(textOnScreenGrid, x0, y0)) {
       paint->drawText(x0, y0, (A.label).c_str());
     }
 
@@ -671,61 +671,61 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   return;
 }
 
-void polyView::zoomIn(){
+void polyView::zoomIn() {
   m_zoomFactor  = 0.5;
   m_viewChanged = true;
   refreshPixmap();
 }
 
-void polyView::zoomOut(){
+void polyView::zoomOut() {
   m_zoomFactor  = 2.0;
   m_viewChanged = true;
   refreshPixmap();
 }
 
-void polyView::shiftRight(){
+void polyView::shiftRight() {
   m_shiftX      = 0.25;
   m_viewChanged = true;
   refreshPixmap();
 }
 
-void polyView::shiftLeft(){
+void polyView::shiftLeft() {
   m_shiftX      = -0.25;
   m_viewChanged = true;
   refreshPixmap();
 }
 
-void polyView::shiftUp(){
+void polyView::shiftUp() {
   m_shiftY      = 0.25;
   m_viewChanged = true;
   refreshPixmap();
 }
 
-void polyView::shiftDown(){
+void polyView::shiftDown() {
   m_shiftY      = -0.25;
   m_viewChanged = true;
   refreshPixmap();
 }
 
-void polyView::centerViewAtPoint(double x, double y){
+void polyView::centerViewAtPoint(double x, double y) {
   m_viewXll     = x - m_viewWidX/2.0;
   m_viewYll     = y - m_viewWidY/2.0;
   m_viewChanged = true;
 }
 
-void polyView::resetView(){
+void polyView::resetView() {
   m_resetView   = true;
   m_viewChanged = true;
   refreshPixmap();
 }
 
 
-void polyView::resetTransformSettings(){
+void polyView::resetTransformSettings() {
   m_zoomFactor = 1.0;
   m_shiftX     = 0.0; m_shiftY = 0.0;
 }
 
-void polyView::mousePressEvent(QMouseEvent *E){
+void polyView::mousePressEvent(QMouseEvent *E) {
 
   const QPoint Q = E->pos();
   m_mousePrsX = Q.x();
@@ -748,7 +748,7 @@ void polyView::mousePressEvent(QMouseEvent *E){
                        );
 
   m_aligningPolysNow = (m_alignMode && isShiftLeftMouse(E) && !m_createPoly);
-  if (m_aligningPolysNow){
+  if (m_aligningPolysNow) {
     assert(m_polyVec.size() >= 1);
     m_polyBeforeShift = m_polyVec[0];
     m_T.reset();
@@ -762,10 +762,10 @@ void polyView::mousePressEvent(QMouseEvent *E){
                                     );
   
   m_movingPolysInHlts = false;
-  if (m_movingVertsOrEdgesOrPolysNow){
+  if (m_movingVertsOrEdgesOrPolysNow) {
 
     double min_x, min_y, min_dist;
-    if (m_moveVertices->isChecked()){
+    if (m_moveVertices->isChecked()) {
       findClosestPolyVertex(// inputs
                             m_mousePressWorldX, m_mousePressWorldY, m_polyVec,
                             // outputs
@@ -774,12 +774,12 @@ void polyView::mousePressEvent(QMouseEvent *E){
                             m_vertIndexInCurrPoly,
                             min_x, min_y, min_dist
                             );
-    }else if (m_movePolys->isChecked() && getNumElements(m_selectedPolyIndices) > 0){
+    }else if (m_movePolys->isChecked() && getNumElements(m_selectedPolyIndices) > 0) {
       m_highlights.clear(); // No need for these anymore
       m_polyVecBeforeShift = m_polyVec;
       m_movingPolysInHlts = true;
     }else if (m_moveEdges->isChecked() ||
-              m_movePolys->isChecked()){
+              m_movePolys->isChecked()) {
       findClosestPolyEdge(// inputs
                           m_mousePressWorldX, m_mousePressWorldY, m_polyVec,
                           // outputs
@@ -797,7 +797,7 @@ void polyView::mousePressEvent(QMouseEvent *E){
   return;
 }
 
-void polyView::mouseMoveEvent(QMouseEvent *E){
+void polyView::mouseMoveEvent(QMouseEvent *E) {
 
   QPoint Q = E->pos();
   int x = Q.x(), y = Q.y();
@@ -808,43 +808,42 @@ void polyView::mouseMoveEvent(QMouseEvent *E){
   double shift_x = wx - m_mousePressWorldX;
   double shift_y = wy - m_mousePressWorldY;
 
-  if (m_aligningPolysNow){
+  if (m_aligningPolysNow) {
     m_polyVec[0] = m_polyBeforeShift;
     m_polyVec[0].applyTransform(1, 0, 0, 1, shift_x, shift_y, m_T);
     refreshPixmap();
     return;
   }
 
-  if (m_movingPolysInHlts){
+  if (m_movingPolysInHlts) {
     m_polyVec = m_polyVecBeforeShift;
     shiftMarkedPolys(// Inputs
                      m_selectedPolyIndices, shift_x, shift_y,
                      // Inputs-outputs
-                     m_polyVec
-                     );
+                     m_polyVec);
     refreshPixmap();
     return;
   }
 
-  if (m_movingVertsOrEdgesOrPolysNow){
+  if (m_movingVertsOrEdgesOrPolysNow) {
 
     if (m_polyVecIndex        < 0 ||
         m_polyIndexInCurrPoly < 0 ||
         m_vertIndexInCurrPoly < 0) return;
 
-    if (m_moveVertices->isChecked()){
+    if (m_moveVertices->isChecked()) {
       m_polyVec[m_polyVecIndex].changeVertexValue(m_polyIndexInCurrPoly,
                                                   m_vertIndexInCurrPoly,
                                                   wx, wy
                                                   );
-    }else if ((m_moveEdges->isChecked() || m_movePolys->isChecked()) && m_polyVecIndex >= 0){
+    }else if ((m_moveEdges->isChecked() || m_movePolys->isChecked()) && m_polyVecIndex >= 0) {
       m_polyVec[m_polyVecIndex] = m_polyBeforeShift;
-      if (m_moveEdges->isChecked()){
+      if (m_moveEdges->isChecked()) {
         m_polyVec[m_polyVecIndex].shiftEdge(m_polyIndexInCurrPoly,
                                             m_vertIndexInCurrPoly,
                                             shift_x, shift_y
                                             );
-      }else if (m_movePolys->isChecked()){
+      }else if (m_movePolys->isChecked()) {
         m_polyVec[m_polyVecIndex].shiftOnePoly(m_polyIndexInCurrPoly,
                                                shift_x, shift_y
                                                );
@@ -863,7 +862,7 @@ void polyView::mouseMoveEvent(QMouseEvent *E){
   return;
 }
 
-void polyView::mouseReleaseEvent (QMouseEvent * E){
+void polyView::mouseReleaseEvent (QMouseEvent * E) {
 
   const QPoint Q = E->pos();
   m_mouseRelX = Q.x();
@@ -877,19 +876,19 @@ void polyView::mouseReleaseEvent (QMouseEvent * E){
 
   pixelToWorldCoords(m_mouseRelX, m_mouseRelY, m_menuX, m_menuY);
 
-  if (m_deletingPolyNow){
+  if (m_deletingPolyNow) {
     // To do: consolidate this with the other call to this function.
     // See if can pass the relevant variables as input arguments.
     deletePoly();
     return;
   }
 
-  if (m_aligningPolysNow){
+  if (m_aligningPolysNow) {
     m_T.print();
     m_totalT = composeTransforms(m_T, m_totalT);
   }
 
-  if (m_aligningPolysNow || m_movingVertsOrEdgesOrPolysNow){
+  if (m_aligningPolysNow || m_movingVertsOrEdgesOrPolysNow) {
     saveDataForUndo(false);
     refreshPixmap();
     return;
@@ -900,7 +899,7 @@ void polyView::mouseReleaseEvent (QMouseEvent * E){
   m_rubberBand = m_emptyRubberBand;
   updateRubberBand(m_rubberBand);
 
-  if (E->modifiers() & Qt::ControlModifier){
+  if (E->modifiers() & Qt::ControlModifier) {
     // Draw a  highlight with control + left mouse button
     // ending at the current point
     createHighlightWithPixelInputs(m_mousePrsX, m_mousePrsY, m_mouseRelX, m_mouseRelY);
@@ -913,23 +912,23 @@ void polyView::mouseReleaseEvent (QMouseEvent * E){
   // as perhaps the user moved the mouse unintentionally between press
   // and release.
   if       (m_mouseRelX > m_mousePrsX + tol &&
-            m_mouseRelY > m_mousePrsY + tol){
+            m_mouseRelY > m_mousePrsY + tol) {
 
     m_zoomToMouseSelection = true; // Will zoom to the region selected with the mouse
     refreshPixmap();
     return;
 
   }else if (m_mouseRelX + tol < m_mousePrsX &&
-            m_mouseRelY + tol < m_mousePrsY){
+            m_mouseRelY + tol < m_mousePrsY) {
 
     zoomOut();
     return;
 
   }else if (abs(m_mouseRelX - m_mousePrsX) <= tol &&
-            abs(m_mouseRelY - m_mousePrsY) <= tol){
+            abs(m_mouseRelY - m_mousePrsY) <= tol) {
 
 
-    if (m_createPoly){
+    if (m_createPoly) {
       addPolyVert(m_mouseRelX, m_mouseRelY);
       refreshPixmap();
 
@@ -945,26 +944,26 @@ void polyView::mouseReleaseEvent (QMouseEvent * E){
   return;
 }
 
-bool polyView::isShiftLeftMouse(QMouseEvent * E){
+bool polyView::isShiftLeftMouse(QMouseEvent * E) {
   // This does not work in mouseReleaseEvent.
   return (E->buttons() & Qt::LeftButton ) && (E->modifiers() & Qt::ShiftModifier);
 }
 
-void polyView::wheelEvent(QWheelEvent *E){
+void polyView::wheelEvent(QWheelEvent *E) {
 
   int delta = E->delta();
 
   // Zoom in/out
-  if (delta > 0){
+  if (delta > 0) {
     zoomIn();
-  }else if (delta < 0){
+  }else if (delta < 0) {
     zoomOut();
   }
   
   E->accept();
 }
 
-void polyView::keyPressEvent(QKeyEvent *K){
+void polyView::keyPressEvent(QKeyEvent *K) {
 
   switch (K->key()) {
   case Qt::Key_Minus:
@@ -994,7 +993,7 @@ void polyView::keyPressEvent(QKeyEvent *K){
 
 // When right-clicking, this will show a menu with a handful of options.
 // Those are created in the constructor. 
-void polyView::contextMenuEvent(QContextMenuEvent *E){
+void polyView::contextMenuEvent(QContextMenuEvent *E) {
   
   int x = E->x(), y = E->y();
   m_mousePrsX = x;
@@ -1014,7 +1013,7 @@ void polyView::contextMenuEvent(QContextMenuEvent *E){
 }
 
 
-void polyView::copyPoly(){
+void polyView::copyPoly() {
 
   double min_x, min_y, min_dist;
   int polyVecIndex, polyIndexInCurrPoly, vertIndexInCurrPoly;
@@ -1032,17 +1031,16 @@ void polyView::copyPoly(){
   m_selectedPolyIndices[polyVecIndex][polyIndexInCurrPoly] = 1;
 
   extractMarkedPolys(m_polyVec, m_selectedPolyIndices,  // Inputs
-                     m_copiedPolyVec                    // Outputs
-                     );
+                     m_copiedPolyVec);                  // Outputs
 
   refreshPixmap();
 
   return;
 }
 
-void polyView::translateSelectedPolys(){
+void polyView::translateSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0){
+  if (getNumElements(m_selectedPolyIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1061,14 +1059,14 @@ void polyView::translateSelectedPolys(){
   return;
 }
 
-void polyView::translateSelectedPolys(std::vector<double> & shiftVec){
+void polyView::translateSelectedPolys(std::vector<double> & shiftVec) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0){
+  if (getNumElements(m_selectedPolyIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
 
-  if (shiftVec.size() < 2){
+  if (shiftVec.size() < 2) {
     popUp("Invalid translation vector.");
     return;
   }
@@ -1090,9 +1088,9 @@ void polyView::translateSelectedPolys(std::vector<double> & shiftVec){
   return;
 }
 
-void polyView::rotateSelectedPolys(){
+void polyView::rotateSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0){
+  if (getNumElements(m_selectedPolyIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1113,14 +1111,14 @@ void polyView::rotateSelectedPolys(){
   return;
 }
 
-void polyView::rotateSelectedPolys(std::vector<double> & angle){
+void polyView::rotateSelectedPolys(std::vector<double> & angle) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0){
+  if (getNumElements(m_selectedPolyIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
 
-  if (angle.size() < 1){
+  if (angle.size() < 1) {
     popUp("Invalid rotation angle.");
     return;
   }
@@ -1142,9 +1140,9 @@ void polyView::rotateSelectedPolys(std::vector<double> & angle){
   return;
 }
 
-void polyView::scaleSelectedPolys(){
+void polyView::scaleSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0){
+  if (getNumElements(m_selectedPolyIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1155,8 +1153,7 @@ void polyView::scaleSelectedPolys(){
                              "Scale selected polygons", "Enter scale",
                              inputVec,
                              // Outputs
-                             scale
-                             )
+                             scale)
       ) return;
 
   scaleSelectedPolys(scale);
@@ -1164,14 +1161,14 @@ void polyView::scaleSelectedPolys(){
   return;
 }
 
-void polyView::scaleSelectedPolys(std::vector<double> & scale){
+void polyView::scaleSelectedPolys(std::vector<double> & scale) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0){
+  if (getNumElements(m_selectedPolyIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
 
-  if (scale.size() < 1){
+  if (scale.size() < 1) {
     popUp("Invalid scale value.");
     return;
   }
@@ -1193,9 +1190,9 @@ void polyView::scaleSelectedPolys(std::vector<double> & scale){
   return;
 }
 
-void polyView::transformSelectedPolys(){
+void polyView::transformSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0){
+  if (getNumElements(m_selectedPolyIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1216,14 +1213,14 @@ void polyView::transformSelectedPolys(){
   return;
 }
 
-void polyView::transformSelectedPolys(std::vector<double> & T){
+void polyView::transformSelectedPolys(std::vector<double> & T) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0){
+  if (getNumElements(m_selectedPolyIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
 
-  if (T.size() < 4){
+  if (T.size() < 4) {
     popUp("Invalid transform matrix.");
     return;
   }
@@ -1246,7 +1243,7 @@ void polyView::transformSelectedPolys(std::vector<double> & T){
   return;
 }
 
-void polyView::pasteSelectedPolys(){
+void polyView::pasteSelectedPolys() {
 
   extractMarkedPolys(m_polyVec, m_selectedPolyIndices,  // Inputs
                      m_copiedPolyVec                    // Outputs
@@ -1261,7 +1258,7 @@ void polyView::pasteSelectedPolys(){
   double shift_x = 0.1*(xur - xll);
   double shift_y = 0.1*(yur - yll);
 
-  for (int s = 0; s < (int)m_polyVec.size(); s++){
+  for (int s = 0; s < (int)m_polyVec.size(); s++) {
     m_polyVec[s].appendAndShiftMarkedPolys(// Inputs
                                            m_selectedPolyIndices[s],
                                            shift_x, shift_y);
@@ -1273,12 +1270,12 @@ void polyView::pasteSelectedPolys(){
   return;
 }
 
-void polyView::pastePoly(){
+void polyView::pastePoly() {
   pasteSelectedPolys();
   return;
 }
 
-void polyView::reversePoly(){
+void polyView::reversePoly() {
 
   double min_x, min_y, min_dist;
   int polyVecIndex, polyIndexInCurrPoly, vertIndexInCurrPoly;
@@ -1300,7 +1297,7 @@ void polyView::reversePoly(){
   return;
 }
 
-void polyView::refreshPixmap(){
+void polyView::refreshPixmap() {
 
   // Draw the data onto the pixmap instead of the screen
   // directly. Later we'll display the pixmap without redrawing
@@ -1323,9 +1320,9 @@ void polyView::refreshPixmap(){
   return;
 }
 
-void polyView::paintEvent(QPaintEvent *){
+void polyView::paintEvent(QPaintEvent *) {
 
-  if (m_firstPaintEvent){
+  if (m_firstPaintEvent) {
     // This will be called the very first time the display is
     // initialized. There must be a better way.
     m_firstPaintEvent = false;
@@ -1346,13 +1343,13 @@ void polyView::paintEvent(QPaintEvent *){
   // to go away when the display changes such as on zoom.
   paint.setPen(QPen(fgColor, m_prefs.lineWidth));
   paint.setBrush(Qt::NoBrush);
-  for (int p = 0; p < (int)m_snappedPoints.size(); p++){
+  for (int p = 0; p < (int)m_snappedPoints.size(); p++) {
     const QPoint & P = m_snappedPoints[p];
     paint.drawEllipse(P.x() - m_smallLen, P.y() - m_smallLen,
                       2*m_smallLen, 2*m_smallLen
                       );
   }
-  for (int p = 0; p < (int)m_nonSnappedPoints.size(); p++){
+  for (int p = 0; p < (int)m_nonSnappedPoints.size(); p++) {
     const QPoint & P = m_nonSnappedPoints[p];
     paint.drawRect(P.x() - m_smallLen, P.y() - m_smallLen,
                    2*m_smallLen, 2*m_smallLen
@@ -1364,7 +1361,7 @@ void polyView::paintEvent(QPaintEvent *){
 
 void polyView::drawPolyBeingPlotted(const std::vector<double> & polyX,
                                     const std::vector<double> & polyY,
-                                    QPainter * paint){
+                                    QPainter * paint) {
 
   if (polyX.size() <= 1) return;
 
@@ -1390,12 +1387,12 @@ void polyView::drawPolyBeingPlotted(const std::vector<double> & polyX,
   return;
 }
 
-void polyView::resizeEvent(QResizeEvent*){
+void polyView::resizeEvent(QResizeEvent*) {
   refreshPixmap();
   return;
 }
 
-void polyView::popUp(std::string msg){
+void polyView::popUp(std::string msg) {
   QMessageBox msgBox;
   msgBox.setText(msg.c_str());
   msgBox.exec();
@@ -1405,7 +1402,7 @@ void polyView::popUp(std::string msg){
 bool polyView::getStringFromGui(std::string title, std::string description,
                                 std::string inputStr,
                                 std::string & outputStr // output
-                                ){
+                                ) {
 
   outputStr = "";
 
@@ -1425,7 +1422,7 @@ bool polyView::getRealValuesFromGui(// Inputs
                                     const std::vector<double> & inputVec,
                                     // Outputs
                                     std::vector<double> & values
-                                    ){
+                                    ) {
 
   values.clear();
 
@@ -1452,7 +1449,7 @@ bool polyView::getRealValuesFromGui(// Inputs
 
 bool polyView::getStringVectorFromGui(std::string title,
                                       std::string description,
-                                      std::vector<std::string> & values){
+                                      std::vector<std::string> & values) {
 
   values.clear();
   string inputStr, outputStr;
@@ -1467,17 +1464,17 @@ bool polyView::getStringVectorFromGui(std::string title,
   return ok;
 }
 
-void polyView::setLineWidth(){
+void polyView::setLineWidth() {
 
   vector<double> inputVec, lineWidth;
   if (!getRealValuesFromGui("Line width", "Enter line width", inputVec,
                             lineWidth)) return;
 
-  if (!lineWidth.empty() && lineWidth[0] >= 1.0){
+  if (!lineWidth.empty() && lineWidth[0] >= 1.0) {
 
     int lw = (int) round(lineWidth[0]);
 
-    for (int polyIter = 0; polyIter < (int)m_polyOptionsVec.size(); polyIter++){
+    for (int polyIter = 0; polyIter < (int)m_polyOptionsVec.size(); polyIter++) {
       m_polyOptionsVec[polyIter].lineWidth = lw;
     }
     m_prefs.lineWidth = lw;
@@ -1490,13 +1487,13 @@ void polyView::setLineWidth(){
   return;
 }
 
-void polyView::setGridWidth(){
+void polyView::setGridWidth() {
 
   vector<double> inputVec, gridWidth;
   if (!getRealValuesFromGui("Grid linewidth", "Enter grid linewidth",
                             inputVec, gridWidth)) return;
 
-  if (!gridWidth.empty() && gridWidth[0] >= 1.0){
+  if (!gridWidth.empty() && gridWidth[0] >= 1.0) {
 
     int gw = (int) round(gridWidth[0]);
     m_prefs.gridWidth = gw;
@@ -1509,7 +1506,7 @@ void polyView::setGridWidth(){
   return;
 }
 
-void polyView::setGridSize(){
+void polyView::setGridSize() {
 
   vector<double> inputVec, gridSize;
 
@@ -1520,7 +1517,7 @@ void polyView::setGridSize(){
   if (!getRealValuesFromGui("Grid size", "Enter grid size", inputVec,
                             gridSize)) return;
 
-  if (!gridSize.empty() && gridSize[0] > 0){
+  if (!gridSize.empty() && gridSize[0] > 0) {
 
     double gs = gridSize[0];
     m_prefs.gridSize = gs;
@@ -1533,7 +1530,7 @@ void polyView::setGridSize(){
   return;
 }
 
-void polyView::setGridColor(){
+void polyView::setGridColor() {
 
   vector<string> values;
   if (!getStringVectorFromGui("Grid", "Enter grid color",
@@ -1541,7 +1538,7 @@ void polyView::setGridColor(){
 
   string gridColor = "";
   if (values.size() > 0) gridColor = values[0];
-  if (QColor(gridColor.c_str()) != QColor::Invalid){
+  if (QColor(gridColor.c_str()) != QColor::Invalid) {
     m_prefs.gridColor = gridColor;
     refreshPixmap();
   }else{
@@ -1550,7 +1547,7 @@ void polyView::setGridColor(){
   return;
 }
 
-void polyView::setBgColor(){
+void polyView::setBgColor() {
 
   vector<string> values;
   if (!getStringVectorFromGui("Background", "Enter background color",
@@ -1558,7 +1555,7 @@ void polyView::setBgColor(){
 
   string bgColor = "";
   if (values.size() > 0) bgColor = values[0];
-  if (QColor(bgColor.c_str()) != QColor::Invalid){
+  if (QColor(bgColor.c_str()) != QColor::Invalid) {
     m_prefs.bgColor = bgColor;
     setBgFgColorsFromPrefs();
     refreshPixmap();
@@ -1568,12 +1565,12 @@ void polyView::setBgColor(){
   return;
 }
 
-void polyView::setBgFgColorsFromPrefs(){
+void polyView::setBgFgColorsFromPrefs() {
 
   // Set the background. Watch for invalid colors.
   string bgColor   = m_prefs.bgColor;
   QColor qtBgColor = QColor(bgColor.c_str());
-  if (qtBgColor == QColor::Invalid){
+  if (qtBgColor == QColor::Invalid) {
     bgColor   = "black";
     qtBgColor = QColor(bgColor.c_str()); // fallback color
   }
@@ -1581,12 +1578,12 @@ void polyView::setBgFgColorsFromPrefs(){
   pal.setColor(QPalette::Background, qtBgColor);
 
   string fgColor = m_prefs.fgColor;
-  if (QColor(fgColor.c_str()) == QColor::Invalid){
+  if (QColor(fgColor.c_str()) == QColor::Invalid) {
     fgColor = "white";
   }
 
   // Make sure bg and fg have different colors
-  if (bgColor == fgColor){
+  if (bgColor == fgColor) {
     if (bgColor == "black") fgColor = "white";
     else                    fgColor = "black";
   }
@@ -1597,7 +1594,7 @@ void polyView::setBgFgColorsFromPrefs(){
 
   // While unnecessary, also update the preferences for each
   // polygon file, for consistency with other preferences per file.
-  for (int s = 0; s < (int)m_polyOptionsVec.size(); s++){
+  for (int s = 0; s < (int)m_polyOptionsVec.size(); s++) {
     m_polyOptionsVec[s].bgColor = bgColor;
     m_polyOptionsVec[s].fgColor = fgColor;
   }
@@ -1606,50 +1603,50 @@ void polyView::setBgFgColorsFromPrefs(){
 }
 
 
-void polyView::translatePolys(){
+void polyView::translatePolys() {
 
   vector<double> inputVec, shiftVec;
   if (getRealValuesFromGui("Translate polygons", "Enter shift_x and shift_y",
                            inputVec,
-                           shiftVec)){
+                           shiftVec)) {
     translatePolys(shiftVec);
   }
   return;
 }
 
-void polyView::rotatePolys(){
+void polyView::rotatePolys() {
 
   vector<double> inputVec, angle;
   if (getRealValuesFromGui("Rotate polygons",
                            "Enter rotation angle in degrees",
                            inputVec,
-                           angle)){
+                           angle)) {
     rotatePolys(angle);
   }
   return;
 }
 
-void polyView::scalePolys(){
+void polyView::scalePolys() {
 
   vector<double> inputVec, scale;
   if (getRealValuesFromGui("Scale polygons", "Enter scale factor",
                            inputVec,
-                           scale)){
+                           scale)) {
     scalePolys(scale);
   }
   return;
 }
 
-void polyView::translatePolys(std::vector<double> & shiftVec){
+void polyView::translatePolys(std::vector<double> & shiftVec) {
 
-  if (shiftVec.size() < 2){
+  if (shiftVec.size() < 2) {
     popUp("Invalid shift_x and shift_y values.");
     return;
   }
   shiftVec.resize(2);
 
   printCmd("translate", shiftVec);
-  for (int vi  = 0; vi < (int)m_polyVec.size(); vi++){
+  for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
     m_polyVec[vi].shift(shiftVec[0], shiftVec[1]);
   }
 
@@ -1659,16 +1656,16 @@ void polyView::translatePolys(std::vector<double> & shiftVec){
   return;
 }
 
-void polyView::rotatePolys(std::vector<double> & angle){
+void polyView::rotatePolys(std::vector<double> & angle) {
 
-  if (angle.size() < 1){
+  if (angle.size() < 1) {
     popUp("Invalid rotation angle.");
     return;
   }
   angle.resize(1);
 
   printCmd("rotate", angle);
-  for (int vi  = 0; vi < (int)m_polyVec.size(); vi++){
+  for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
     m_polyVec[vi].rotate(angle[0]);
   }
 
@@ -1678,16 +1675,16 @@ void polyView::rotatePolys(std::vector<double> & angle){
   return;
 }
 
-void polyView::scalePolys(std::vector<double> & scale){
+void polyView::scalePolys(std::vector<double> & scale) {
 
-  if (scale.size() < 1){
+  if (scale.size() < 1) {
     popUp("Invalid scale factor.");
     return;
   }
   scale.resize(1);
 
   printCmd("scale", scale);
-  for (int vi  = 0; vi < (int)m_polyVec.size(); vi++){
+  for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
     m_polyVec[vi].scale(scale[0]);
   }
 
@@ -1697,9 +1694,9 @@ void polyView::scalePolys(std::vector<double> & scale){
   return;
 }
 
-void polyView::transformPolys(std::vector<double> & M){
+void polyView::transformPolys(std::vector<double> & M) {
 
-  if (M.size() < 6){
+  if (M.size() < 6) {
     popUp("Invalid linear transform.");
     return;
   }
@@ -1709,7 +1706,7 @@ void polyView::transformPolys(std::vector<double> & M){
   int end = m_polyVec.size();
   if (m_alignMode) end = min(end, 1);
 
-  for (int vi = 0; vi < end; vi++){
+  for (int vi = 0; vi < end; vi++) {
     m_polyVec[vi].applyTransform(M[0], M[1], M[2], M[3], M[4], M[5], m_T);
   }
 
@@ -1725,7 +1722,7 @@ void polyView::transformPolys(std::vector<double> & M){
   return;
 }
 
-void polyView::addPolyVert(int px, int py){
+void polyView::addPolyVert(int px, int py) {
 
   // Add a point to the polygon being drawn or stop drawing and append
   // the drawn polygon to the list of polygons.
@@ -1738,7 +1735,7 @@ void polyView::addPolyVert(int px, int py){
 
   if (pSize <= 0 ||
       distance(m_currPolyX[0], m_currPolyY[0], wx, wy) > wtol
-      ){
+      ) {
 
     // We did not arrive at the starting point of the polygon being
     // drawn. Add the current point.
@@ -1746,7 +1743,7 @@ void polyView::addPolyVert(int px, int py){
     m_currPolyX.push_back(wx);
     m_currPolyY.push_back(wy);
     pSize = m_currPolyX.size();
-    if (m_snapPolyTo45DegreeIntGrid){
+    if (m_snapPolyTo45DegreeIntGrid) {
       bool isClosedPolyLine = false;
       snapPolyLineTo45DegAngles(isClosedPolyLine, pSize,
                                 vecPtr(m_currPolyX), vecPtr(m_currPolyY));
@@ -1761,7 +1758,7 @@ void polyView::addPolyVert(int px, int py){
   // We arrived at the starting point of the polygon being drawn. Stop
   // adding points and append the current polygon.
 
-  if (m_snapPolyTo45DegreeIntGrid){
+  if (m_snapPolyTo45DegreeIntGrid) {
     bool isClosedPolyLine = true;
     snapPolyLineTo45DegAngles(isClosedPolyLine, pSize,
                               vecPtr(m_currPolyX), vecPtr(m_currPolyY));
@@ -1778,7 +1775,7 @@ void polyView::addPolyVert(int px, int py){
                       minX, minY, minDist
                       );
   string color, layer;
-  if (minVecIndex >= 0 && minPolyIndex >= 0){
+  if (minVecIndex >= 0 && minPolyIndex >= 0) {
     const vector<string> & layers = m_polyVec[minVecIndex].get_layers();
     const vector<string> & colors = m_polyVec[minVecIndex].get_colors();
     color = colors.at(minPolyIndex);
@@ -1809,12 +1806,12 @@ void polyView::addPolyVert(int px, int py){
   return;
 }
 
-void polyView::appendToPolyVec(const dPoly & P){
+void polyView::appendToPolyVec(const dPoly & P) {
 
   // Append the new polygon to the list of polygons. If we have several
   // clips already, append it to the last clip. If we have no clips,
   // create a new clip.
-  if (m_polyVec.size() == 0){
+  if (m_polyVec.size() == 0) {
     m_polyVec.push_back(P);
     m_polyOptionsVec.push_back(m_prefs);
     string fileName = "poly" + num2str(m_polyVec.size() - 1) + ".xg";
@@ -1831,7 +1828,7 @@ void polyView::appendToPolyVec(const dPoly & P){
 
 void polyView::drawPolyLine(const std::vector<double> & polyX,
                             const std::vector<double> & polyY,
-                            QPainter * paint){
+                            QPainter * paint) {
 
   dPoly  polyLine;
   bool   isPolyClosed = false;
@@ -1852,7 +1849,7 @@ void polyView::drawPolyLine(const std::vector<double> & polyX,
   return;
 }
 
-void polyView::createHighlightWithPixelInputs(int pxll, int pyll, int pxur, int pyur){
+void polyView::createHighlightWithPixelInputs(int pxll, int pyll, int pxur, int pyur) {
 
   double xll, yll, xur, yur;
   pixelToWorldCoords(pxll, pyll, // inputs
@@ -1867,7 +1864,7 @@ void polyView::createHighlightWithPixelInputs(int pxll, int pyll, int pxur, int 
   return;
 }
 
-void polyView::createHighlightWithRealInputs(double xll, double yll, double xur, double yur){
+void polyView::createHighlightWithRealInputs(double xll, double yll, double xur, double yur) {
 
   dPoly R;
   bool isPolyClosed = true;
@@ -1878,7 +1875,7 @@ void polyView::createHighlightWithRealInputs(double xll, double yll, double xur,
 
   // Flag the polygons and annotations in the highlights
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices);  // Outputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
 
   toggleMovePolys();
   saveDataForUndo(false);
@@ -1887,8 +1884,7 @@ void polyView::createHighlightWithRealInputs(double xll, double yll, double xur,
 }
 
 void polyView::printCurrCoords(const Qt::MouseButton & state, // input
-                               int & currX, int  & currY      // in-out
-                               ){
+                               int & currX, int  & currY) {   // in-out
 
   // Snap or not the current point to the closest polygon vertex
   // and print its coordinates.
@@ -1901,7 +1897,7 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
   pixelToWorldCoords(currX, currY, wx, wy);
   int len = 2*m_smallLen + 2*m_prefs.lineWidth; // big enough
 
-  if (state == (int)Qt::LeftButton){
+  if (state == (int)Qt::LeftButton) {
 
     // Snap to the closest vertex with the left mouse button.
 
@@ -1927,7 +1923,7 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
   }else if (state == ((int)Qt::LeftButton | (int)Qt::AltModifier)
             ||
             state == ((int)Qt::MidButton)
-            ){
+            ) {
 
     // Don't snap with the alt-left button or the middle button.
 
@@ -1940,7 +1936,7 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
 
   cout << "Point" << " ("
        << wx << ", " << wy << ")";
-  if (m_prevClickExists){
+  if (m_prevClickExists) {
     cout  << " dist from prev: ("
           << (wx - m_prevClickedX) << ", "
           << (wy - m_prevClickedY)
@@ -1960,7 +1956,7 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
 }
 
 
-void polyView::updateRubberBand(QRect & R){
+void polyView::updateRubberBand(QRect & R) {
 
   QRect rect = R.normalized();
   update(rect.left(), rect.top(),    rect.width(), 1            );
@@ -1972,7 +1968,7 @@ void polyView::updateRubberBand(QRect & R){
 }
 
 void polyView::pixelToWorldCoords(int px, int py,
-                                  double & wx, double & wy){
+                                  double & wx, double & wy) {
 
   // Compensate for the Qt's origin being in the upper-left corner
   // instead of the lower-left corner.
@@ -1984,7 +1980,7 @@ void polyView::pixelToWorldCoords(int px, int py,
 }
 
 void polyView::worldToPixelCoords(double wx, double wy,
-                                  int & px,  int & py){
+                                  int & px,  int & py) {
 
   px = iround((wx - m_viewXll)/m_pixelSize);
   py = iround((wy - m_viewYll)/m_pixelSize);
@@ -1996,7 +1992,7 @@ void polyView::worldToPixelCoords(double wx, double wy,
 }
 
 void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
-                             int drawVertIndex, QPainter * paint){
+                             int drawVertIndex, QPainter * paint) {
 
   // Draw a vertex as a small shape (a circle, rectangle, triangle)
 
@@ -2008,7 +2004,7 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
   paint->setPen(QPen(color, lineWidth));
 
   int numTypes = 4;
-  if (drawVertIndex < 0){
+  if (drawVertIndex < 0) {
 
     // This will be reached only for the case when a polygon
     // is so small that it collapses into a point.
@@ -2016,19 +2012,19 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
     paint->setBrush(color);
     paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
 
-  } else if (drawVertIndex%numTypes == 0){
+  } else if (drawVertIndex%numTypes == 0) {
 
     // Draw a small empty ellipse
     paint->setBrush(Qt::NoBrush);
     paint->drawEllipse(x0 - len, y0 - len, 2*len, 2*len);
 
-  }else if (drawVertIndex%numTypes == 1){
+  }else if (drawVertIndex%numTypes == 1) {
 
     // Draw an empty square
     paint->setBrush(Qt::NoBrush);
     paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
 
-  }else if (drawVertIndex%numTypes == 2){
+  }else if (drawVertIndex%numTypes == 2) {
 
     // Draw an empty triangle
     paint->setBrush(Qt::NoBrush);
@@ -2050,7 +2046,7 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
 }
 
 void polyView::drawMark(int x0, int y0, QColor color, int lineWidth,
-                        QPainter * paint){
+                        QPainter * paint) {
 
   int len = 6;
 
@@ -2063,42 +2059,42 @@ void polyView::drawMark(int x0, int y0, QColor color, int lineWidth,
 
 }
 
-void polyView::toggleAnno(){
+void polyView::toggleAnno() {
   m_showAnnotations   = !m_showAnnotations;
   m_showVertIndexAnno = false;
   m_showLayerAnno     = false;
   refreshPixmap();
 }
 
-void polyView::toggleVertIndexAnno(){
+void polyView::toggleVertIndexAnno() {
   m_showVertIndexAnno = !m_showVertIndexAnno;
   m_showAnnotations   = false;
   m_showLayerAnno     = false;
   refreshPixmap();
 }
 
-void polyView::toggleLayerAnno(){
+void polyView::toggleLayerAnno() {
   m_showLayerAnno     = !m_showLayerAnno;
   m_showAnnotations   = false;
   m_showVertIndexAnno = false;
   refreshPixmap();
 }
 
-void polyView::toggleFilled(){
+void polyView::toggleFilled() {
   m_showFilledPolys = !m_showFilledPolys;
   refreshPixmap();
 }
 
-void polyView::toggleShowGrid(){
+void polyView::toggleShowGrid() {
   m_prefs.isGridOn = !m_prefs.isGridOn;
   refreshPixmap();
 }
 
-void polyView::toggleDifferentColors(){
+void polyView::toggleDifferentColors() {
 
   // Color the polys in different colors to distinguish them better
 
-  if (m_diffColorsMode){
+  if (m_diffColorsMode) {
     // Turn off diff color mode
     m_diffColorsMode    = false;
     m_polyVec           = m_polyVecBk;
@@ -2126,7 +2122,7 @@ void polyView::toggleDifferentColors(){
   m_polyOptionsVecBk = m_polyOptionsVec;
 
   cout << "Changing the polygons colors" << endl;
-  for (int pIter = 0; pIter < (int)m_polyVec.size(); pIter++){
+  for (int pIter = 0; pIter < (int)m_polyVec.size(); pIter++) {
     string color = colors[pIter % numColors];
     m_polyVec[pIter].set_color(color);
     cout << color << "\t" << m_polyOptionsVec[pIter].polyFileName << endl;
@@ -2135,13 +2131,13 @@ void polyView::toggleDifferentColors(){
   refreshPixmap();
 }
 
-void polyView::toggleShowPolyDiff(){
+void polyView::toggleShowPolyDiff() {
 
   // Show the differences of two polygons as points
 
   printCmd("poly_diff");
 
-  if (m_polyDiffMode){
+  if (m_polyDiffMode) {
     // Turn off diff mode
     m_polyDiffMode      = false;
     m_polyVec           = m_polyVecBk;
@@ -2162,12 +2158,12 @@ void polyView::toggleShowPolyDiff(){
 
   assert(m_polyVec.size() == m_polyOptionsVec.size());
 
-  if (m_polyVec.size() < 2){
+  if (m_polyVec.size() < 2) {
     popUp("Must have two polygon files to diff.");
     return;
   }
 
-  if (m_polyVec.size() > 2){
+  if (m_polyVec.size() > 2) {
     cout << "Showing the differences of the first two polygon files "
          << "and ignoring the rest" << endl;
   }
@@ -2213,15 +2209,15 @@ void polyView::toggleShowPolyDiff(){
   refreshPixmap();
 }
 
-void polyView::plotNextDiff(){
+void polyView::plotNextDiff() {
   plotDiff(1);
 }
 
-void polyView::plotPrevDiff(){
+void polyView::plotPrevDiff() {
   plotDiff(-1);
 }
 
-void polyView::plotDiff(int direction){
+void polyView::plotDiff(int direction) {
 
   // For every vertex in m_polyVec[0], find the distance to the
   // closest point on the closest edge of m_polyVec[1], and the
@@ -2237,7 +2233,7 @@ void polyView::plotDiff(int direction){
 
   assert(direction == 1 || direction == -1);
 
-  if (m_distVec.size() == 0){
+  if (m_distVec.size() == 0) {
     assert(m_polyVec.size() >= 2);
     findDistanceBwPolys(// inputs
                         m_polyVec[0], m_polyVec[1],
@@ -2246,14 +2242,14 @@ void polyView::plotDiff(int direction){
                         );
   }
 
-  if (m_indexOfDistToPlot < 0){
+  if (m_indexOfDistToPlot < 0) {
     if (direction > 0) m_indexOfDistToPlot = -1;
     else               m_indexOfDistToPlot = 0;
   }
   m_indexOfDistToPlot += direction;
 
   int len = m_distVec.size();
-  if (len > 0){
+  if (len > 0) {
     m_indexOfDistToPlot = (m_indexOfDistToPlot + len) % len;
   }else{
     m_indexOfDistToPlot = -1; // Nothing to plot
@@ -2279,7 +2275,7 @@ void polyView::plotDiff(int direction){
 }
 
 
-void polyView::plotDistBwPolyClips(QPainter *paint){
+void polyView::plotDistBwPolyClips(QPainter *paint) {
 
   // This is to be called in poly diff mode only. Plot the current
   // segment/distance between clips of polygons. See
@@ -2290,7 +2286,7 @@ void polyView::plotDistBwPolyClips(QPainter *paint){
   return;
 }
 
-void polyView::toggleMovePolys(){
+void polyView::toggleMovePolys() {
 
   m_moveVertices->setChecked(false);
   m_moveEdges->setChecked(false);
@@ -2311,7 +2307,7 @@ void polyView::toggleMovePolys(){
   return;
 }
 
-void polyView::toggleMoveVertices(){
+void polyView::toggleMoveVertices() {
   
   m_movePolys->setChecked(false);
   m_moveEdges->setChecked(false);
@@ -2333,7 +2329,7 @@ void polyView::toggleMoveVertices(){
   return;
 }
 
-void polyView::toggleMoveEdges(){
+void polyView::toggleMoveEdges() {
 
   m_movePolys->setChecked(false);
   m_moveVertices->setChecked(false);
@@ -2355,12 +2351,12 @@ void polyView::toggleMoveEdges(){
   return;
 }
 
-void polyView::toggleAlignMode(){
+void polyView::toggleAlignMode() {
 
   m_alignMode = !m_alignMode;
 
-  if (m_alignMode){
-    if (m_polyVec.size() < 2){
+  if (m_alignMode) {
+    if (m_polyVec.size() < 2) {
       popUp("Must have two polygon files to align.");
       m_alignMode = false;
       return;
@@ -2375,7 +2371,7 @@ void polyView::toggleAlignMode(){
 
     m_highlights.clear();
     markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                    m_selectedPolyIndices);  // Outputs
+                    m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
 
 
     m_totalT.reset();
@@ -2389,7 +2385,7 @@ void polyView::toggleAlignMode(){
   return;
 }
 
-void polyView::align_rotate90(){
+void polyView::align_rotate90() {
   assert(m_alignMode);
   m_polyVec[0].applyTransformAroundBdBoxCenter(0, -1, 1, 0, m_T);
   m_T.print();
@@ -2398,7 +2394,7 @@ void polyView::align_rotate90(){
   refreshPixmap();
 }
 
-void polyView::align_rotate180(){
+void polyView::align_rotate180() {
   assert(m_alignMode);
   m_polyVec[0].applyTransformAroundBdBoxCenter(-1, 0, 0, -1, m_T);
   m_T.print();
@@ -2407,7 +2403,7 @@ void polyView::align_rotate180(){
   refreshPixmap();
 }
 
-void polyView::align_rotate270(){
+void polyView::align_rotate270() {
   assert(m_alignMode);
   m_polyVec[0].applyTransformAroundBdBoxCenter(0, 1, -1, 0, m_T);
   m_T.print();
@@ -2416,7 +2412,7 @@ void polyView::align_rotate270(){
   refreshPixmap();
 }
 
-void polyView::align_flip_against_y_axis(){
+void polyView::align_flip_against_y_axis() {
   assert(m_alignMode);
   m_polyVec[0].applyTransformAroundBdBoxCenter(-1, 0, 0, 1, m_T);
   m_T.print();
@@ -2425,7 +2421,7 @@ void polyView::align_flip_against_y_axis(){
   refreshPixmap();
 }
 
-void polyView::align_flip_against_x_axis(){
+void polyView::align_flip_against_x_axis() {
   assert(m_alignMode);
   m_polyVec[0].applyTransformAroundBdBoxCenter(1, 0, 0, -1, m_T);
   m_T.print();
@@ -2434,7 +2430,7 @@ void polyView::align_flip_against_x_axis(){
   refreshPixmap();
 }
 
-void polyView::performAlignmentOfClosePolys(){
+void polyView::performAlignmentOfClosePolys() {
   assert(m_alignMode);
   assert(m_polyVec.size() >= 2);
   alignPoly1ToPoly2(m_polyVec[0], m_polyVec[1], m_T);
@@ -2444,7 +2440,7 @@ void polyView::performAlignmentOfClosePolys(){
   refreshPixmap();
 }
 
-void polyView::create45DegIntPoly(){
+void polyView::create45DegIntPoly() {
 
   // This flag will change the behavior of mouseReleaseEvent() so that
   // we can start adding points to the polygon with the mouse.
@@ -2455,7 +2451,7 @@ void polyView::create45DegIntPoly(){
   setPolyDrawCursor();
 }
 
-void polyView::createArbitraryPoly(){
+void polyView::createArbitraryPoly() {
 
   // This flag will change the behavior of mouseReleaseEvent() so that
   // we can start adding points to the polygon with the mouse.
@@ -2466,7 +2462,7 @@ void polyView::createArbitraryPoly(){
   setPolyDrawCursor();
 }
 
-void polyView::addAnno(){
+void polyView::addAnno() {
 
   string inputStr, outputStr;
   bool ok = getStringFromGui("Annotation", "Enter annotation", inputStr,
@@ -2507,7 +2503,7 @@ void polyView::addAnno(){
   return;
 }
 
-void polyView::deleteAnno(){
+void polyView::deleteAnno() {
 
   int polyVecIndex, annoIndexInCurrPoly;
   double minDist;
@@ -2520,7 +2516,7 @@ void polyView::deleteAnno(){
                         minDist
                         );
 
-  if (polyVecIndex < 0 || annoIndexInCurrPoly < 0){
+  if (polyVecIndex < 0 || annoIndexInCurrPoly < 0) {
     return;
   }
 
@@ -2529,7 +2525,7 @@ void polyView::deleteAnno(){
   return;
 }
 
-void polyView::insertVertex(){
+void polyView::insertVertex() {
 
   if (m_polyVec.size() == 0) return;
 
@@ -2558,7 +2554,7 @@ void polyView::insertVertex(){
   return;
 }
 
-void polyView::deleteVertex(){
+void polyView::deleteVertex() {
 
   if (m_polyVec.size() == 0) return;
 
@@ -2586,7 +2582,7 @@ void polyView::deleteVertex(){
   return;
 }
 
-void polyView::deletePoly(){
+void polyView::deletePoly() {
 
   if (m_polyVec.size() == 0) return;
 
@@ -2600,7 +2596,7 @@ void polyView::deletePoly(){
                       minX, minY, minDist
                       );
 
-  if (minVecIndex >= 0 && minPolyIndex >= 0){
+  if (minVecIndex >= 0 && minPolyIndex >= 0) {
     m_polyVec[minVecIndex].eraseOnePoly(minPolyIndex);
   }
 
@@ -2610,12 +2606,12 @@ void polyView::deletePoly(){
   return;
 }
 
-void polyView::saveMark(){
+void polyView::saveMark() {
 
   // When saving the mark don't overwrite existing marks
   int markIndex = 0;
   string markFile;
-  while(1){
+  while(1) {
     markIndex++;
     markFile = "mark" + num2str(markIndex) + ".xg";
     ifstream mark(markFile.c_str());
@@ -2633,7 +2629,7 @@ void polyView::saveMark(){
   return;
 }
 
-void polyView::plotMark(double x, double y){
+void polyView::plotMark(double x, double y) {
   cout << "mark " << x << ' ' << y << endl;
   m_markX.resize(1); m_markX[0] = x;
   m_markY.resize(1); m_markY[0] = y;
@@ -2641,21 +2637,21 @@ void polyView::plotMark(double x, double y){
   return;
 }
 
-void polyView::createHlt(){
+void polyView::createHlt() {
   popUp("To create a highlight use Control-Mouse.");
   return;
 }
 
-void polyView::moveSelectedPolys(){
+void polyView::moveSelectedPolys() {
   popUp("To move the selected polygons use Shift-Mouse.");
   return;
 }
 
-void polyView::deselectPolysDeleteHlts(){
+void polyView::deselectPolysDeleteHlts() {
   m_highlights.clear();
 
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices);  // Outputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
 
 
   saveDataForUndo(false);
@@ -2663,11 +2659,11 @@ void polyView::deselectPolysDeleteHlts(){
   return;
 }
 
-void polyView::cutToHlt(){
+void polyView::cutToHlt() {
 
   // Cut to the last highlight
   int numH = m_highlights.size();
-  if (numH == 0){
+  if (numH == 0) {
     popUp("No highlights are present. Create one with Control-Mouse.");
     return;
   }
@@ -2679,7 +2675,7 @@ void polyView::cutToHlt(){
   printCmd("clip", xl, yl, xh - xl, yh - yl);
 
   dPoly clippedPoly;
-  for (int vecIter = 0; vecIter < (int)m_polyVec.size(); vecIter++){
+  for (int vecIter = 0; vecIter < (int)m_polyVec.size(); vecIter++) {
 
     m_polyVec[vecIter].clipPoly(xl, yl, xh, yh, //inputs
                                 clippedPoly     // output
@@ -2690,7 +2686,7 @@ void polyView::cutToHlt(){
 
   m_highlights.resize(numH - 1);
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices);  // Outputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
 
   saveDataForUndo(false);
   refreshPixmap();
@@ -2698,13 +2694,13 @@ void polyView::cutToHlt(){
   return;
 }
 
-void polyView::enforce45(){
+void polyView::enforce45() {
 
   // Enforce that polygon vertices are integers and the angles are 45x.
 
   printCmd("enforce45");
 
-  for (int vecIter = 0; vecIter < (int)m_polyVec.size(); vecIter++){
+  for (int vecIter = 0; vecIter < (int)m_polyVec.size(); vecIter++) {
     m_polyVec[vecIter].enforce45();
   }
 
@@ -2714,21 +2710,21 @@ void polyView::enforce45(){
   return;
 }
 
-void polyView::enforce45AndSnapToGrid(){
+void polyView::enforce45AndSnapToGrid() {
 
   // Enforce that polygon vertices are on grid that the angles are 45x.
 
-  if (!m_prefs.isGridOn){
+  if (!m_prefs.isGridOn) {
     popUp("Must have the grid on to snap to grid.");
     return;
   }
 
-  if (m_prefs.gridSize <= 0){
+  if (m_prefs.gridSize <= 0) {
     popUp("Error: expecting positive grid size.");
     return;
   }
 
-  for (int vecIter = 0; vecIter < (int)m_polyVec.size(); vecIter++){
+  for (int vecIter = 0; vecIter < (int)m_polyVec.size(); vecIter++) {
     m_polyVec[vecIter].scale(1.0/m_prefs.gridSize);
     m_polyVec[vecIter].enforce45();
     m_polyVec[vecIter].scale(m_prefs.gridSize);
@@ -2740,7 +2736,7 @@ void polyView::enforce45AndSnapToGrid(){
   return;
 }
 
-void polyView::saveDataForUndo(bool resetViewOnUndo){
+void polyView::saveDataForUndo(bool resetViewOnUndo) {
 
   // Save the current geometry and other data. This must
   // be called AFTER each event which changes any data
@@ -2767,7 +2763,7 @@ void polyView::saveDataForUndo(bool resetViewOnUndo){
   return;
 }
 
-void polyView::restoreDataAtUndoPos(){
+void polyView::restoreDataAtUndoPos() {
 
   // The functions saveDataForUndo and restoreDataAtUndoPos
   // are very intimately related.
@@ -2779,13 +2775,13 @@ void polyView::restoreDataAtUndoPos(){
   m_polyOptionsVec = m_polyOptionsVecStack[m_posInUndoStack];
   m_highlights     = m_highlightsStack[m_posInUndoStack];
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices);  // Outputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
   return;
 }
 
-void polyView::undo(){
+void polyView::undo() {
 
-  if (m_posInUndoStack <= 0){
+  if (m_posInUndoStack <= 0) {
     cout << "No actions to undo" << endl;
     return;
   }
@@ -2800,9 +2796,9 @@ void polyView::undo(){
   return;
 }
 
-void polyView::redo(){
+void polyView::redo() {
 
-  if (m_posInUndoStack + 1 >= (int)m_polyVecStack.size()){
+  if (m_posInUndoStack + 1 >= (int)m_polyVecStack.size()) {
     cout << "No actions to redo" << endl;
     return;
   }
@@ -2818,12 +2814,12 @@ void polyView::redo(){
 }
 
 
-void polyView::reloadPolys(){
+void polyView::reloadPolys() {
   readAllPolys();
   refreshPixmap();
 }
 
-void polyView::readAllPolys(){
+void polyView::readAllPolys() {
 
   int numFiles = m_polyOptionsVec.size();
   m_polyVec.resize(numFiles);
@@ -2831,7 +2827,7 @@ void polyView::readAllPolys(){
   string missingFiles = "";
   int numMissing = 0;
 
-  for (int fileIter = 0; fileIter < numFiles; fileIter++){
+  for (int fileIter = 0; fileIter < numFiles; fileIter++) {
 
     // Do not read polygons which were created by the program itself
     // rather than read from disk.
@@ -2844,19 +2840,19 @@ void polyView::readAllPolys(){
                                // output
                                m_polyVec[fileIter]
                                );
-    if (!success){
+    if (!success) {
       missingFiles += " " + m_polyOptionsVec[fileIter].polyFileName;
       numMissing++;
     }
 
-    if (m_polyOptionsVec[fileIter].useCmdLineColor){
+    if (m_polyOptionsVec[fileIter].useCmdLineColor) {
       m_polyVec[fileIter].set_color(m_polyOptionsVec[fileIter].cmdLineColor);
     }
 
   }
 
 
-  if (numMissing >= 1){
+  if (numMissing >= 1) {
     string suffix = ""; if (numMissing > 1) suffix = "s";
     popUp("Warning: Could not read file" + suffix + ":" + missingFiles + ".");
   }
@@ -2866,13 +2862,13 @@ void polyView::readAllPolys(){
   return;
 }
 
-void polyView::chooseFilesToShow(){
+void polyView::chooseFilesToShow() {
   m_chooseFilesDlg.chooseFiles(m_polyOptionsVec);
   // User's choice is processed in showFilesChosenByUser().
   return;
 }
 
-void polyView::showFilesChosenByUser(){
+void polyView::showFilesChosenByUser() {
 
   // Process user's choice from chooseFilesToShow().
 
@@ -2880,7 +2876,7 @@ void polyView::showFilesChosenByUser(){
   QTableWidget * filesTable = m_chooseFilesDlg.getFilesTable();
   QList<QTableWidgetItem*> selectedRows = filesTable->selectedItems();
   QListIterator<QTableWidgetItem*> i(selectedRows);
-  while (i.hasNext()){
+  while (i.hasNext()) {
     QTableWidgetItem* item = i.next();
     string fileName = ((item->data(0)).toString()).toStdString();
     m_filesToHide.insert(fileName);
@@ -2891,7 +2887,7 @@ void polyView::showFilesChosenByUser(){
   return;
 }
 
-void polyView::openPoly(){
+void polyView::openPoly() {
 
   QString s = QFileDialog::getOpenFileName(this,
                                            "Open file dialog, Choose a file",
@@ -2918,11 +2914,11 @@ void polyView::openPoly(){
                              poly
                              );
 
-  if (!success){
+  if (!success) {
     popUp("Warning: Could not read file: " + m_polyOptionsVec.back().polyFileName + ".");
   }
 
-  if (m_polyOptionsVec.back().useCmdLineColor){
+  if (m_polyOptionsVec.back().useCmdLineColor) {
     poly.set_color(m_polyOptionsVec.back().cmdLineColor);
   }
   m_polyVec.push_back(poly);
@@ -2939,28 +2935,28 @@ bool polyView::readOnePoly(// inputs
                            closedPolyInfo  isPolyClosed,
                            // output
                            dPoly & poly
-                           ){
+                           ) {
 
   poly.reset();
 
   string type = getFilenameExtension(filename);
 
-  if (type == "pol" || type == "cnt"){
+  if (type == "pol" || type == "cnt") {
     if (poly.read_pol_or_cnt_format(filename, type, plotPointsOnly)) return true;
     string msg = string("Invalid .") + type + " format for " + filename
       + ". Trying to read it in .xg format.";
     cerr << msg << endl;
   }
 
-  if (! poly.readPoly(filename, plotPointsOnly)){
+  if (! poly.readPoly(filename, plotPointsOnly)) {
     return false;
   }
 
   bool isClosed;
-  if (isPolyClosed == forceClosedPoly){
+  if (isPolyClosed == forceClosedPoly) {
     isClosed = true;
     poly.set_isPolyClosed(isClosed);
-  }else if (isPolyClosed == forceNonClosedPoly){
+  }else if (isPolyClosed == forceNonClosedPoly) {
     isClosed = false;
     poly.set_isPolyClosed(isClosed);
   } // else use the isClosed info from file
@@ -2969,7 +2965,7 @@ bool polyView::readOnePoly(// inputs
 }
 
 
-void polyView::saveOnePoly(){
+void polyView::saveOnePoly() {
 
   QString s = QFileDialog::getSaveFileName(this,  "Save as one file", "savedPoly.xg", "(*.xg)"
                                            );
@@ -2979,7 +2975,7 @@ void polyView::saveOnePoly(){
 
   dPoly poly;
 
-  for (int polyIter = 0; polyIter < (int)m_polyVec.size(); polyIter++){
+  for (int polyIter = 0; polyIter < (int)m_polyVec.size(); polyIter++) {
     poly.appendPolygons(m_polyVec[polyIter]);
   }
 
@@ -2989,20 +2985,20 @@ void polyView::saveOnePoly(){
   return;
 }
 
-void polyView::overwriteMultiplePolys(){
+void polyView::overwriteMultiplePolys() {
   bool overwrite = true;
   writeMultiplePolys(overwrite);
 }
 
-void polyView::saveAsMultiplePolys(){
+void polyView::saveAsMultiplePolys() {
   bool overwrite = false;
   writeMultiplePolys(overwrite);
 }
 
-void polyView::writeMultiplePolys(bool overwrite){
+void polyView::writeMultiplePolys(bool overwrite) {
 
   string allFiles = "";
-  for (int polyIter = 0; polyIter < (int)m_polyVec.size(); polyIter++){
+  for (int polyIter = 0; polyIter < (int)m_polyVec.size(); polyIter++) {
 
     dPoly poly = m_polyVec[polyIter];
 
@@ -3013,38 +3009,38 @@ void polyView::writeMultiplePolys(bool overwrite){
     allFiles += " " + fileName;
   }
 
-  if ((int)m_polyVec.size() > 0){
+  if ((int)m_polyVec.size() > 0) {
     cout << "Polygons saved to" << allFiles << endl;
   }
 
   return;
 }
 
-void polyView::toggleShowPointsEdges(){
+void polyView::toggleShowPointsEdges() {
 
   m_displayMode = m_displayMode%3 + 1;
   refreshPixmap();
 
 }
 
-void polyView::changeOrder(){
+void polyView::changeOrder() {
 
   m_changeDisplayOrder = true;
   refreshPixmap();
 
 }
 
-bool polyView::isPolyZeroDim(const QPolygon & pa){
+bool polyView::isPolyZeroDim(const QPolygon & pa) {
 
   int numPts = pa.size();
-  for (int s = 1; s < numPts; s++){
+  for (int s = 1; s < numPts; s++) {
     if (pa[0] != pa[s]) return false;
   }
 
   return true;
 }
 
-void polyView::initTextOnScreenGrid(std::vector< std::vector<int> > & Grid){
+void polyView::initTextOnScreenGrid(std::vector< std::vector<int> > & Grid) {
 
   // Split the screen into numGridPts x numGridPts rectangles.  For
   // performance reasons, will not allow more than one string of text
@@ -3054,16 +3050,16 @@ void polyView::initTextOnScreenGrid(std::vector< std::vector<int> > & Grid){
   int numGridPts = 20;
 
   Grid.resize(numGridPts);
-  for (int s = 0; s < (int)Grid.size(); s++){
+  for (int s = 0; s < (int)Grid.size(); s++) {
     Grid[s].resize(numGridPts);
-    for (int t = 0; t < (int)Grid[s].size(); t++){
+    for (int t = 0; t < (int)Grid[s].size(); t++) {
       Grid[s][t] = 0; // All points start free
     }
   }
 }
 
 bool polyView::isClosestGridPtFree(std::vector< std::vector<int> > & Grid,
-                                   int x, int y){
+                                   int x, int y) {
 
   int numGridPts = Grid.size();
   if (numGridPts <= 0) return false;
@@ -3076,7 +3072,7 @@ bool polyView::isClosestGridPtFree(std::vector< std::vector<int> > & Grid,
   sy = max(sy, 0); sy = min(sy, numGridPts - 1);
 
   int maxAllow = 2; // Allow at most this many text labels around one grid point
-  if (Grid[sx][sy] <= maxAllow - 1){
+  if (Grid[sx][sy] <= maxAllow - 1) {
     Grid[sx][sy]++;
     return true;
   }else{
@@ -3086,7 +3082,7 @@ bool polyView::isClosestGridPtFree(std::vector< std::vector<int> > & Grid,
   return false;
 }
 
-double polyView::pixelToWorldDist(int pd){
+double polyView::pixelToWorldDist(int pd) {
 
   double x0, x1, y0, y1;
   pixelToWorldCoords(0,  0, x0, y0);
@@ -3096,12 +3092,12 @@ double polyView::pixelToWorldDist(int pd){
 
 }
 
-void polyView::setStandardCursor(){
+void polyView::setStandardCursor() {
   QCursor C(Qt::ArrowCursor);
   setCursor(C);
 }
 
-void polyView::setPolyDrawCursor(){
+void polyView::setPolyDrawCursor() {
   QCursor C(Qt::CrossCursor);
   setCursor(C);
 }
@@ -3111,20 +3107,20 @@ void polyView::setupDisplayOrder(// Inputs
                                  // Input-output
                                  bool              & changeDisplayOrder,
                                  std::vector<int>  & polyVecOrder
-                                 ){
+                                 ) {
 
 
   // Decide the order in which polygons are displayed.
 
-  if ((int)polyVecOrder.size() != numPolys){
+  if ((int)polyVecOrder.size() != numPolys) {
 
     // Default order
     polyVecOrder.resize(numPolys);
-    for (int c = 0; c < numPolys; c++){
+    for (int c = 0; c < numPolys; c++) {
       polyVecOrder[c] = c;
     }
 
-  }else if (changeDisplayOrder && numPolys >= 1){
+  }else if (changeDisplayOrder && numPolys >= 1) {
 
     changeDisplayOrder = false;
 
@@ -3139,13 +3135,13 @@ void polyView::setupDisplayOrder(// Inputs
   return;
 }
 
-void polyView::printCmd(std::string cmd, const std::vector<double> & vals){
+void polyView::printCmd(std::string cmd, const std::vector<double> & vals) {
 
   ostringstream S;
   int prec = 16;
   S.precision(prec);
   S << cmd;
-  for (int p = 0; p < (int)vals.size(); p++){
+  for (int p = 0; p < (int)vals.size(); p++) {
     S << ' ' << vals[p];
   }
   S << endl;
@@ -3156,7 +3152,7 @@ void polyView::printCmd(std::string cmd, const std::vector<double> & vals){
 }
 
 void polyView::printCmd(std::string cmd, double xll, double yll,
-                        double widX, double widY){
+                        double widX, double widY) {
 
   ostringstream S;
   int prec = 16;
@@ -3167,7 +3163,7 @@ void polyView::printCmd(std::string cmd, double xll, double yll,
   return;
 }
 
-void polyView::printCmd(std::string cmd){
+void polyView::printCmd(std::string cmd) {
 
   ostringstream S;
   int prec = 16;
@@ -3178,27 +3174,27 @@ void polyView::printCmd(std::string cmd){
   return;
 }
 
-void polyView::runCmd(std::string cmd){
+void polyView::runCmd(std::string cmd) {
 
   string cmdName = "";
   vector<double> vals; vals.clear();
   double val;
 
   istringstream in(cmd);
-  if (in >> cmdName){
+  if (in >> cmdName) {
 
     while (in >> val) vals.push_back(val);
 
     // Commands with no arguments
-    if (cmdName == "enforce45"){ enforce45();          return; }
-    if (cmdName == "poly_diff"){ toggleShowPolyDiff(); return; }
+    if (cmdName == "enforce45") { enforce45();          return; }
+    if (cmdName == "poly_diff") { toggleShowPolyDiff(); return; }
 
     // Process a command with four numbers are input arguments
-    if (cmdName == "view"){
+    if (cmdName == "view") {
 
-      if (vals.size() >= 4){
+      if (vals.size() >= 4) {
         double xll = vals[0], yll = vals[1], widx = vals[2], widy = vals[3];
-        if (xll + widx > xll && yll + widy > yll){
+        if (xll + widx > xll && yll + widy > yll) {
           m_viewXll = xll; m_viewWidX = widx;
           m_viewYll = yll; m_viewWidY = widy;
           m_viewChanged = true;
@@ -3209,11 +3205,11 @@ void polyView::runCmd(std::string cmd){
       cerr << "Invalid view command: " << cmd << endl;
       return;
 
-    }else if (cmdName == "clip"){
+    }else if (cmdName == "clip") {
 
-      if (vals.size() >= 4){
+      if (vals.size() >= 4) {
         double xll = vals[0], yll = vals[1], widx = vals[2], widy = vals[3];
-        if (xll + widx > xll && yll + widy > yll){
+        if (xll + widx > xll && yll + widy > yll) {
           createHighlightWithRealInputs(xll, yll, xll + widx, yll + widy);
           cutToHlt();
           return;
@@ -3222,11 +3218,11 @@ void polyView::runCmd(std::string cmd){
       cerr << "Invalid clip command: " << cmd << endl;
       return;
 
-    }else if (cmdName == "erasePolysInHlt"){
+    }else if (cmdName == "erasePolysInHlt") {
 
-      if (vals.size() >= 4){
+      if (vals.size() >= 4) {
         double xll = vals[0], yll = vals[1], widx = vals[2], widy = vals[3];
-        if (xll + widx > xll && yll + widy > yll){
+        if (xll + widx > xll && yll + widy > yll) {
           createHighlightWithRealInputs(xll, yll, xll + widx, yll + widy);
           deleteSelectedPolys();
           return;
@@ -3235,65 +3231,65 @@ void polyView::runCmd(std::string cmd){
       cerr << "Invalid command: " << cmd << endl;
       return;
 
-    }else if (cmdName == "translate"){
-      if (vals.size() >= 2){
+    }else if (cmdName == "translate") {
+      if (vals.size() >= 2) {
         translatePolys(vals);
         return;
       }
       cerr << "Invalid translate command: " << cmd << endl;
       return;
 
-    }else if (cmdName == "rotate"){
-      if (vals.size() >= 1){
+    }else if (cmdName == "rotate") {
+      if (vals.size() >= 1) {
         rotatePolys(vals);
         return;
       }
       cerr << "Invalid rotate command: " << cmd << endl;
       return;
-    }else if (cmdName == "scale"){
-      if (vals.size() >= 1){
+    }else if (cmdName == "scale") {
+      if (vals.size() >= 1) {
         scalePolys(vals);
         return;
       }
       cerr << "Invalid scale command: " << cmd << endl;
       return;
-    }else if (cmdName == "transform"){
-      if (vals.size() >= 6){
+    }else if (cmdName == "transform") {
+      if (vals.size() >= 6) {
         transformPolys(vals);
         return;
       }
       cerr << "Invalid transform command: " << cmd << endl;
       return;
-    }else if (cmdName == "translate_selected"){
-      if (vals.size() >= 2){
+    }else if (cmdName == "translate_selected") {
+      if (vals.size() >= 2) {
         translateSelectedPolys(vals);
         return;
       }
       cerr << "Invalid translate command: " << cmd << endl;
       return;
-    }else if (cmdName == "rotate_selected"){
-      if (vals.size() >= 1){
+    }else if (cmdName == "rotate_selected") {
+      if (vals.size() >= 1) {
         rotateSelectedPolys(vals);
         return;
       }
       cerr << "Invalid rotate command: " << cmd << endl;
       return;
-    }else if (cmdName == "scale_selected"){
-      if (vals.size() >= 1){
+    }else if (cmdName == "scale_selected") {
+      if (vals.size() >= 1) {
         scaleSelectedPolys(vals);
         return;
       }
       cerr << "Invalid scale command: " << cmd << endl;
       return;
-    }else if (cmdName == "transform_selected"){
-      if (vals.size() >= 4){
+    }else if (cmdName == "transform_selected") {
+      if (vals.size() >= 4) {
         transformSelectedPolys(vals);
         return;
       }
       cerr << "Invalid transform command: " << cmd << endl;
       return;
-    }else if (cmdName == "mark"){
-      if (vals.size() >= 2){
+    }else if (cmdName == "mark") {
+      if (vals.size() >= 2) {
         plotMark(vals[0], vals[1]);
         return;
       }
@@ -3308,11 +3304,11 @@ void polyView::runCmd(std::string cmd){
   return;
 }
 
-double polyView::calcGrid(double widx, double widy){
+double polyView::calcGrid(double widx, double widy) {
 
   double grid = max(widx, widy)/50;
 
-  if (grid <= 0){
+  if (grid <= 0) {
     cout << "Warning: non-positive width and height" << endl;
     return 1.0;
   }
@@ -3328,18 +3324,17 @@ double polyView::calcGrid(double widx, double widy){
   return grid;
 }
 
-void polyView::deleteSelectedPolys(){
+void polyView::deleteSelectedPolys() {
 
   eraseMarkedPolys(// Inputs
-                   m_selectedPolyIndices,
+                   m_selectedPolyIndices, m_selectedAnnoIndices,
                    // Inputs-outputs
-                   m_polyVec
-                   );
+                   m_polyVec);
 
   m_highlights.clear();
 
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices);  // Outputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
 
   saveDataForUndo(false);
   refreshPixmap();

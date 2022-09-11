@@ -106,10 +106,11 @@ public:
 
   void set_isPolyClosed(bool isPolyClosed);
 
-  void eraseMarkedPolys(// Inputs
-                        std::map<int, int> & mark
-                        );
+  void eraseMarkedPolys(std::map<int, int> const& mark);
+  void eraseMarkedAnnos(std::map<int, int> const& mark);
+
   void erasePolysIntersectingBox(double xll, double yll, double xur, double yur);
+  void eraseAnnosIntersectingBox(double xll, double yll, double xur, double yur);
   void appendAndShiftMarkedPolys(// Inputs
                                  std::map<int, int> & mark,
                                  double shift_x, double shift_y
@@ -125,8 +126,14 @@ public:
                                 double xll, double yll,
                                 double xur, double yur,
                                 // Outputs
-                                std::map<int, int> & mark
-                                ) const;
+                                std::map<int, int> & mark) const;
+
+  void markAnnosIntersectingBox(// Inputs
+                                double xll, double yll,
+                                double xur, double yur,
+                                // Outputs
+                                std::map<int, int> & mark) const;
+  
   void replaceOnePoly(int polyIndex, int numV, const double* x, const double* y);
   // Annotations
   void get_annotations (std::vector<anno> & annotations) const;
