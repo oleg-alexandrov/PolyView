@@ -1435,6 +1435,8 @@ void dPoly::markPolysIntersectingBox(// Inputs
     extractOnePoly(polyIndex, // input
                    onePoly    // output
                    );
+    // A polygon intersects a rectangle if cut to the rectangle
+    // it returns a non-empty polygon
     onePoly.clipPoly(xll, yll, xur, yur, // inputs
                      clippedPoly         // outputs
                      );

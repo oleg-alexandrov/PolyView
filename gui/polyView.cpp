@@ -458,8 +458,7 @@ void polyView::displayData(QPainter *paint){
                                             lPolys                          // output
                                             );
       plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth2,
-                drawVertIndex, textOnScreenGrid, paint, lPolys
-                );
+                drawVertIndex, textOnScreenGrid, paint, lPolys);
     }
 
   } // End iterating over sets of polygons
@@ -1050,13 +1049,12 @@ void polyView::translateSelectedPolys(){
 
   vector<double> inputVec, shiftVec;
   inputVec.clear();
-  if (! getRealValuesFromGui(// Inputs
+  if (!getRealValuesFromGui(// Inputs
                              "Translate selected polygons",
                              "Enter shift_x shift_y", inputVec,
                              // Outputs
-                             shiftVec
-                             )
-      ) return;
+                             shiftVec))
+    return;
 
   translateSelectedPolys(shiftVec);
 
@@ -1071,7 +1069,7 @@ void polyView::translateSelectedPolys(std::vector<double> & shiftVec){
   }
 
   if (shiftVec.size() < 2){
-    popUp("Invalid translate vector.");
+    popUp("Invalid translation vector.");
     return;
   }
   shiftVec.resize(2);
@@ -1080,8 +1078,7 @@ void polyView::translateSelectedPolys(std::vector<double> & shiftVec){
                    m_selectedPolyIndices,
                    shiftVec[0], shiftVec[1],
                    // Inputs-outputs
-                   m_polyVec
-                   );
+                   m_polyVec);
 
 
   printCmd("translate_selected", shiftVec);
@@ -1267,8 +1264,7 @@ void polyView::pasteSelectedPolys(){
   for (int s = 0; s < (int)m_polyVec.size(); s++){
     m_polyVec[s].appendAndShiftMarkedPolys(// Inputs
                                            m_selectedPolyIndices[s],
-                                           shift_x, shift_y
-                                           );
+                                           shift_x, shift_y);
   }
   m_highlights.clear();
   saveDataForUndo(false);
@@ -1879,9 +1875,11 @@ void polyView::createHighlightWithRealInputs(double xll, double yll, double xur,
   R.setRectangle(min(xll, xur), min(yll, yur), max(xll, xur), max(yll, yur),
                  isPolyClosed, color, layer);
   m_highlights.push_back(R);
+
+  // Flag the polygons and annotations in the highlights
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices    // Outputs
-                  );
+                  m_selectedPolyIndices);  // Outputs
+
   toggleMovePolys();
   saveDataForUndo(false);
 
@@ -2377,8 +2375,8 @@ void polyView::toggleAlignMode(){
 
     m_highlights.clear();
     markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                    m_selectedPolyIndices    // Outputs
-                    );
+                    m_selectedPolyIndices);  // Outputs
+
 
     m_totalT.reset();
   }else{
@@ -2497,6 +2495,8 @@ void polyView::addAnno(){
   A.y = m_menuY;
   A.label = outputStr;
 
+  // TODO(oalexan1): It is more efficient to have a function like
+  // append_annotation() rather than copying back and forth.
   std::vector<anno> annotations;
   m_polyVec[m_polyVecIndex].get_annotations(annotations);
   annotations.push_back(A);
@@ -2655,8 +2655,8 @@ void polyView::deselectPolysDeleteHlts(){
   m_highlights.clear();
 
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices    // Outputs
-                  );
+                  m_selectedPolyIndices);  // Outputs
+
 
   saveDataForUndo(false);
   refreshPixmap();
@@ -2690,8 +2690,7 @@ void polyView::cutToHlt(){
 
   m_highlights.resize(numH - 1);
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices    // Outputs
-                  );
+                  m_selectedPolyIndices);  // Outputs
 
   saveDataForUndo(false);
   refreshPixmap();
@@ -2780,9 +2779,7 @@ void polyView::restoreDataAtUndoPos(){
   m_polyOptionsVec = m_polyOptionsVecStack[m_posInUndoStack];
   m_highlights     = m_highlightsStack[m_posInUndoStack];
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices    // Outputs
-                  );
-
+                  m_selectedPolyIndices);  // Outputs
   return;
 }
 
@@ -3342,8 +3339,7 @@ void polyView::deleteSelectedPolys(){
   m_highlights.clear();
 
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices    // Outputs
-                  );
+                  m_selectedPolyIndices);  // Outputs
 
   saveDataForUndo(false);
   refreshPixmap();

@@ -204,8 +204,8 @@ provides a basic level of scripting and reproducibility.
 * Copy the polygon closest to the mouse cursor
 * Paste the polygon closest to the mouse cursor
 * Reverse the orientation of the polygon closest to the mouse cursor
-* Insert text label
-* Delete text label
+* Insert annotation (text label)
+* Delete annotation (text label)
 * Enter align mode (a mode in which, given two polygon files, the second polygon file is kept fixed, while the first one can be interactively translated using Shift-Mouse and rotated/flipped from the right-click menu until it aligns to the second one).
 
 # Command line options

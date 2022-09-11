@@ -463,8 +463,7 @@ void utils::markPolysInHlts(// Inputs
                             const std::vector<dPoly> & polyVec,
                             const std::vector<dPoly> & highlights,
                             // Outputs
-                            std::map< int, std::map<int, int> > & markedPolyIndices
-                            ){
+                            std::map< int, std::map<int, int> > & markedPolyIndices){
 
   markedPolyIndices.clear();
 
@@ -477,8 +476,8 @@ void utils::markPolysInHlts(// Inputs
     map<int, int> mark;
     for (int t = 0; t < (int)polyVec.size(); t++){
       polyVec[t].markPolysIntersectingBox(xll, yll, xur, yur, // Inputs
-                                          mark                // Outputs
-                                          );
+                                          mark);              // Outputs
+      
       for (map<int, int>::iterator it = mark.begin(); it != mark.end(); it++){
         markedPolyIndices[t][it->first] = it->second;
       }
