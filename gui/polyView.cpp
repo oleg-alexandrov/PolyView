@@ -818,7 +818,8 @@ void polyView::mouseMoveEvent(QMouseEvent *E) {
   if (m_movingPolysInHlts) {
     m_polyVec = m_polyVecBeforeShift;
     shiftMarkedPolys(// Inputs
-                     m_selectedPolyIndices, shift_x, shift_y,
+                     m_selectedPolyIndices, m_selectedAnnoIndices, 
+                     shift_x, shift_y,
                      // Inputs-outputs
                      m_polyVec);
     refreshPixmap();
@@ -1040,7 +1041,7 @@ void polyView::copyPoly() {
 
 void polyView::translateSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0) {
+  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1061,7 +1062,7 @@ void polyView::translateSelectedPolys() {
 
 void polyView::translateSelectedPolys(std::vector<double> & shiftVec) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0) {
+  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1073,7 +1074,7 @@ void polyView::translateSelectedPolys(std::vector<double> & shiftVec) {
   shiftVec.resize(2);
 
   shiftMarkedPolys(// Inputs
-                   m_selectedPolyIndices,
+                   m_selectedPolyIndices, m_selectedAnnoIndices, 
                    shiftVec[0], shiftVec[1],
                    // Inputs-outputs
                    m_polyVec);
@@ -1090,7 +1091,7 @@ void polyView::translateSelectedPolys(std::vector<double> & shiftVec) {
 
 void polyView::rotateSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0) {
+  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1113,7 +1114,7 @@ void polyView::rotateSelectedPolys() {
 
 void polyView::rotateSelectedPolys(std::vector<double> & angle) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0) {
+  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1125,7 +1126,7 @@ void polyView::rotateSelectedPolys(std::vector<double> & angle) {
   angle.resize(1);
 
   rotateMarkedPolysAroundCtr(// Inputs
-                             m_selectedPolyIndices,
+                             m_selectedPolyIndices, m_selectedAnnoIndices, 
                              angle[0],
                              // Inputs-outputs
                              m_polyVec
@@ -1142,7 +1143,7 @@ void polyView::rotateSelectedPolys(std::vector<double> & angle) {
 
 void polyView::scaleSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0) {
+  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1163,7 +1164,7 @@ void polyView::scaleSelectedPolys() {
 
 void polyView::scaleSelectedPolys(std::vector<double> & scale) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0) {
+  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1175,7 +1176,7 @@ void polyView::scaleSelectedPolys(std::vector<double> & scale) {
   scale.resize(1);
 
   scaleMarkedPolysAroundCtr(// Inputs
-                            m_selectedPolyIndices,
+                            m_selectedPolyIndices, m_selectedAnnoIndices, 
                             scale[0],
                             // Inputs-outputs
                             m_polyVec
@@ -1192,7 +1193,7 @@ void polyView::scaleSelectedPolys(std::vector<double> & scale) {
 
 void polyView::transformSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0) {
+  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1203,10 +1204,8 @@ void polyView::transformSelectedPolys() {
                              "Transform selected polygons",
                              "Enter transform matrix a11 a12 a21 a22",
                              inputVec,
-                             // Outputs
-                             T
-                             )
-      ) return;
+                             T)) // Output
+    return;
 
   transformSelectedPolys(T);
 
@@ -1215,7 +1214,7 @@ void polyView::transformSelectedPolys() {
 
 void polyView::transformSelectedPolys(std::vector<double> & T) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0) {
+  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
     popUp("No polygons are selected.");
     return;
   }
@@ -1229,7 +1228,7 @@ void polyView::transformSelectedPolys(std::vector<double> & T) {
   matrix2 M;
   M.a11 = T[0]; M.a12 = T[1]; M.a21 = T[2]; M.a22 = T[3];
   transformMarkedPolysAroundCtr(// Inputs
-                                m_selectedPolyIndices, M,
+                                m_selectedPolyIndices, m_selectedAnnoIndices, M,
                                 // Inputs-outputs
                                 m_polyVec
                                 );

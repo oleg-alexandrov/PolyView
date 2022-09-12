@@ -118,23 +118,27 @@ namespace utils{
                        std::map<int, std::map<int, int>> & markedAnnoIndices);
 
   void shiftMarkedPolys(// Inputs
-                        std::map<int, std::map<int, int>> & markedPolyIndices,
+                        std::map<int, std::map<int, int>> const& markedPolyIndices,
+                        std::map<int, std::map<int, int>> const& markedAnnoIndices,
                         double shift_x, double shift_y,
                         // Inputs-outputs
                         std::vector<dPoly> & polyVec);
   void scaleMarkedPolysAroundCtr(// Inputs
-                                 std::map<int, std::map<int, int>> & markedPolyIndices,
+                                 std::map<int, std::map<int, int>> const& markedPolyIndices,
+                                 std::map<int, std::map<int, int>> const& markedAnnoIndices,
                                  double scale,
                                  // Inputs-outputs
                                  std::vector<dPoly> & polyVec);
   void rotateMarkedPolysAroundCtr(// Inputs
-                                  std::map<int, std::map<int, int>> & markedPolyIndices,
+                                  std::map<int, std::map<int, int>> const& markedPolyIndices,
+                                  std::map<int, std::map<int, int>> const& markedAnnoIndices,
                                   double angle,
                                   // Inputs-outputs
                                   std::vector<dPoly> & polyVec);
 
   void transformMarkedPolysAroundCtr(// Inputs
-                                     std::map<int, std::map<int, int>> & markedPolyIndices,
+                                     std::map<int, std::map<int, int>> const& markedPolyIndices,
+                                     std::map<int, std::map<int, int>> const& markedAnnoIndices,
                                      const utils::matrix2 & M,
                                      // Inputs-outputs
                                      std::vector<dPoly> & polyVec);
@@ -146,11 +150,10 @@ namespace utils{
                         std::vector<dPoly> & polyVec);
   void extractMarkedPolys(// Inputs
                           const std::vector<dPoly> & polyVec,
-                          std::map<int, std::map<int, int>> & markedPolyIndices,
+                          std::map<int, std::map<int, int>> const& markedPolyIndices,
                           // Outputs
-                          std::vector<dPoly> & extractedPolyVec
-                          );
-  int getNumElements(std::map<int, std::map<int, int>> & Indices);
+                          std::vector<dPoly> & extractedPolyVec);
+  int getNumElements(std::map<int, std::map<int, int>> const& index_map);
 
 }
 

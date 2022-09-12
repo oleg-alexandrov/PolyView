@@ -82,12 +82,18 @@ public:
   void shift(double shift_x, double shift_y);
   void rotate(double angle);
   void scale(double scale);
-  void transformMarkedPolys(std::map<int, int> & mark, const utils::linTrans & T);
-  void transformMarkedPolysAroundPt(std::map<int, int> & mark, const utils::matrix2 & M, dPoint P);
+  void transformMarkedPolys(std::map<int, int> const& mark, const utils::linTrans & T);
+  void transformMarkedAnnos(std::map<int, int> const& mark, const utils::linTrans & T);
+
+  void transformMarkedPolysAroundPt(std::map<int, int> const& mark,
+                                    const utils::matrix2 & M, dPoint P);
+  void transformMarkedAnnosAroundPt(std::map<int, int> const& mark,
+                                    const utils::matrix2 & M, dPoint P);
+
   void applyTransform(double a11, double a12, double a21, double a22,
                       double sx, double sy,
-                      utils::linTrans & T // save the transform here
-                      );
+                      utils::linTrans & T); // save the transform here
+  
   void applyTransformAroundBdBoxCenter(double a11, double a12,
                                        double a21, double a22,
                                        utils::linTrans & T
@@ -192,20 +198,22 @@ public:
   void changeVertexValue(int polyIndex, int vertIndex, double x, double y);
   void shiftEdge(int polyIndex, int vertIndex, double shift_x, double shift_y);
   void shiftOnePoly(int polyIndex, double shift_x, double shift_y);
-  void shiftMarkedPolys(const std::map<int, int> & mark, double shift_x, double shift_y);
-  void extractOnePoly(int polyIndex, // input
-                      dPoly & poly   // output
-                      ) const;
-  void extractMarkedPolys(std::map<int, int> & mark, // input
-                          dPoly & polys              // output
-                          ) const;
+  void shiftOneAnno(int index, double shift_x, double shift_y);
+  void shiftMarkedPolys(std::map<int, int> const & mark, double shift_x, double shift_y);
+  void shiftMarkedAnnos(std::map<int, int> const & amark, double shift_x, double shift_y);
+
+  void extractOnePoly(int polyIndex,       // input
+                      dPoly & poly) const; // output
+                      
+  void extractMarkedPolys(std::map<int, int> const& mark, // input
+                          dPoly & polys) const;           // output
+  
   void reverseOnePoly(int polyIndex);
   void sortFromLargestToSmallest();
 
   void sortBySizeAndMaybeAddBigContainingRect(// inputs
                                               double bigXll, double bigYll,
-                                              double bigXur, double bigYur
-                                              );
+                                              double bigXur, double bigYur);
 
   void enforce45();
 

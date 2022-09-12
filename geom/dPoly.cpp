@@ -405,7 +405,7 @@ void dPoly::scale(double scale) {
   return;
 }
 
-void dPoly::transformMarkedPolys(std::map<int, int> & mark, const utils::linTrans & T) {
+void dPoly::transformMarkedPolys(std::map<int, int> const& mark, const utils::linTrans & T) {
 
   int start = 0;
   for (int pIter = 0; pIter < m_numPolys; pIter++) {
@@ -414,10 +414,10 @@ void dPoly::transformMarkedPolys(std::map<int, int> & mark, const utils::linTran
 
     for (int vIter = 0; vIter < m_numVerts[pIter]; vIter++) {
       int i = start + vIter;
-      double tmpx = T.a11*m_xv[i] + T.a12*m_yv[i] + T.sx;
-      double tmpy = T.a21*m_xv[i] + T.a22*m_yv[i] + T.sy;
-      m_xv[i] = tmpx;
-      m_yv[i] = tmpy;
+      double x = T.a11*m_xv[i] + T.a12*m_yv[i] + T.sx;
+      double y = T.a21*m_xv[i] + T.a22*m_yv[i] + T.sy;
+      m_xv[i] = x;
+      m_yv[i] = y;
     }
 
   }
@@ -427,17 +427,36 @@ void dPoly::transformMarkedPolys(std::map<int, int> & mark, const utils::linTran
   return;
 }
 
-void dPoly::transformMarkedPolysAroundPt(std::map<int, int> & mark, const utils::matrix2 & M, dPoint P) {
+void dPoly::transformMarkedAnnos(std::map<int, int> const& mark, const utils::linTrans & T) {
+  for (size_t it = 0; it < m_annotations.size(); it++) {
+
+    if (mark.find(it) == mark.end()) continue;
+
+    anno & A = m_annotations[it]; // alias
+    double x = T.a11*A.x + T.a12*A.y + T.sx;
+    double y = T.a21*A.x + T.a22*A.y + T.sy;
+    A.x = x;
+    A.y = y;
+  }
+}
+
+void dPoly::transformMarkedPolysAroundPt(std::map<int, int> const& mark, const utils::matrix2 & M,
+                                         dPoint P) {
   linTrans T = transAroundPt(M, P);
   transformMarkedPolys(mark, T);
   return;
 }
 
+void dPoly::transformMarkedAnnosAroundPt(std::map<int, int> const& mark, const utils::matrix2 & M,
+                                         dPoint P) {
+  linTrans T = transAroundPt(M, P);
+  transformMarkedAnnos(mark, T);
+  return;
+}
+
 void dPoly::applyTransform(double a11, double a12, double a21, double a22,
                            double sx, double sy,
-                           utils::linTrans & T // save the transform here
-                           ) {
-
+                           utils::linTrans & T) { // save the transform here
 
   // To do: Need to integrate the several very similar transform functions
 
@@ -445,10 +464,10 @@ void dPoly::applyTransform(double a11, double a12, double a21, double a22,
   T.a11 = a11; T.a12 = a12; T.a21 = a21; T.a22 = a22; T.sx = sx; T.sy = sy;
 
   for (int i = 0; i < (int)m_xv.size(); i++) {
-    double tmpx = a11*m_xv[i] + a12*m_yv[i] + sx;
-    double tmpy = a21*m_xv[i] + a22*m_yv[i] + sy;
-    m_xv[i] = tmpx;
-    m_yv[i] = tmpy;
+    double x = a11*m_xv[i] + a12*m_yv[i] + sx;
+    double y = a21*m_xv[i] + a22*m_yv[i] + sy;
+    m_xv[i] = x;
+    m_yv[i] = y;
   }
 
   vector<anno> annotations;
@@ -456,10 +475,10 @@ void dPoly::applyTransform(double a11, double a12, double a21, double a22,
     get_annoByType(annotations, annoType);
     for (int i = 0; i < (int)annotations.size(); i++) {
       anno & A = annotations[i]; // alias
-      double tmpx = a11*A.x + a12*A.y + sx;
-      double tmpy = a21*A.x + a22*A.y + sy;
-      A.x = tmpx;
-      A.y = tmpy;
+      double x = a11*A.x + a12*A.y + sx;
+      double y = a21*A.x + a22*A.y + sy;
+      A.x = x;
+      A.y = y;
     }
     set_annoByType(annotations, annoType);
   }
@@ -516,14 +535,12 @@ void dPoly::appendPolygons(const dPoly & poly) {
   return;
 }
 
-void dPoly::get_annotations (std::vector<anno> & annotations) const {
+void dPoly::get_annotations(std::vector<anno> & annotations) const {
   annotations = m_annotations;
 }
 
 void dPoly::set_annotations(const std::vector<anno> & A) {
   m_annotations = A;
-  for (size_t i=0 ; i < m_annotations.size();i++) {
-  }
 }
 
 void dPoly::set_vertIndexAnno(const std::vector<anno> & annotations) {
@@ -568,7 +585,7 @@ void dPoly::compVertIndexAnno() {
 
   const double * xv = get_xv();
   const double * yv = get_yv();
-
+  
   int start = 0;
   for (int pIter = 0; pIter < m_numPolys; pIter++) {
 
@@ -859,11 +876,30 @@ void dPoly::shiftOnePoly(int polyIndex, double shift_x, double shift_y) {
   return;
 }
 
-void dPoly::shiftMarkedPolys(const std::map<int, int> & mark, double shift_x, double shift_y) {
+void dPoly::shiftOneAnno(int index, double shift_x, double shift_y) {
 
-  for (int pIter = 0; pIter < m_numPolys; pIter++) {
-    if (mark.find(pIter) != mark.end()) shiftOnePoly(pIter, shift_x, shift_y);
-  }
+  assert(0 <= index && index < (int)m_annotations.size());
+
+  m_annotations[index].x += shift_x;
+  m_annotations[index].y += shift_y;
+
+  m_vertIndexAnno.clear();
+
+  return;
+}
+
+void dPoly::shiftMarkedPolys(std::map<int, int> const & mark, double shift_x, double shift_y) {
+
+  for (auto it = mark.begin(); it != mark.end(); it++)
+    shiftOnePoly(it->first, shift_x, shift_y);
+
+  return;
+}
+
+void dPoly::shiftMarkedAnnos(std::map<int, int> const & amark, double shift_x, double shift_y) {
+
+  for (auto it = amark.begin(); it != amark.end(); it++)
+    shiftOneAnno(it->first, shift_x, shift_y);
 
   return;
 }
@@ -888,9 +924,8 @@ void dPoly::extractOnePoly(int polyIndex, // input
   return;
 }
 
-void dPoly::extractMarkedPolys(std::map<int, int> & mark, // input
-                               dPoly & polys              // output
-                               ) const {
+void dPoly::extractMarkedPolys(std::map<int, int> const& mark, // input
+                               dPoly & polys) const {          // output 
 
   polys.reset();
   for (int pIter = 0; pIter < m_numPolys; pIter++) {
