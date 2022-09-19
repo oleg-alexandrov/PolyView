@@ -52,7 +52,7 @@ jobs:
         run: |
           echo Empty test
 
-      - name: Upload the 
+      - name: Upload
         uses: actions/upload-artifact@v2
         with: 
           name: polyview-release
