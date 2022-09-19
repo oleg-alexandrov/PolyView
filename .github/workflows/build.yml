@@ -29,6 +29,9 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
 
+      - name: Step 1 - Create the directory which will store the release
+        run: mkdir polyview_release
+
       - name: Install Packages
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then        
@@ -43,7 +46,15 @@ jobs:
         run: |
           qmake polyview.pro
           make
+          make install INSTALL_ROOT=polyview_release
+
       - name: Test Package
         run: |
           echo Empty test
 
+      - name: Upload the 
+        uses: actions/upload-artifact@v2
+        with: 
+          name: polyview-release
+          path: polyview_release
+          
