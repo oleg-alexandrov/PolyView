@@ -157,6 +157,10 @@ namespace utils{
                                      dPoint const & ctr,
                                      // Inputs-outputs
                                      std::vector<dPoly> & polyVec);
+  void reverseMarkedPolys(// Inputs
+                          std::map<int, std::map<int, int>> const& markedPolyIndices,
+                          // Inputs-outputs
+                          std::vector<dPoly> & polyVec);
   void eraseMarkedPolys(// Inputs
                         std::map<int, std::map<int, int>> const& markedPolyIndices,
                         std::map<int, std::map<int, int>> const& markedAnnoIndices,

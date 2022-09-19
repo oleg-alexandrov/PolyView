@@ -125,6 +125,7 @@ public slots:
   void scaleSelectedPolys();
   void transformSelectedPolys();
   void pasteSelectedPolys();
+  void reverseSelectedPolys();
   void pastePoly();
   void reversePoly();
   void align_rotate90();

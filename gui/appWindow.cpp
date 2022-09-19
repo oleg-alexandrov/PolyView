@@ -245,6 +245,8 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
                         m_poly, SLOT(scaleSelectedPolys()) );
   transform->addAction("Transform selected polygons", m_poly,
                         SLOT(transformSelectedPolys()) );
+  transform->addAction("Reverse orientation of selected polygons", m_poly,
+                        SLOT(reverseSelectedPolys()));
 #if 0
   selection->addSeparator();
   transform->insertItem("Translate polygons", m_poly, SLOT(translatePolys()),

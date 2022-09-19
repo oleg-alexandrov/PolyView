@@ -904,6 +904,14 @@ void dPoly::shiftMarkedAnnos(std::map<int, int> const & amark, double shift_x, d
   return;
 }
 
+void dPoly::reverseMarkedPolys(std::map<int, int> const & mark) {
+
+  for (auto it = mark.begin(); it != mark.end(); it++)
+    reverseOnePoly(it->first);
+
+  return;
+}
+
 void dPoly::extractOnePoly(int polyIndex, // input
                            dPoly & poly   // output
                            ) const {

@@ -202,6 +202,8 @@ public:
   void shiftMarkedPolys(std::map<int, int> const & mark, double shift_x, double shift_y);
   void shiftMarkedAnnos(std::map<int, int> const & amark, double shift_x, double shift_y);
 
+  void reverseMarkedPolys(std::map<int, int> const & mark);
+
   void extractOnePoly(int polyIndex,       // input
                       dPoly & poly) const; // output
                       

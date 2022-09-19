@@ -633,6 +633,21 @@ void utils::transformMarkedPolysAroundCtr(// Inputs
   return;
 }
 
+void utils::reverseMarkedPolys(// Inputs
+                             std::map<int, std::map<int, int>> const& markedPolyIndices,
+                             // Inputs-outputs
+                             std::vector<dPoly> & polyVec) {
+
+  for (int pIter = 0; pIter < (int)polyVec.size(); pIter++){
+
+     auto mark_it = markedPolyIndices.find(pIter);
+     if (mark_it != markedPolyIndices.end())
+       polyVec[pIter].reverseMarkedPolys(mark_it->second);
+  }
+
+  return;
+}
+
 void utils::eraseMarkedPolys(// Inputs
                              std::map<int, std::map<int, int>> const& markedPolyIndices,
                              std::map<int, std::map<int, int>> const& markedAnnoIndices,

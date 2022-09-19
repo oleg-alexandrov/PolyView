@@ -158,8 +158,9 @@ provides a basic level of scripting and reproducibility.
 
 #### Transform menu
 
-* Translate/rotate/scale the polygons
-
+* Translate/rotate/scale selected polygons
+* Reverse orientation of selected polygons
+ 
 #### Selection menu
 
 * Create a highlight (the polygons in the highlight are automatically selected and copied to a buffer)

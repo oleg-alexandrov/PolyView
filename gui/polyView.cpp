@@ -1254,6 +1254,31 @@ void polyView::transformSelectedPolys(std::vector<double> & T) {
   return;
 }
 
+void polyView::reverseSelectedPolys() {
+
+  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
+    popUp("No polygons are selected.");
+    return;
+  }
+  
+  reverseMarkedPolys(// Inputs
+                     m_selectedPolyIndices,
+                     // Inputs-outputs
+                     m_polyVec);
+
+  printCmd("reverse_selected");
+
+  m_highlights.clear();
+  markPolysInHlts(m_polyVec, m_highlights, // Inputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+  
+  saveDataForUndo(false);
+
+  refreshPixmap();
+
+  return;
+}
+
 void polyView::pasteSelectedPolys() {
 
   extractMarkedPolys(m_polyVec, m_selectedPolyIndices,  // Inputs
@@ -3299,6 +3324,9 @@ void polyView::runCmd(std::string cmd) {
         return;
       }
       cerr << "Invalid transform command: " << cmd << endl;
+      return;
+    }else if (cmdName == "reverse_selected") {
+      reverseSelectedPolys();
       return;
     }else if (cmdName == "mark") {
       if (vals.size() >= 2) {
