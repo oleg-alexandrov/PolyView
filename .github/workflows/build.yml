@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  RELEASE_DIR: polyview_release_${RUNNER_OS}
+  
 jobs:
   Build:
     runs-on: ${{ matrix.os }}
@@ -46,7 +49,7 @@ jobs:
         run: |
           qmake polyview.pro
           make
-          make install INSTALL_ROOT=polyview_release
+          make install INSTALL_ROOT=${RELEASE_DIR}
 
       - name: Test Package
         run: |
@@ -55,6 +58,6 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v2
         with: 
-          name: polyview-release
-          path: polyview_release
+          name: ${RELEASE_DIR}
+          path: ${RELEASE_DIR}
           
