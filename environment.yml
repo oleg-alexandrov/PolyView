@@ -1,0 +1,8 @@
+name: qtenv
+channels:
+  - conda-forge
+  - default
+
+dependencies:
+  - qt=5.9.6
+  
