@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Build
 
 on:
   push:
@@ -7,17 +7,36 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
+  Build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+       os: [ubuntu-latest, macos-latest]
+       python-version: ["3.7", "3.8", "3.9"]
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
-    - uses: actions/checkout@v3
-    - name: configure
-      run: qmake polyview.pro
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          activate-environment: qtenv
+          environment-file: environment.yml
+          auto-activate-base: false
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Check build environment
+        run: |
+          conda list
+      - name: Build Package
+        run: |
+          qmake polyview.pro
+          make
+      - name: Test Package
+        run: |
+          echo Empty test
+
