@@ -515,32 +515,32 @@ void utils::shiftMarkedPolys(// Inputs
   return;
 }
 
-void utils::scaleMarkedPolysAroundCtr(// Inputs
-                                       std::map<int, std::map<int, int>> const& markedPolyIndices,
-                                       std::map<int, std::map<int, int>> const& markedAnnoIndices,
-                                       double scale,
-                                       // Inputs-outputs
-                                       std::vector<dPoly> & polyVec) {
-
+void utils::scaleMarkedPolys(// Inputs
+                             std::map<int, std::map<int, int>> const& markedPolyIndices,
+                             std::map<int, std::map<int, int>> const& markedAnnoIndices,
+                             double scale,
+                             // Inputs-outputs
+                             std::vector<dPoly> & polyVec) {
+  
   matrix2 M;
   M.a11 = scale; M.a12 = 0.0; M.a21 = 0.0; M.a22 = scale;
-  transformMarkedPolysAroundCtr(// Inputs
-                                markedPolyIndices, markedAnnoIndices, M,
-                                // Inputs-outputs
-                                polyVec);
-
+  transformMarkedPolys(// Inputs
+                       markedPolyIndices, markedAnnoIndices, M,
+                       // Inputs-outputs
+                       polyVec);
+  
   return;
 }
 
-void utils::rotateMarkedPolysAroundCtr(// Inputs
-                                       std::map<int, std::map<int, int>> const& markedPolyIndices,
-                                       std::map<int, std::map<int, int>> const& markedAnnoIndices,
-                                       double angle,
-                                       // Inputs-outputs
-                                       std::vector<dPoly> & polyVec) {
-
+void utils::rotateMarkedPolys(// Inputs
+                              std::map<int, std::map<int, int>> const& markedPolyIndices,
+                              std::map<int, std::map<int, int>> const& markedAnnoIndices,
+                              double angle,
+                              // Inputs-outputs
+                              std::vector<dPoly> & polyVec) {
+  
   double a = angle*M_PI/180.0, c = cos(a), s= sin(a);
-
+  
   if (angle == round(angle) && int(angle)%90 == 0 ) {
     // The special case of angle multiple of 90 degrees
     c = round(c), s = round(s);
@@ -548,10 +548,31 @@ void utils::rotateMarkedPolysAroundCtr(// Inputs
 
   matrix2 M;
   M.a11 = c; M.a12 = -s; M.a21 = s; M.a22 = c;
-  transformMarkedPolysAroundCtr(// Inputs
-                                markedPolyIndices, markedAnnoIndices, M,
-                                // Inputs-outputs
-                                polyVec);
+  transformMarkedPolys(// Inputs
+                       markedPolyIndices, markedAnnoIndices, M,
+                       // Inputs-outputs
+                       polyVec);
+  return;
+}
+
+void utils::transformMarkedPolys(// Inputs
+                                 std::map<int, std::map<int, int>> const&
+                                 markedPolyIndices,
+                                 std::map<int, std::map<int, int>> const&
+                                 markedAnnoIndices,
+                                 const utils::matrix2 & M,
+                                 // Inputs-outputs
+                                 std::vector<dPoly> & polyVec) {
+  if (getNumElements(markedPolyIndices) == 0) return;
+
+  dPoint ctr;
+  ctr.x = 0;
+  ctr.y = 0;
+
+  utils::transformMarkedPolysAroundCtr(markedPolyIndices, markedAnnoIndices, M, ctr,
+                                       // Inputs-outputs
+                                       polyVec);
+  
   return;
 }
 
@@ -575,31 +596,49 @@ void utils::transformMarkedPolysAroundCtr(// Inputs
   // Find the center of the bounding box of the marked polygons
   double xll, yll, xur, yur;
   bdBox(extractedPolyVec,   // inputs
-        xll, yll, xur, yur  // outputs
-        );
-  dPoint P;
-  P.x = (xll + xur)/2.0;
-  P.y = (yll + yur)/2.0;
+        xll, yll, xur, yur);// outputs
+        
+  dPoint ctr;
+  ctr.x = (xll + xur)/2.0;
+  ctr.y = (yll + yur)/2.0;
+
+  utils::transformMarkedPolysAroundCtr(markedPolyIndices, markedAnnoIndices, M, ctr,
+                                       // Inputs-outputs
+                                       polyVec);
+  
+  return;
+}
+
+void utils::transformMarkedPolysAroundCtr(// Inputs
+                                          std::map<int, std::map<int, int>> const&
+                                          markedPolyIndices,
+                                          std::map<int, std::map<int, int>> const&
+                                          markedAnnoIndices,
+                                          const utils::matrix2 & M,
+                                          dPoint const & ctr,
+                                          // Inputs-outputs
+                                          std::vector<dPoly> & polyVec) {
 
   for (int pIter = 0; pIter < (int)polyVec.size(); pIter++) {
 
     auto mark_it = markedPolyIndices.find(pIter);
     if (mark_it != markedPolyIndices.end()) 
-      polyVec[pIter].transformMarkedPolysAroundPt(mark_it->second, M, P);
+      polyVec[pIter].transformMarkedPolysAroundPt(mark_it->second, M, ctr);
 
     auto amark_it = markedAnnoIndices.find(pIter);
     if (amark_it != markedAnnoIndices.end()) 
-      polyVec[pIter].transformMarkedAnnosAroundPt(amark_it->second, M, P);
+      polyVec[pIter].transformMarkedAnnosAroundPt(amark_it->second, M, ctr);
   }
 
   return;
 }
 
 void utils::eraseMarkedPolys(// Inputs
-                               std::map<int, std::map<int, int>> const& markedPolyIndices,
-                               std::map<int, std::map<int, int>> const& markedAnnoIndices,
-                               // Inputs-outputs
-                               std::vector<dPoly> & polyVec) {
+                             std::map<int, std::map<int, int>> const& markedPolyIndices,
+                             std::map<int, std::map<int, int>> const& markedAnnoIndices,
+                             // Inputs-outputs
+                             std::vector<dPoly> & polyVec) {
+  
   for (int pIter = 0; pIter < (int)polyVec.size(); pIter++) {
 
     auto mark_it = markedPolyIndices.find(pIter);

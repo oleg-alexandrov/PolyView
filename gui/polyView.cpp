@@ -1073,13 +1073,17 @@ void polyView::translateSelectedPolys(std::vector<double> & shiftVec) {
                    // Inputs-outputs
                    m_polyVec);
 
-
   printCmd("translate_selected", shiftVec);
 
   m_highlights.clear();
+  markPolysInHlts(m_polyVec, m_highlights, // Inputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+  
   saveDataForUndo(false);
-  refreshPixmap();
 
+  std::cout << "Resetting the view after the translation was applied." << std::endl;
+  resetView();  
+  
   return;
 }
 
@@ -1119,18 +1123,22 @@ void polyView::rotateSelectedPolys(std::vector<double> & angle) {
   }
   angle.resize(1);
 
-  rotateMarkedPolysAroundCtr(// Inputs
-                             m_selectedPolyIndices, m_selectedAnnoIndices, 
-                             angle[0],
-                             // Inputs-outputs
-                             m_polyVec
-                             );
-
+  rotateMarkedPolys(// Inputs
+                    m_selectedPolyIndices, m_selectedAnnoIndices, 
+                    angle[0],
+                    // Inputs-outputs
+                    m_polyVec);
+  
   printCmd("rotate_selected", angle);
 
   m_highlights.clear();
+  markPolysInHlts(m_polyVec, m_highlights, // Inputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+
   saveDataForUndo(false);
-  refreshPixmap();
+
+  std::cout << "Resetting the view after the rotation was applied." << std::endl;
+  resetView();  
 
   return;
 }
@@ -1169,19 +1177,25 @@ void polyView::scaleSelectedPolys(std::vector<double> & scale) {
   }
   scale.resize(1);
 
-  scaleMarkedPolysAroundCtr(// Inputs
-                            m_selectedPolyIndices, m_selectedAnnoIndices, 
-                            scale[0],
-                            // Inputs-outputs
-                            m_polyVec
-                            );
-
+  scaleMarkedPolys(// Inputs
+                   m_selectedPolyIndices, m_selectedAnnoIndices, 
+                   scale[0],
+                   // Inputs-outputs
+                   m_polyVec
+                   );
+  
   printCmd("scale_selected", scale);
 
   m_highlights.clear();
+  markPolysInHlts(m_polyVec, m_highlights, // Inputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+
   saveDataForUndo(false);
   refreshPixmap();
 
+  std::cout << "Resetting the view after the scale was applied." << std::endl;
+  resetView();
+  
   return;
 }
 
@@ -1221,17 +1235,21 @@ void polyView::transformSelectedPolys(std::vector<double> & T) {
 
   matrix2 M;
   M.a11 = T[0]; M.a12 = T[1]; M.a21 = T[2]; M.a22 = T[3];
-  transformMarkedPolysAroundCtr(// Inputs
-                                m_selectedPolyIndices, m_selectedAnnoIndices, M,
-                                // Inputs-outputs
-                                m_polyVec
-                                );
+  transformMarkedPolys(// Inputs
+                       m_selectedPolyIndices, m_selectedAnnoIndices, M,
+                       // Inputs-outputs
+                       m_polyVec);
 
   printCmd("transform_selected", T);
 
   m_highlights.clear();
+  markPolysInHlts(m_polyVec, m_highlights, // Inputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+
   saveDataForUndo(false);
-  refreshPixmap();
+
+  std::cout << "Resetting the view after the transform was applied." << std::endl;
+  resetView();  
 
   return;
 }
@@ -1257,6 +1275,9 @@ void polyView::pasteSelectedPolys() {
                                            shift_x, shift_y);
   }
   m_highlights.clear();
+  markPolysInHlts(m_polyVec, m_highlights, // Inputs
+                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+
   saveDataForUndo(false);
   refreshPixmap();
 
@@ -2366,7 +2387,6 @@ void polyView::toggleAlignMode() {
     markPolysInHlts(m_polyVec, m_highlights, // Inputs
                     m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
 
-
     m_totalT.reset();
   }else{
     cout << "\nCombined transform:" << endl;
@@ -2642,7 +2662,6 @@ void polyView::moveSelectedPolys() {
 
 void polyView::deselectPolysDeleteHlts() {
   m_highlights.clear();
-
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
                   m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
 
