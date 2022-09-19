@@ -363,6 +363,7 @@ private:
   bool m_aligningPolysNow;
   utils::linTrans m_T, m_totalT;
 
+  bool m_counter_cc; // true if counter-clockwise polygons have positive orientation
 };
 
 #endif // POLYVIEW_H

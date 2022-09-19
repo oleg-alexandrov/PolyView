@@ -972,7 +972,7 @@ namespace dPoly_local_functions{
   }
 }
 
-void dPoly::sortFromLargestToSmallest() {
+void dPoly::sortFromLargestToSmallest(bool counter_cc) {
 
   // Sort the polygons so that if polygon A is inside of polygon B, then
   // polygon B shows up before polygon A after sorting.
@@ -997,14 +997,13 @@ void dPoly::sortFromLargestToSmallest() {
     int numV = m_numVerts[s];
 
     boxDims[s].point = dPoint( xur[s] - xll[s], yur[s] - yll[s] );
-    boxDims[s].area  = abs(signedPolyArea(numV,
-                                          vecPtr(m_xv) + start, vecPtr(m_yv) + start)
-                           );
+    boxDims[s].area  = abs(signedPolyArea(numV, vecPtr(m_xv) + start, vecPtr(m_yv) + start,
+                                          counter_cc));
     boxDims[s].index = s;
   }
 
   // Sort the bounding boxes, this will tell us how to sort the polygons
-  sort(boxDims.begin(), boxDims.end(), greaterThanPtIndex );
+  sort(boxDims.begin(), boxDims.end(), greaterThanPtIndex);
 
   // Sort the polygons using auxiliary storage
 
@@ -1043,8 +1042,8 @@ void dPoly::sortFromLargestToSmallest() {
 
 void dPoly::sortBySizeAndMaybeAddBigContainingRect(// inputs
                                                    double bigXll, double bigYll,
-                                                   double bigXur, double bigYur
-                                                   ) {
+                                                   double bigXur, double bigYur,
+                                                   bool counter_cc) {
 
   // Sort the polygons from largest to smallest by size. If the
   // largest one is going clockwise, it is a hole. In this case, add a
@@ -1052,7 +1051,7 @@ void dPoly::sortBySizeAndMaybeAddBigContainingRect(// inputs
   // hole in this box. This is important only when polygons are filled
   // (and holes are of background color).
 
-  sortFromLargestToSmallest();
+  sortFromLargestToSmallest(counter_cc);
 
   if (get_numPolys() <= 0) return;
 
@@ -1062,7 +1061,7 @@ void dPoly::sortBySizeAndMaybeAddBigContainingRect(// inputs
   const vector<string> & colors   = get_colors();
   const vector<string> & layers   = get_layers();
 
-  double signedArea = signedPolyArea(numVerts[0], xv, yv);
+  double signedArea = signedPolyArea(numVerts[0], xv, yv, counter_cc);
 
   if (signedArea >= 0) return; // Outer poly is correctly oriented
 
@@ -1081,7 +1080,7 @@ void dPoly::sortBySizeAndMaybeAddBigContainingRect(// inputs
   appendRectangle(bigXll, bigYll, bigXur, bigYur, isPolyClosed, colors[0], layers[0]);
 
   // Reorder the updated set of polygons
-  sortFromLargestToSmallest();
+  sortFromLargestToSmallest(counter_cc);
 
   return;
 }

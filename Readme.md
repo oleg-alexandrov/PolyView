@@ -225,6 +225,7 @@ polygons are displayed.
 * -nc | -nonClosedPoly	Interpret the polygons after this option as polygonal lines (the last vertex is not connected to the first one)
 * -f | -filledPoly	All polygons after this option will show up as filled
 * -nf | -nonFilledPoly	All polygons after this option will show up as not filled
+* -cw | -clockwisePoly	Polygons oriented clockwise are assumed to have positive area
 * -grid on | off	Turn on/off the grid display
 * -gridSize `integer`	Grid size
 * -gridWidth `integer`	Grid width in pixels

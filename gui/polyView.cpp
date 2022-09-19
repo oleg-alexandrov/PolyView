@@ -68,11 +68,8 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   installEventFilter(this);
 
   // Choose which files to hide/show in the GUI
-  QObject::connect(m_chooseFilesDlg.getFilesTable(),
-                   SIGNAL(itemSelectionChanged()),
-                   this,
-                   SLOT(showFilesChosenByUser())
-                   );
+  QObject::connect(m_chooseFilesDlg.getFilesTable(), SIGNAL(itemSelectionChanged()),
+                   this, SLOT(showFilesChosenByUser()));
 
   setAttribute(Qt::WA_Hover); // To be able to do hovering
 
@@ -81,7 +78,8 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   // file. Set it apart, it will be used for new polygons.
   m_polyOptionsVec = options.polyOptionsVec;
   assert(m_polyOptionsVec.size() >= 1);
-  m_prefs = m_polyOptionsVec.back(); m_polyOptionsVec.pop_back();
+  m_prefs = m_polyOptionsVec.back();
+  m_polyOptionsVec.pop_back();
   m_prefs.plotAsPoints = false; // most likely the user wants to see edges not points
   setBgFgColorsFromPrefs(); // must be called after m_prefs is set
 
@@ -128,6 +126,9 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   // Points closer than this are in some situations considered equal
   m_pixelTol = 6;
 
+  // If positively oriented polygons are counter-clockwise (default) or clockwise
+  m_counter_cc = (!m_prefs.clockwisePoly);
+  
   // Used for undo
   m_polyVecStack.clear();
   m_polyOptionsVecStack.clear();
@@ -366,8 +367,7 @@ void polyView::setupViewingWindow() {
       expandBoxToGivenRatio(//inputs
                             m_screenRatio,
                             // input/outputs
-                            xll, yll, widx, widy
-                            );
+                            xll, yll, widx, widy);
 
       // Overwrite the view
       m_viewXll = xll; m_viewWidX = widx;
@@ -390,7 +390,7 @@ void polyView::displayData(QPainter *paint) {
   setupViewingWindow(); // Must happen before anything else
 
   // This vector is used for sparsing out text on screen
-  vector< vector<int> > textOnScreenGrid;
+  vector<vector<int>> textOnScreenGrid;
 
   // Build the grid if the user wants to
   if (m_prefs.isGridOn && m_prefs.gridWidth > 0) {
@@ -406,11 +406,9 @@ void polyView::displayData(QPainter *paint) {
     grid.buildGrid(m_viewXll,  m_viewYll,
                    m_viewXll + m_viewWidX,
                    m_viewYll + m_viewWidY,
-                   m_prefs.gridSize, m_prefs.gridColor
-                   );
+                   m_prefs.gridSize, m_prefs.gridColor);
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, m_prefs.gridWidth,
-              drawVertIndex, textOnScreenGrid, paint, grid
-              );
+              drawVertIndex, textOnScreenGrid, paint, grid);
   }
 
 
@@ -448,8 +446,7 @@ void polyView::displayData(QPainter *paint) {
 
     bool showAnno = true;
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
-              drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter]
-              );
+              drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter]);
     if (!plotFilled && !m_selectedPolyIndices[vecIter].empty()) {
       // Plot the selected polys on top with thicker lines
       dPoly lPolys;
@@ -471,8 +468,7 @@ void polyView::displayData(QPainter *paint) {
     m_highlights[h].set_color(m_prefs.fgColor.c_str());
     bool showAnno = false;
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, m_prefs.lineWidth,
-              drawVertIndex, textOnScreenGrid, paint, m_highlights[h]
-              );
+              drawVertIndex, textOnScreenGrid, paint, m_highlights[h]);
   }
 
   // This draws the polygon being created if in that mode
@@ -523,9 +519,8 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   // When polys are filled, plot largest polys first
   if (plotFilled)
     currPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
-                                                    m_viewXll + m_viewWidX,
-                                                    m_viewYll + m_viewWidY
-                                                    );
+                                                    m_viewXll + m_viewWidX, m_viewYll + m_viewWidY,
+                                                    m_counter_cc);
 
   // Clip the polygon a bit beyond the viewing window, as to not see
   // the edges where the cut took place. It is a bit tricky to
@@ -542,8 +537,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                     m_viewXll + m_viewWidX + extraX,
                     m_viewYll + m_viewWidY + extraY,
                     // output
-                    clippedPoly
-                    );
+                    clippedPoly);
 
   const double * xv               = clippedPoly.get_xv();
   const double * yv               = clippedPoly.get_yv();
@@ -587,7 +581,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     // Determine the orientation of polygons
     double signedArea = 0.0;
     if (plotFilled && isPolyClosed[pIter]) {
-      signedArea = signedPolyArea(pSize, xv + start, yv + start);
+      signedArea = signedPolyArea(pSize, xv + start, yv + start, m_counter_cc);
     }
 
     QPolygon pa(pSize);

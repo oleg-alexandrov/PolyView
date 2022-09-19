@@ -270,7 +270,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   diff->addAction("Show next diff", m_poly, SLOT(plotNextDiff()), Qt::Key_K);
   diff->addAction("Show prev diff", m_poly, SLOT(plotPrevDiff()), Qt::Key_J);
 
-  QMenu* options = new QMenu("Options", menu );
+  QMenu* options = new QMenu("Options", menu);
   menu->addMenu( options);
   options->addAction("Set line width", m_poly, SLOT(setLineWidth()));
   options->addAction("Set background color", m_poly, SLOT(setBgColor()));

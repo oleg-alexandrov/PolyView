@@ -209,11 +209,12 @@ public:
                           dPoly & polys) const;           // output
   
   void reverseOnePoly(int polyIndex);
-  void sortFromLargestToSmallest();
+  void sortFromLargestToSmallest(bool counter_cc);
 
   void sortBySizeAndMaybeAddBigContainingRect(// inputs
                                               double bigXll, double bigYll,
-                                              double bigXur, double bigYur);
+                                              double bigXur, double bigYur,
+                                              bool counter_cc);
 
   void enforce45();
 
@@ -237,7 +238,6 @@ private:
   std::vector<anno>        m_annotations;
   std::vector<anno>        m_vertIndexAnno; // Anno showing vertex index
   std::vector<anno>        m_layerAnno;     // Anno showing layer number
-
 };
 
 #endif

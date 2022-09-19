@@ -40,6 +40,7 @@ struct polyOptions{
   // Each polygon file has these options
   bool            plotAsPoints;
   bool            isPolyFilled;
+  bool            clockwisePoly;
   closedPolyInfo  isPolyClosed;
   bool            useCmdLineColor;
   int             fontSize;
@@ -57,6 +58,7 @@ struct polyOptions{
   polyOptions(){
     plotAsPoints     = false;
     isPolyFilled     = false;
+    clockwisePoly    = false;
     isPolyClosed     = readClosedPolyInfoFromFile;
     fontSize         = 10;
     lineWidth        = 1;

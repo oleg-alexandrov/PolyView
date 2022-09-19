@@ -43,8 +43,7 @@ int main(int argc, char** argv){
   parseCmdOptions(// inputs
                   argc, argv, exeName,
                   // outputs
-                  windowWidX, windowWidY, options
-                  );
+                  windowWidX, windowWidY, options);
   
   QApplication app(argc, argv);
   string progName = "PolyView";

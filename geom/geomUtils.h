@@ -79,11 +79,10 @@ namespace utils{
                       std::string & layer    // output
                       );
 
-  double signedPolyArea(int numV, const double* xv, const double* yv);
+  double signedPolyArea(int numV, const double* xv, const double* yv, bool counter_cw);
 
-  void searchForColor(std::string lineStr, // input, not a reference on purpose
-                      std::string & color  // output
-                      );
+  void searchForColor(std::string lineStr,  // input, not a reference on purpose
+                      std::string & color); // output
 
   bool searchForAnnotation(std::string lineStr, anno & annotation);
 

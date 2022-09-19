@@ -37,7 +37,7 @@ void utils::printUsage(std::string progName){
        << "[ -fs | -fontSize 10 ] "
        << "[ -lw | -lineWidth 2 ] "
        << "[ -p | -points ] [ -cp | -closedPoly ] [ -nc | -nonClosedPoly ] "
-       << "[ -f | -filledPoly ] [ -nf | -nonFilledPoly ] "
+       << "[ -f | -filledPoly ] [ -nf | -nonFilledPoly ] [ -cw | clockwisePoly ]"
        << "[ -grid on | off ] [ -gridSize 10 ] [ -gridWidth 1 ] "
        << "[ -gridColor green ] "
        << "file_1.xg ... file_N.xg " << endl;
@@ -88,8 +88,7 @@ void utils::extractWindowDims(// inputs
 void utils::parseCmdOptions(//inputs
                             int argc, char** argv, std::string exeName,
                             // outputs
-                            int & windowWidX, int & windowWidY, cmdLineOptions & options
-                            ){
+                            int & windowWidX, int & windowWidY, cmdLineOptions & options){
 
   options.polyOptionsVec.clear();
 
@@ -128,6 +127,11 @@ void utils::parseCmdOptions(//inputs
 
     if ( strcmp(currArg, "-nf") == 0 || strcmp(currArg, "-nonfilledpoly") == 0 ){
       opt.isPolyFilled = false;
+      continue;
+    }
+
+    if ( strcmp(currArg, "-cw") == 0 || strcmp(currArg, "-clockwisepoly") == 0 ){
+      opt.clockwisePoly = true;
       continue;
     }
 

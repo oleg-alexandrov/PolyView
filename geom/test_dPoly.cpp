@@ -67,7 +67,8 @@ int main(int argc, char** argv){
   }
   
 #if 0
-  poly.sortFromLargestToSmallest();
+  bool counter_cc = true;
+  poly.sortFromLargestToSmallest(counter_cc);
   double * xv   = (double*)poly.get_xv(); // to do: fix this hack
   double * yv   = (double*)poly.get_yv();
   int      numV = poly.get_totalNumVerts();
