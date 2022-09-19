@@ -29,6 +29,12 @@ jobs:
           auto-activate-base: false
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
+
+      - name: Install Packages
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev
+          
       - name: Check build environment
         run: |
           conda list
