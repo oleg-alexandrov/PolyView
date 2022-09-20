@@ -13,43 +13,42 @@ cut polygons to a box.
 
 # Download
 
-The newest version of PolyView, which uses Qt 5, should be compiled
-by the user. The instructions are further down.
+This software is available for Linux only, for the moment. It can be
+installed in user's home directory without needing administrative
+rights. The installation uses the ``conda`` package manager, whose
+installation also needs no administrative rights.
 
-Ready-to-run binaries for older versions, which were compiled with Qt
-4, can be found at:
+To install ``conda``, see:
 
-* https://github.com/oleg-alexandrov/PolyView/releases
+    https://docs.conda.io/en/latest/miniconda.html
 
-On Linux and OSX the PolyView program is installed in the *bin*
-directory.  On Windows it is in the base directory. The Windows
-version is large because of the size of the Qt libraries.
+Make the fetched installation file executable and run it, such as::
+
+    chmod u+x ./Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh
+
+on Linux (and analogously on OSX). Use the suggested::
+
+    $HOME/miniconda3
+
+directory for installation. If prompted to set up your shell and
+restart it, do so.
+
+Install PolyView:
+
+    conda create -c oleg-alexandrov -n polyview polyview=1.0
+
+This will take a while to run and will download Qt and other
+supporting libraries.
+
+This program will be installed in:
+
+  $HOME/miniconda3/envs/polyview/bin/polyview
 
 # License
 
 PolyView is available under the MIT license and can be used for any
 purpose, academic or commercial.
-
-# Compiling
-
-PolyView is written in C++. It was successfully compiled on Linux with
-g++, on OSX with clang, and on Windows with MinGW. It was written with
-portability in mind and it should be possible to build it on any
-platform and compiler.
-
-To compile PolyView on Linux or OSX, run:
-
-```
-qmake polyview.pro
-make
-```
-
-Its only dependency is the Qt 5 library (e.g., Qt 5.9). Qt can be
-installed on Ubuntu with the command:
-
-```
-apt-get install qmake
-```
 
 # Comparison with XGRAPH
 
@@ -232,6 +231,37 @@ polygons are displayed.
 * -gridSize `integer`	Grid size
 * -gridWidth `integer`	Grid width in pixels
 * -gridColor `color`	Grid color
+
+# Compiling
+
+PolyView is written in C++. It was successfully compiled on Linux with
+g++, on OSX with clang, and on Windows with MinGW. It was written with
+portability in mind and it should be possible to build it on any
+platform and compiler.
+
+To compile this package with ``conda``, fetch the source code, go
+to the "PolyView" directory, and run::
+
+   conda create --name polyview
+   conda activate polyview
+   conda install conda-build
+   conda build .
+
+To compile PolyView on Linux or OSX with a local compiler, run:
+
+```
+qmake polyview.pro
+make
+make install INSTALL_ROOT=install_directory
+
+```
+
+Its only dependency is the Qt 5 library (e.g., Qt 5.9). Qt can be
+installed on Ubuntu with the command:
+
+```
+apt-get install qmake
+```
 
 # Author
 
