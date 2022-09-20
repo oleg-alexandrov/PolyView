@@ -1,0 +1,40 @@
+#{% set version = "3.1.0" %}
+
+package:
+    name: polyview
+#    version: {{ version }}
+
+source:
+  git_url: git@github.com:oleg-alexandrov/PolyView.git 
+  #git_tag: ec86553 # ensure the correct tag here
+
+build:
+    number: 0
+
+requirements:
+    build:
+# Use the local compiler for OSX. See build.sh for details.
+        - {{ compiler('c') }}       # [linux]
+        - {{ compiler('cxx') }}     # [linux]
+
+    host:
+        - qt=5.9.6
+
+    run:
+        - qt=5.9.6
+
+test:
+    files:
+        imports:
+        commands:
+        comment: ""
+
+about:
+    home: https://github.com/oleg-alexandrov/PolyView
+    license: MIT
+    summary: PolyView: a free and fast 2D polygon viewer and editor
+    summary: 
+
+extra:
+  recipe-maintainers:
+    - oleg.alexandrov@gmail.com
