@@ -46,6 +46,8 @@ This program will be installed in:
 
     $HOME/miniconda3/envs/polyview/bin/polyview
 
+See instructions further down for how to compile it.
+
 # License
 
 PolyView is available under the MIT license and can be used for any
