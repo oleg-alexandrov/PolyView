@@ -34,9 +34,10 @@ void utils::printUsage(std::string progName){
   cout << "Usage: " << progName << " "
        << "[ -geo[metry] 1000x800 ] [-bg | -backgroundColor black ] "
        << "[ -c | -color yellow ] "
+       << "[ -nc | -noColorOverride ] "
        << "[ -fs | -fontSize 10 ] "
        << "[ -lw | -lineWidth 2 ] "
-       << "[ -p | -points ] [ -cp | -closedPoly ] [ -nc | -nonClosedPoly ] "
+       << "[ -p | -points ] [ -cp | -closedPoly ] [ -ncp | -nonClosedPoly ] "
        << "[ -f | -filledPoly ] [ -nf | -nonFilledPoly ] [ -cw | clockwisePoly ]"
        << "[ -grid on | off ] [ -gridSize 10 ] [ -gridWidth 1 ] "
        << "[ -gridColor green ] "
@@ -141,7 +142,7 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if ( strcmp(currArg, "-nc") == 0 || strcmp(currArg, "-nonclosedpoly") == 0 ){
+    if ( strcmp(currArg, "-ncp") == 0 || strcmp(currArg, "-nonclosedpoly") == 0 ){
       // Plot as polygonal lines
       opt.isPolyClosed = forceNonClosedPoly;
       continue;
@@ -219,6 +220,12 @@ void utils::parseCmdOptions(//inputs
       opt.useCmdLineColor = true;
       opt.cmdLineColor    = argv[argIter + 1];
       argIter++;
+      continue;
+    }
+
+    if ((strcmp(currArg, "-nc") == 0 ||
+         strcmp(currArg, "-nocoloroverride") == 0)){
+      opt.useCmdLineColor = false;
       continue;
     }
 
