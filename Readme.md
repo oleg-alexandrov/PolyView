@@ -244,26 +244,21 @@ platform and compiler.
 To compile this package with ``conda``, fetch the source code, go
 to the "PolyView" directory, and run:
 
-   conda create --name polyview
-   conda activate polyview
-   conda install conda-build
-   conda build .
+    conda create --name polyview
+    conda activate polyview
+    conda install conda-build
+    conda build .
 
 To compile PolyView on Linux or OSX with a local compiler, run:
 
-```
-qmake polyview.pro
-make
-make install INSTALL_ROOT=install_directory
-
-```
+    qmake polyview.pro
+    make
+    make install INSTALL_ROOT=install_directory
 
 Its only dependency is the Qt 5 library (e.g., Qt 5.9). Qt can be
 installed on Ubuntu with the command:
 
-```
-apt-get install qmake
-```
+    apt-get install qmake
 
 # Author
 
