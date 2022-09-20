@@ -2233,7 +2233,7 @@ void polyView::toggleShowPolyDiff() {
                );
 
   cout << "Changing the polygons colors to " << color1 << " and "
-       << color2 << " in show poly diff mode"<< endl;
+       << color2 << " in show-poly-diff mode." << endl;
 
   P.set_color(color1);
   Q.set_color(color2);
@@ -2303,10 +2303,28 @@ void polyView::plotDiff(int direction) {
 
   // The segment to plot
   segDist S = m_distVec[m_indexOfDistToPlot];
-  m_segX.push_back(S.begx); m_segX.push_back(S.endx);
-  m_segY.push_back(S.begy); m_segY.push_back(S.endy);
 
   cout << "Distance: " << S.dist << endl;
+  
+  if (S.dist == 0) {
+    // Skip 0 diffs, as those are not interesting. First see if there's a non-zero diff.
+    bool has_nonzero_diff = false;
+    for (size_t seg_it = 0; seg_it < m_distVec.size(); seg_it++) {
+      if (m_distVec[seg_it].dist > 0) {
+        has_nonzero_diff = true;
+        break;
+      }
+    }
+
+    if (has_nonzero_diff) {
+      std::cout << "Skipping vertex at which the polygons are agree fully." << std::endl;
+      plotDiff(direction); // call itself
+      return;
+    }
+  }
+
+  m_segX.push_back(S.begx); m_segX.push_back(S.endx);
+  m_segY.push_back(S.begy); m_segY.push_back(S.endy);
 
   // Set up the view so that it is centered at the midpoint of this
   // segment.
