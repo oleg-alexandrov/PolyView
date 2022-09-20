@@ -243,14 +243,6 @@ g++, on OSX with clang, and on Windows with MinGW. It was written with
 portability in mind and it should be possible to build it on any
 platform and compiler.
 
-To compile this package with ``conda``, fetch the source code, go
-to the "PolyView" directory, and run:
-
-    conda create --name polyview
-    conda activate polyview
-    conda install conda-build
-    conda build .
-
 To compile PolyView on Linux or OSX with a local compiler, run:
 
     qmake polyview.pro
@@ -261,6 +253,14 @@ Its only dependency is the Qt 5 library (e.g., Qt 5.9). Qt can be
 installed on Ubuntu with the command:
 
     apt-get install qmake
+
+To compile this package with ``conda``, fetch the source code, go
+to the "PolyView" directory, and run:
+
+    conda create --name polyview
+    conda activate polyview
+    conda install conda-build
+    conda build .
 
 # Author
 
