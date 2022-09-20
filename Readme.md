@@ -13,10 +13,11 @@ cut polygons to a box.
 
 # Download
 
-This software is available for Linux only, for the moment (OSX and Windows versions
-will be available soon). It can be installed in user's home directory without needing
-administrative rights. The installation uses the ``conda`` package manager, whose
-installation also needs no administrative rights.
+This software is available for Linux only, for the moment (OSX and
+Windows versions will be available soon). It can be installed in
+user's home directory without needing administrative rights. The
+installation uses the ``conda`` package manager, whose installation
+also needs no administrative rights.
 
 To install ``conda``, see:
 
@@ -56,11 +57,11 @@ PolyView was inspired by XGRAPH (http://www.xgraph.org/). The latter
 is a general purpose data plotter and has a lot of features PolyView
 lacks. PolyView has extra features for viewing and editing polygons.
 
-PolyView is (as of 2007) more responsive for polygons with very many 
-vertices, and it can handle zooming to small regions of polygons with 
-large floating point vertex coordinates without overflowing and 
-showing incorrect results. Credit for responsiveness goes to Qt,
-and issues with overflow required careful handling.
+PolyView is (as of 2007) more responsive for polygons with very many
+vertices, and it can handle zooming to small regions of polygons with
+large floating point vertex coordinates without overflowing and
+showing incorrect results. Credit for responsiveness goes to Qt, and
+issues with overflow required careful handling.
 
 Lastly, PolyView is open-source and under a liberal license, and can
 be improved in a collaborative manner.
@@ -69,10 +70,10 @@ be improved in a collaborative manner.
 
 ## File format
 
-PolyView uses the XGRAPH file format, in which the x and y coordinates of each
-polygon are stored as two columns in a plain text file followed by the
-"NEXT" statement. Here is a sample polygon file storing a rectangle
-and a triangle.
+PolyView uses the XGRAPH file format, in which the x and y coordinates
+of each polygon are stored as two columns in a plain text file
+followed by the "NEXT" statement. Here is a sample polygon file
+storing a rectangle and a triangle.
 
 ```
 color = red
@@ -96,8 +97,9 @@ Polygon vertices are stored in double precision.
 Notice that the first vertex of each polygon is repeated again before
 the "NEXT" statement, to signal to the viewer that the polygon is
 closed. PolyView can also display polygonal lines, in addition to
-polygons, when the last vertex need not equal the first one. The last line
-above shows how to place a text label, with its coordinates and text.
+polygons, when the last vertex need not equal the first one. The last
+line above shows how to place a text label, with its coordinates and
+text.
 
 
 ## Functionality
@@ -218,7 +220,7 @@ polygons are displayed.
 * -geo[metry] `width`x`height`	The window size in pixels (for example, 800x800)
 * -bg | -backgroundColor `color`	Color of the background (the default is black)
 * -c | -color `color`	All polygons after this option will show up in the given color (the default is to use the colors specified in the polygon files). 
-* -nc | -noColorOverride All polygons after this option will show up in the color specified in the file. 
+* -nc | -noColorOverride All polygons after this option will show up in the colors specified in the file. 
 * -fs | -fontSize `integer`	The text font size in pixels
 * -lw | -lineWidth `integer`	All polygons after this option will show up with given line width
 * -p | -points	All polygons after this option will show up as vertices rather than edges (a subsequent -p option undoes this behavior)
