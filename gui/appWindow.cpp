@@ -205,8 +205,8 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   view->addAction("Toggle filled",        m_poly, SLOT(toggleFilled()), Qt::Key_F);
   view->addAction("Toggle points display",
                    m_poly, SLOT(toggleShowPointsEdges()),          Qt::Key_P);
-  view->addAction("Toggle show vertex indices",
-                   m_poly, SLOT(toggleVertIndexAnno()), Qt::Key_V);
+  view->addAction("Toggle show vertex or poly indices",
+                   m_poly, SLOT(toggleVertOrPolyIndexAnno()), Qt::Key_V);
   view->addAction("Toggle show layers", m_poly, SLOT(toggleLayerAnno()), Qt::Key_L);
 
   QMenu* edit = new QMenu("Edit", menu );

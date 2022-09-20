@@ -77,7 +77,7 @@ public slots:
   void plotPrevDiff();
   void plotDiff(int direction);
   void toggleShowPointsEdges();
-  void toggleVertIndexAnno();
+  void toggleVertOrPolyIndexAnno();
   void toggleLayerAnno();
 
   // Edit menu
@@ -286,8 +286,9 @@ private:
   std::vector<dPoly> m_highlights;
 
   int m_showEdges, m_showPoints, m_showPointsEdges, m_displayMode;
-  bool m_changeDisplayOrder, m_showVertIndexAnno, m_showLayerAnno;
-
+  bool m_changeDisplayOrder, m_showLayerAnno;
+  int m_showVertOrPolyIndexAnno; // these are conveniently grouped together
+  
   bool m_createPoly, m_snapPolyTo45DegreeIntGrid;
   std::vector<double> m_currPolyX, m_currPolyY;
   std::vector<double> m_markX, m_markY;

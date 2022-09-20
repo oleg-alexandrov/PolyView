@@ -146,7 +146,7 @@ provides a basic level of scripting and reproducibility.
 * Show/hide annotations (text labels)
 * Show the polygons filled with color
 * Show the vertices only (no edges)
-* Show the index of each vertex
+* Show the index of each vertex or polygon
 * Show the layer ids (if present)
 
 #### Edit menu

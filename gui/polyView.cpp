@@ -98,7 +98,7 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   m_firstPaintEvent = true;
 
   m_showAnnotations    = true;
-  m_showVertIndexAnno  = false;
+  m_showVertOrPolyIndexAnno  = 0;
   m_showLayerAnno      = false;
   m_showFilledPolys    = false;
   m_changeDisplayOrder = false;
@@ -170,10 +170,10 @@ polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(par
   connect(m_showPolysFilled, SIGNAL(triggered()), this, SLOT(toggleFilled()));
 
   // Show vertex indices
-  m_showIndices = m_ContextMenu->addAction("Show vertex indices");
+  m_showIndices = m_ContextMenu->addAction("Show vertex or poly indices");
   m_showIndices->setCheckable(true);
   m_showIndices->setChecked(false);
-  connect(m_showIndices, SIGNAL(triggered()), this, SLOT(toggleVertIndexAnno()));
+  connect(m_showIndices, SIGNAL(triggered()), this, SLOT(toggleVertOrPolyIndexAnno()));
   
   // Create arbitrary poly
   m_createArbitraryPoly = m_ContextMenu->addAction("Create polygon (left mouse click)");
@@ -510,12 +510,14 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   // slow for large polygons.
   // The operations below must happen before cutting,
   // as cutting will inherit the result computed here.
-  if (m_showVertIndexAnno) {
+  if (m_showVertOrPolyIndexAnno == 1) {
     currPoly.compVertIndexAnno();
+  } else if (m_showVertOrPolyIndexAnno == 2) {
+    currPoly.compPolyIndexAnno();
   }else if (m_showLayerAnno) {
     currPoly.compLayerAnno();
   }
-
+  
   // When polys are filled, plot largest polys first
   if (plotFilled)
     currPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
@@ -550,8 +552,10 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   vector<anno> annotations;
   annotations.clear();
   if (showAnno) {
-    if (m_showVertIndexAnno) {
+    if (m_showVertOrPolyIndexAnno == 1) {
       clippedPoly.get_vertIndexAnno(annotations);
+    } else if (m_showVertOrPolyIndexAnno == 2) {
+      clippedPoly.get_polyIndexAnno(annotations);
     }else if (m_showLayerAnno) {
       clippedPoly.get_layerAnno(annotations);
     }else if (m_showAnnotations) {
@@ -2099,23 +2103,24 @@ void polyView::drawMark(int x0, int y0, QColor color, int lineWidth,
 }
 
 void polyView::toggleAnno() {
-  m_showAnnotations   = !m_showAnnotations;
-  m_showVertIndexAnno = false;
-  m_showLayerAnno     = false;
+  m_showAnnotations         = !m_showAnnotations;
+  m_showVertOrPolyIndexAnno = 0;
+  m_showLayerAnno           = false;
   refreshPixmap();
 }
 
-void polyView::toggleVertIndexAnno() {
-  m_showVertIndexAnno = !m_showVertIndexAnno;
-  m_showAnnotations   = false;
-  m_showLayerAnno     = false;
+void polyView::toggleVertOrPolyIndexAnno() {
+  m_showVertOrPolyIndexAnno++;
+  m_showVertOrPolyIndexAnno = m_showVertOrPolyIndexAnno % 3; // Wrap around
+  m_showAnnotations         = false;
+  m_showLayerAnno           = false;
   refreshPixmap();
 }
 
 void polyView::toggleLayerAnno() {
-  m_showLayerAnno     = !m_showLayerAnno;
-  m_showAnnotations   = false;
-  m_showVertIndexAnno = false;
+  m_showLayerAnno           = !m_showLayerAnno;
+  m_showAnnotations         = false;
+  m_showVertOrPolyIndexAnno = 0;
   refreshPixmap();
 }
 

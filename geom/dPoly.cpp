@@ -47,6 +47,7 @@ void dPoly::reset() {
   m_layers.clear();
   m_annotations.clear();
   m_vertIndexAnno.clear();
+  m_polyIndexAnno.clear();
   m_layerAnno.clear();
 }
 
@@ -195,27 +196,35 @@ bool dPoly::isXYRect() {
   return true;
 }
 
-void dPoly::get_annoByType(std::vector<anno> & annotations, int annoType) {
+void dPoly::get_annoByType(std::vector<anno> & annotations, AnnoType annoType) {
 
-  if (annoType == 0) {
+  if (annoType == fileAnno) {
     get_annotations(annotations);
-  }else if (annoType == 1) {
+  }else if (annoType == vertAnno) {
     get_vertIndexAnno(annotations);
-  }else{
+  }else if (annoType == polyAnno) {
+    get_polyIndexAnno(annotations);
+  }else if (annoType == layerAnno) {
     get_layerAnno(annotations);
+  }else{
+    std::cout << "Unknown annotation type." << std::endl;
   }
 
   return;
 }
 
-void dPoly::set_annoByType(const std::vector<anno> & annotations, int annoType) {
+void dPoly::set_annoByType(const std::vector<anno> & annotations, AnnoType annoType) {
 
-  if (annoType == 0) {
+  if (annoType == fileAnno) {
     set_annotations(annotations);
-  }else if (annoType == 1) {
+  }else if (annoType == vertAnno) {
     set_vertIndexAnno(annotations);
-  }else{
+  }else if (annoType == polyAnno) {
+    set_polyIndexAnno(annotations);
+  }else if (annoType == layerAnno) {
     set_layerAnno(annotations);
+  }else{
+    std::cout << "Unknown annotation type." << std::endl;
   }
 
   return;
@@ -224,8 +233,7 @@ void dPoly::set_annoByType(const std::vector<anno> & annotations, int annoType) 
 void dPoly::clipPoly(// inputs
                      double clip_xll, double clip_yll,
                      double clip_xur, double clip_yur,
-                     dPoly & clippedPoly // output
-                     ) {
+                     dPoly & clippedPoly) { // output
 
   assert(this != &clippedPoly); // source and destination must be different
 
@@ -304,9 +312,9 @@ void dPoly::clipPoly(// inputs
   // polygons which are in the cutting box.
   vector<anno> annotations, annoInBox;
 
-  for (int annoType = 0; annoType < 3; annoType++) {
+  for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
 
-    get_annoByType(annotations, annoType);
+    get_annoByType(annotations, (AnnoType)annoType);
 
     annoInBox.clear();
     for (int s = 0; s < (int)annotations.size(); s++) {
@@ -316,7 +324,7 @@ void dPoly::clipPoly(// inputs
       }
     }
 
-    clippedPoly.set_annoByType(annoInBox, annoType);
+    clippedPoly.set_annoByType(annoInBox, (AnnoType)annoType);
 
   }
 
@@ -332,15 +340,15 @@ void dPoly::shift(double shift_x, double shift_y) {
     m_yv[i] += shift_y;
   }
 
-  vector<anno> annotations;
-  for (int annoType = 0; annoType < 3; annoType++) {
-    get_annoByType(annotations, annoType);
+  std::vector<anno> annotations;
+  for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
+    get_annoByType(annotations, (AnnoType)annoType);
     for (int i = 0; i < (int)annotations.size(); i++) {
       anno & A = annotations[i]; // alias
       A.x += shift_x;
       A.y += shift_y;
     }
-    set_annoByType(annotations, annoType);
+    set_annoByType(annotations, (AnnoType)annoType);
   }
 
   return;
@@ -365,8 +373,8 @@ void dPoly::rotate(double angle) { // The angle is given in degrees
   }
 
   vector<anno> annotations;
-  for (int annoType = 0; annoType < 3; annoType++) {
-    get_annoByType(annotations, annoType);
+  for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
+    get_annoByType(annotations, (AnnoType)annoType);
     for (int i = 0; i < (int)annotations.size(); i++) {
       anno & A = annotations[i]; // alias
       double tmpx = c*A.x - s*A.y;
@@ -374,7 +382,7 @@ void dPoly::rotate(double angle) { // The angle is given in degrees
       A.x = tmpx;
       A.y = tmpy;
     }
-    set_annoByType(annotations, annoType);
+    set_annoByType(annotations, (AnnoType)annoType);
   }
 
   return;
@@ -390,16 +398,16 @@ void dPoly::scale(double scale) {
   }
 
   vector<anno> annotations;
-  for (int annoType = 0; annoType < 3; annoType++) {
+  for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
 
-    get_annoByType(annotations, annoType);
+    get_annoByType(annotations, (AnnoType)annoType);
     for (int i = 0; i < (int)annotations.size(); i++) {
       anno & A = annotations[i]; // alias
       A.x *= scale;
       A.y *= scale;
     }
 
-    set_annoByType(annotations, annoType);
+    set_annoByType(annotations, (AnnoType)annoType);
   }
 
   return;
@@ -471,8 +479,8 @@ void dPoly::applyTransform(double a11, double a12, double a21, double a22,
   }
 
   vector<anno> annotations;
-  for (int annoType = 0; annoType < 3; annoType++) {
-    get_annoByType(annotations, annoType);
+  for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
+    get_annoByType(annotations, (AnnoType)annoType);
     for (int i = 0; i < (int)annotations.size(); i++) {
       anno & A = annotations[i]; // alias
       double x = a11*A.x + a12*A.y + sx;
@@ -480,7 +488,7 @@ void dPoly::applyTransform(double a11, double a12, double a21, double a22,
       A.x = x;
       A.y = y;
     }
-    set_annoByType(annotations, annoType);
+    set_annoByType(annotations, (AnnoType)annoType);
   }
 
   return;
@@ -496,9 +504,7 @@ void dPoly::applyTransformAroundBdBoxCenter(double a11, double a12,
 
   double mx, my;
   bdBoxCenter(mx, my);
-  applyTransform(a11, a12, a21, a22, mx - a11*mx - a12*my, my - a21*mx - a22*my,
-                 T
-                 );
+  applyTransform(a11, a12, a21, a22, mx - a11*mx - a12*my, my - a21*mx - a22*my, T);
 
   return;
 }
@@ -549,6 +555,14 @@ void dPoly::set_vertIndexAnno(const std::vector<anno> & annotations) {
 
 void dPoly::get_vertIndexAnno(std::vector<anno> & annotations) const {
   annotations = m_vertIndexAnno;
+}
+
+void dPoly::set_polyIndexAnno(const std::vector<anno> & annotations) {
+  m_polyIndexAnno = annotations;
+}
+
+void dPoly::get_polyIndexAnno(std::vector<anno> & annotations) const {
+  annotations = m_polyIndexAnno;
 }
 
 void dPoly::set_layerAnno(const std::vector<anno> & annotations) {
@@ -602,6 +616,39 @@ void dPoly::compVertIndexAnno() {
 
   }
 
+  return;
+}
+
+// Place the poly index annotation at the poly center of graviity
+void dPoly::compPolyIndexAnno() {
+
+  m_polyIndexAnno.clear();
+
+  const double * xv = get_xv();
+  const double * yv = get_yv();
+  
+  int start = 0;
+  for (int pIter = 0; pIter < m_numPolys; pIter++) {
+
+    if (pIter > 0)
+      start += m_numVerts[pIter - 1];
+    
+    double x = 0.0, y = 0.0, num = 0.0;
+    for (int v = 0; v < m_numVerts[pIter]; v++) {
+      x   += xv[start + v];
+      y   += yv[start + v];
+      num += 1.0;
+    }
+
+    if (num > 0) {
+      anno A;
+      A.x     = x/num;
+      A.y     = y/num;
+      A.label = num2str(pIter);
+      m_polyIndexAnno.push_back(A);
+    }
+  }
+  
   return;
 }
 
@@ -1167,7 +1214,7 @@ bool dPoly::readPoly(std::string filename,
     // Else keep 'color' unchanged.
     searchForColor(line, color);
 
-    if ( searchForAnnotation(line, annotation) ) {
+    if (searchForAnnotation(line, annotation)) {
       m_annotations.push_back(annotation);
     }
 

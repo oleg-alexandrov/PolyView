@@ -27,9 +27,12 @@
 #include <baseUtils.h>
 #include <geomUtils.h>
 
+enum AnnoType {
+  fileAnno = 0, vertAnno, polyAnno, layerAnno, lastAnno
+};
 
 // A class holding a set of polygons in double precision
-class dPoly{
+class dPoly {
 
 public:
 
@@ -41,8 +44,7 @@ public:
 
   bool read_pol_or_cnt_format(std::string filename,
                               std::string type,
-                              bool isPointCloud = false
-                              );
+                              bool isPointCloud = false);
 
   bool readPoly(std::string filename,
                 bool isPointCloud = false
@@ -145,12 +147,15 @@ public:
   void get_annotations (std::vector<anno> & annotations) const;
   void get_layerAnno(std::vector<anno> & annotations) const;
   void get_vertIndexAnno(std::vector<anno> & annotations) const;
+  void get_polyIndexAnno(std::vector<anno> & annotations) const;
   void set_annotations(const std::vector<anno> & A);
   void set_layerAnno(const std::vector<anno> & annotations);
   void set_vertIndexAnno(const std::vector<anno> & annotations);
+  void set_polyIndexAnno(const std::vector<anno> & annotations);
 
   void addAnno(const anno & A){m_annotations.push_back(A); }
   void compVertIndexAnno();
+  void compPolyIndexAnno();
   void compLayerAnno();
 
   void bdBox(double & xll, double & yll, double & xur, double & yur) const;
@@ -223,8 +228,8 @@ public:
 private:
 
   bool getColorInCntFile(const std::string & line, std::string & color);
-  void get_annoByType(std::vector<anno> & annotations, int annoType);
-  void set_annoByType(const std::vector<anno> & annotations, int annoType);
+  void get_annoByType(std::vector<anno> & annotations, AnnoType annoType);
+  void set_annoByType(const std::vector<anno> & annotations, AnnoType annoType);
 
   // If isPointCloud is true, treat each point as a set of unconnected points
   bool                     m_isPointCloud;
@@ -239,6 +244,7 @@ private:
   std::vector<std::string> m_layers;
   std::vector<anno>        m_annotations;
   std::vector<anno>        m_vertIndexAnno; // Anno showing vertex index
+  std::vector<anno>        m_polyIndexAnno; // Anno showing poly index in a set of polys
   std::vector<anno>        m_layerAnno;     // Anno showing layer number
 };
 
