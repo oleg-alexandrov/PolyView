@@ -13,21 +13,21 @@ cut polygons to a box.
 
 # Download
 
-This software is available for Linux only, for the moment. It can be
-installed in user's home directory without needing administrative
-rights. The installation uses the ``conda`` package manager, whose
+This software is available for Linux only, for the moment (OSX and Windows versions
+will be available soon). It can be installed in user's home directory without needing
+administrative rights. The installation uses the ``conda`` package manager, whose
 installation also needs no administrative rights.
 
 To install ``conda``, see:
 
     https://docs.conda.io/en/latest/miniconda.html
 
-Make the fetched installation file executable and run it, such as::
+Make the fetched installation file executable and run it, such as:
 
     chmod u+x ./Miniconda3-latest-Linux-x86_64.sh
     ./Miniconda3-latest-Linux-x86_64.sh
 
-on Linux (and analogously on OSX). Use the suggested::
+on Linux (and analogously on OSX). Use the suggested:
 
     $HOME/miniconda3
 
@@ -43,7 +43,7 @@ supporting libraries.
 
 This program will be installed in:
 
-  $HOME/miniconda3/envs/polyview/bin/polyview
+    $HOME/miniconda3/envs/polyview/bin/polyview
 
 # License
 
@@ -240,7 +240,7 @@ portability in mind and it should be possible to build it on any
 platform and compiler.
 
 To compile this package with ``conda``, fetch the source code, go
-to the "PolyView" directory, and run::
+to the "PolyView" directory, and run:
 
    conda create --name polyview
    conda activate polyview
