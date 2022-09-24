@@ -19,6 +19,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+// For MS Windows
+#define _USE_MATH_DEFINES 
+
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -33,6 +37,11 @@
 #include <geomUtils.h>
 #include <kdTree.h>
 #include <dTree.h>
+
+// If all else fails
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
 
 using namespace std;
 using namespace utils;
@@ -637,9 +646,9 @@ void utils::reverseMarkedPolys(// Inputs
                              std::map<int, std::map<int, int>> const& markedPolyIndices,
                              // Inputs-outputs
                              std::vector<dPoly> & polyVec) {
-
+  
   for (int pIter = 0; pIter < (int)polyVec.size(); pIter++){
-
+    
      auto mark_it = markedPolyIndices.find(pIter);
      if (mark_it != markedPolyIndices.end())
        polyVec[pIter].reverseMarkedPolys(mark_it->second);
