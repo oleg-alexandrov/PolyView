@@ -28,6 +28,11 @@
 #include <cstring>
 #include <string>
 #include <map>
+
+// For MS Windows
+#define _USE_MATH_DEFINES 
+#include <cmath>
+
 #include <cutPoly.h>
 #include <dPoly.h>
 using namespace std;
