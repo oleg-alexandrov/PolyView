@@ -57,7 +57,7 @@ void utils::snapPolyLineTo45DegAngles(bool isClosedPolyLine,
   if (numVerts <= 0) return;
 
   // The vectors corresponding to angles multiple of 45 degree
-  int numAngles = 8;
+  const int numAngles = 8;
   double xs[numAngles], ys[numAngles];
   for (int a = 0; a < numAngles; a++){
     double theta = a*45*M_PI/180;
