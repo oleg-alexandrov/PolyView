@@ -2,15 +2,9 @@ project(PolyView)
 
 cmake_minimum_required (VERSION 3.15)
 
-<<<<<<< HEAD
-if ("${CONDA_DEPS_DIR}" STREQUAL "")
-  message(FATAL_ERROR "You need to set CONDA_DEPS_DIR")
-endif()
-=======
 # if ("${CONDA_DEPS_DIR}" STREQUAL "")
 #   message(FATAL_ERROR "You need to set CONDA_DEPS_DIR")
 # endif()
->>>>>>> Some more build tweaks
 
 # This block is for Qt
 # Tell CMake to run moc when necessary:
@@ -31,11 +25,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS})
 
 find_package(OpenGL REQUIRED)
 
-<<<<<<< HEAD
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 ")
-=======
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11")
->>>>>>> Some more build tweaks
 
 # Find all sources which are not tests
 # TODO(oalexan1): Make the code below more compact
