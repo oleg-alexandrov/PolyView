@@ -12,6 +12,7 @@ env:
 jobs:
   windows_build:
     name: Windows build
+    name: Windows
     runs-on: windows-latest
 
     steps:
@@ -20,12 +21,19 @@ jobs:
         submodules: recursive
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
+
+    - uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
     - name: Cache Qt
       id: cache-qt
       uses: actions/cache@v1
       with:
         path: ../Qt
         key: ${{ runner.os }}-QtCache-${{ env.QT_VERSION }}
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
@@ -39,10 +47,14 @@ jobs:
 
     - name: Build Package
       run: |
-        qmake polyview.pro
         make
         make install INSTALL_ROOT=polyview_release/$RUNNER_OS
 
+        mkdir build
+        cd build
+        cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
+        ninja
+ 
     - name: Test Package
       run: |
         echo Empty test
