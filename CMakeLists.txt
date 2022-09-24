@@ -25,7 +25,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS})
 
 find_package(OpenGL REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11")
+# The Windows compiler does not understand the line below
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11")
 
 # Find all sources which are not tests
 # TODO(oalexan1): Make the code below more compact
