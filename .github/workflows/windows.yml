@@ -1,4 +1,4 @@
-name: Build
+name: WindowsBuild
 
 on:
   push:
@@ -10,8 +10,8 @@ env:
   QT_VERSION: 5.15.2
 
 jobs:
-  windows_build:
-    name: Windows
+  WindowsBuild:
+    name: WindowsBuild
     runs-on: windows-latest
 
     steps:
