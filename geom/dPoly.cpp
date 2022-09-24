@@ -19,6 +19,11 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+// For MS Windows
+#define _USE_MATH_DEFINES 
+
+#include <cmath>
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -29,14 +34,15 @@
 #include <string>
 #include <map>
 
-// For MS Windows
-#define _USE_MATH_DEFINES 
-#include <cmath>
-
 #include <cutPoly.h>
 #include <dPoly.h>
 using namespace std;
 using namespace utils;
+
+// If all else fails
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
 
 // A double precision polygon class
 
