@@ -34,15 +34,15 @@
 #include <string>
 #include <map>
 
-#include <cutPoly.h>
-#include <dPoly.h>
-using namespace std;
-using namespace utils;
-
 // If all else fails
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
 #endif
+
+#include <cutPoly.h>
+#include <dPoly.h>
+using namespace std;
+using namespace utils;
 
 // A double precision polygon class
 

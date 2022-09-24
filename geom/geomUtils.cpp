@@ -19,6 +19,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+// For MS Windows
+#define _USE_MATH_DEFINES 
+
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -29,6 +33,11 @@
 #include <baseUtils.h>
 #include <geomUtils.h>
 #include <edgeUtils.h>
+
+// If all else fails
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
 
 using namespace std;
 using namespace utils;
