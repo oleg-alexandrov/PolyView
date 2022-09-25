@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  LINUX_VERSION: ubuntu-18.04
+
 jobs:
   UnixCondaBuild:
     name: UnixCondaBuild
@@ -14,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-       os: [ubuntu-18.04, macos-latest]
+       os: [${{ env.LINUX_VERSION }}, macos-latest]
 
     defaults:
       run:
@@ -50,7 +53,7 @@ jobs:
         echo Empty test
 
     - name: Upload Linux
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == ${{ env.LINUX_VERSION }}
       uses: actions/upload-artifact@v2
       with: 
          name: polyview_${{ matrix.os }}_conda_build
