@@ -23,19 +23,23 @@ To install ``conda``, see:
 
     https://docs.conda.io/en/latest/miniconda.html
 
-Make the fetched installation file executable and run it, such as:
+On Linux and OSX, make the fetched installation file executable and
+run it, such as:
 
     chmod u+x ./Miniconda3-latest-Linux-x86_64.sh
     ./Miniconda3-latest-Linux-x86_64.sh
 
-on Linux (and analogously on OSX). Use the suggested:
+Use the suggested:
 
     $HOME/miniconda3
 
 directory for installation. If prompted to set up your shell and
 restart it, do so.
 
-Install PolyView:
+On Windows, run the installer by double-clicking on it, and then
+launch the "Anaconda Prompt" from the "Start" menu.
+
+Install PolyView (for now on Linux only):
 
     conda create -c oleg-alexandrov -n polyview polyview=1.0
 
