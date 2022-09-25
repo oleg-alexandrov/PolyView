@@ -52,3 +52,17 @@ target_link_libraries(polyview_lib Qt5::Widgets)
 add_executable(polyview "gui/mainProg.cpp")
 target_link_libraries(polyview polyview_lib Qt5::Widgets ${OPENGL_opengl_LIBRARY})
 
+# TODO(oalexan1): Likely conda will take care of the rpaths, so the block
+# below may not be necessary if building with conda.
+if (NOT ("${CONDA_DEPS_DIR}" STREQUAL ""))
+    if (APPLE)
+        set_target_properties(polyview PROPERTIES
+            INSTALL_RPATH "@loader_path;${CONDA_DEPS_DIR}/lib")
+    elseif(UNIX) # Unix which is not Apple
+        set_target_properties(polyview PROPERTIES
+            INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib:${CONDA_DEPS_DIR}/lib")
+        endif()
+endif()
+
+# Install the lib and the tools
+install(TARGETS polyview RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
