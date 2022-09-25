@@ -50,7 +50,19 @@ add_library(polyview_lib STATIC ${SOURCES})
 target_link_libraries(polyview_lib Qt5::Widgets)
 
 add_executable(polyview "gui/mainProg.cpp")
-target_link_libraries(polyview polyview_lib Qt5::Widgets ${OPENGL_opengl_LIBRARY})
+target_link_libraries(polyview polyview_lib Qt5::Widgets
+    ${OPENGL_opengl_LIBRARY}
+    ${OPENGL_egl_LIBRARY}
+    ${OPENGL_glu_LIBRARY}
+    ${OPENGL_glx_LIBRARY}
+    #/lib64/libGL.so.1 /home/oalexan1/miniconda3/envs/isis6/lib/libX11.so.6 /home/oalexan1/miniconda3/envs/isis6/lib/libXext.so.6 /lib64/libGLdispatch.so.0 /home/oalexan1/miniconda3/envs/isis6/lib/././libicudata.so.58 /home/oalexan1/miniconda3/envs/isis6/lib/./libxcb.so.1 /home/oalexan1/miniconda3/envs/isis6/lib/././libXau.so.6  /home/oalexan1/miniconda3/envs/isis6/lib/././libXdmcp.so.6 
+)
+
+# If conda set the prefix, install there
+message(STATUS "---env_prefix value $ENV{PREFIX}")
+if (NOT ("$ENV{PREFIX}" STREQUAL ""))
+    set(CMAKE_INSTALL_BINDIR $ENV{PREFIX}/bin)
+endif()
 
 # TODO(oalexan1): Likely conda will take care of the rpaths, so the block
 # below may not be necessary if building with conda.
