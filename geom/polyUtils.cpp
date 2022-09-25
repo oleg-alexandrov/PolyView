@@ -184,8 +184,7 @@ void utils::findDistanceFromVertsOfPoly1ToVertsPoly2(// inputs
                                                      const dPoly & poly1,
                                                      const dPoly & poly2,
                                                      // outputs
-                                                     std::vector<segDist> & distVec
-                                                     ) {
+                                                     std::vector<segDist> & distVec) {
 
   // Given two sets of polygons, for each vertex in the first set of
   // polygons find the distance to the closest vertex in the second
@@ -260,8 +259,7 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
                                          const dPoly & poly1,
                                          const dPoly & poly2,
                                          // outputs
-                                         std::vector<segDist> & distVec
-                                         ) {
+                                         std::vector<segDist> & distVec) {
 
   // Given two sets of polygons, for each vertex in the first set of
   // polygons find the distance to the closest point (may be on edge)

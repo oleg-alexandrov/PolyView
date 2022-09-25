@@ -92,15 +92,15 @@ inline bool lexLessThan(Box P, Box Q){
   return false;
 }
 
-template <typename Box>
-inline bool operator==(Box P, Box Q){
-  return P.xl == Q.xl && P.xh == Q.xh && P.yl == Q.yl && P.yh == Q.yh;
-}
-
-template <typename Box>
-inline bool operator!=(Box P, Box Q){
-  return ! (P == Q);
-}
+// The MS compiler does not like these
+// template <typename Box>
+// inline bool operator==(Box P, Box Q){
+//   return (P.xl == Q.xl && P.xh == Q.xh && P.yl == Q.yl && P.yh == Q.yh);
+// }
+// template <typename Box>
+// inline bool operator!=(Box P, Box Q){
+//   return (!(P == Q));
+// }
 
 template <typename Box>
 struct boxNode{
@@ -120,8 +120,7 @@ public:
   boxTree();
   void formTreeOfBoxes(// Boxes will be reordered but otherwise
                        // unchanged inside this function
-                       std::vector<Box> & Boxes
-                       );
+                       std::vector<Box> & Boxes);
 
   void getBoxesInRegion(double xl, double yl, double xh, double yh, // Inputs
                         std::vector<Box> & outBoxes                 // Outputs
@@ -182,8 +181,7 @@ boxNode<Box> * boxTree<Box>::getNewboxNode(){
 template <typename Box>
 void boxTree<Box>::formTreeOfBoxes(// Boxes will be reordered but otherwise
                                    // unchanged inside this function
-                                   std::vector<Box> & Boxes
-                                   ){
+                                   std::vector<Box> & Boxes){
 
   reset();
   int numBoxes = Boxes.size();
@@ -376,8 +374,7 @@ private:
                                       boxNode<utils::dRectWithId> * root,
                                       // outputs
                                       utils::seg & closestEdge,
-                                      double     & closestDist
-                                      );
+                                      double     & closestDist);
   // Internal data structures
   boxTree<utils::dRectWithId>      m_boxTree;
   std::vector<utils::dRectWithId>  m_allEdges;
