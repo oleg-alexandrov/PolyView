@@ -30,6 +30,7 @@
 #include <cfloat>
 #include <cstring>
 #include <cassert>
+#include <algorithm>
 #include <baseUtils.h>
 #include <geomUtils.h>
 #include <edgeUtils.h>
@@ -201,8 +202,8 @@ void utils::minDistFromPtToSeg(//inputs
   double t;
   if (a == 0.0) t = 0.0;
   else          t = b/a;
-  t = max(t, 0.0);
-  t = min(t, 1.0);
+  t = std::max(t, 0.0);
+  t = std::min(t, 1.0);
 
   minX = x0 + t*(x1 - x0);
   minY = y0 + t*(y1 - y0);
@@ -386,11 +387,8 @@ bool utils::boxesIntersect(double xl1, double yl1, double xh1, double yh1,
   assert(xl2 <= xh2 && yl2 <= yh2);
 
   return
-    (
-     std::max(xl1, xl2) <= std::min(xh1, xh2)
-     &&
-     std::max(yl1, yl2) <= std::min(yh1, yh2)
-     );
+    (std::max(xl1, xl2) <= std::min(xh1, xh2) &&
+     std::max(yl1, yl2) <= std::min(yh1, yh2));
 
 }
 
@@ -557,7 +555,7 @@ bool utils::isPointInPolyOrOnEdges(double x, double y,
     if (x < x0 || x > x1) continue;
 
     if (x0 == x1){
-      if (y >= min(y0, y1) && y <= max(y0, y1)) return true;
+      if (y >= std::min(y0, y1) && y <= std::max(y0, y1)) return true;
       else                                      continue;
     }
 

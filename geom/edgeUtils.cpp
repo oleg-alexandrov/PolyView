@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
+#include <algorithm>
 #include <edgeUtils.h>
 #include <baseUtils.h>
 using namespace std;

@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <iomanip>   // required for use of setw()
 #include <iostream>
+#include <algorithm>
 #include <qapplication.h>
 #include <qcursor.h>
 #include <qdir.h>

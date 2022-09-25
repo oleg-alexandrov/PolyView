@@ -34,6 +34,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 #include <appWindow.h>
 #include <chooseFilesDlg.h>
 #include <polyView.h>
