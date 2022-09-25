@@ -50,14 +50,14 @@ jobs:
         echo Empty test
 
     - name: Upload Linux
-      if: ${{ matrix.os }} == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v2
       with: 
          name: polyview_${{ matrix.os }}_conda_build
          path: "/usr/share/miniconda3/envs/buildenv/conda-bld/linux-64"
 
     - name: Upload OSX
-      if: ${{ matrix.os }} == 'macos-latest'
+      if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v2
       with: 
           name: polyview_${{ matrix.os }}_conda_build
