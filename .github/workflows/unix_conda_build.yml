@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-       os: [${{ env.LINUX_VERSION }}, macos-latest]
+       os: [env.LINUX_VERSION, macos-latest]
 
     defaults:
       run:
