@@ -15,9 +15,11 @@ jobs:
       fail-fast: false
       matrix:
        os: [ubuntu-latest, macos-latest]       
+
     defaults:
       run:
         shell: bash -l {0}
+
     steps:
     - uses: actions/checkout@v2
       with:
@@ -51,4 +53,5 @@ jobs:
       uses: actions/upload-artifact@v2
       with: 
           name: polyview_${{ matrix.os }}_conda_build
-          path: "C:/Miniconda3/envs/conda_build_env/conda-bld/win-64"
+          path: "/usr/share/miniconda3/envs/conda_build_env/conda-bld"
+

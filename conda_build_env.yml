@@ -1,4 +1,4 @@
-name: conda_build_env
+name: qtenv
 channels:
   - conda-forge
   - default
