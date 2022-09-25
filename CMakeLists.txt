@@ -59,7 +59,6 @@ target_link_libraries(polyview polyview_lib Qt5::Widgets
 )
 
 # If conda set the prefix, install there
-message(STATUS "---env_prefix value $ENV{PREFIX}")
 if (NOT ("$ENV{PREFIX}" STREQUAL ""))
     set(CMAKE_INSTALL_BINDIR $ENV{PREFIX}/bin)
 endif()

@@ -1,4 +1,4 @@
-name: CondaBuild
+name: WindowsCondaBuild
 
 on:
   push:
@@ -6,12 +6,9 @@ on:
   pull_request:
     branches: [ "master" ]
 
-env:
-  QT_VERSION: 5.15.2
-
 jobs:
-  CondaBuild:
-    name: CondaBuild
+  WindowsCondaBuild:
+    name: WindowsCondaBuild
     runs-on: windows-latest
 
     steps:
@@ -50,5 +47,5 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v2
       with: 
-          name: polyview_release
-          path: "C:/Miniconda3/envs/qtenv/conda-bld/win-64"
+          name: polyview_windows_conda_build
+          path: "C:/Miniconda3/envs/conda_build_env/conda-bld/win-64"

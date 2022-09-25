@@ -1,0 +1,53 @@
+name: UnixCondaBuild
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  UnixCondaBuild:
+    name: UnixCondaBuild
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+       os: [ubuntu-latest, macos-latest]       
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          activate-environment: conda_build_env
+          environment-file: conda_build_env.yml
+          auto-activate-base: false
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Packages
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then        
+            sudo apt-get update -qq
+            sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev
+          fi
+
+    - name: Build Package
+      run: |
+        conda build .
+ 
+    - name: Test Package
+      run: |
+        echo Empty test
+
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with: 
+          name: polyview_${{ matrix.os }}_conda_build
+          path: "C:/Miniconda3/envs/conda_build_env/conda-bld/win-64"

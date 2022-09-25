@@ -11,15 +11,13 @@ PolyView can add, delete, move, rotate, and scale polygons, add,
 delete, and move vertices and edges, add and delete text labels, and
 cut polygons to a box.
 
-# Download
+# Installation
 
-This software is available for Linux only, for the moment (OSX and
-Windows versions will be available soon). It can be installed in
-user's home directory without needing administrative rights. The
-installation uses the ``conda`` package manager, whose installation
-also needs no administrative rights.
+This software is available for Linux, OSX, and Microsoft Windows. It
+can be installed in user's home directory using ``conda``, with 
+no administrative rights. 
 
-To install ``conda``, see:
+First install ``conda`` from:
 
     https://docs.conda.io/en/latest/miniconda.html
 
@@ -36,19 +34,27 @@ Use the suggested:
 directory for installation. If prompted to set up your shell and
 restart it, do so.
 
-On Windows, run the installer by double-clicking on it, and then
-launch the "Anaconda Prompt" from the "Start" menu.
+On Windows, run the installer by double-clicking on it. When finished,
+launch the "Anaconda Powershell Prompt" from the "Start" menu.
 
-Install PolyView (for now on Linux only):
+Install PolyView on all platforms as:
 
-    conda create -c oleg-alexandrov -n polyview polyview=1.0
+    conda create -c oleg-alexandrov -c conda-forge -n polyview polyview=1.0
 
 This will take a while to run and will download Qt and other
 supporting libraries.
 
-This program will be installed in:
+This program will be installed for Linux and OSX in:
 
     $HOME/miniconda3/envs/polyview/bin/polyview
+
+On Windows, first set in the Anaconda PowerShell the value:
+
+     $Env:QT_PLUGIN_PATH = "C:\Users\UserName\Miniconda3\envs\polyview\Library\plugins"
+
+and then run it from that shell as:
+
+    C:\Users\UserName\Miniconda3\envs\polyview\bin\polyview.exe
 
 See instructions further down for how to compile it.
 
@@ -265,6 +271,9 @@ to the "PolyView" directory, and run:
     conda activate polyview
     conda install conda-build
     conda build .
+
+On Windows, Visual Studio is needed. On OSX, XCode may be
+necessary. On Linux, the compiler is fetched by conda.
 
 # Author
 
