@@ -51,5 +51,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with: 
           name: polyview_release
-          path: polyview_release
-          
+          path: "C:\Miniconda3\envs\qtenv\conda-bld\win-64"
