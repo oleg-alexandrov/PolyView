@@ -48,7 +48,8 @@ This program will be installed for Linux and OSX in:
 
     $HOME/miniconda3/envs/polyview/bin/polyview
 
-On Windows, first set in the Anaconda PowerShell the value:
+and can be run with this command. On Windows, first set in the
+Anaconda PowerShell the value:
 
      $Env:QT_PLUGIN_PATH = "C:\Users\UserName\Miniconda3\envs\polyview\Library\plugins"
 
@@ -271,6 +272,11 @@ to the "PolyView" directory, and run:
     conda activate polyview
     conda install conda-build
     conda build .
+
+This will produce a packaged build. To keep the development environment,
+so the code can be edited and recompiled, pass to ``conda build``
+the flags ``--dirty --keep-old-work``. See also the 
+[conda build documentation](https://docs.conda.io/projects/conda-build/en/latest/resources/commands/conda-build.html).
 
 On Windows, Visual Studio is needed. On OSX, XCode may be
 necessary. On Linux, the compiler is fetched by conda.
