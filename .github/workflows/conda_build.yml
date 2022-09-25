@@ -30,7 +30,7 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniconda-version: "latest"
-        activate-environment: qtenv
+        activate-environment: buildenv
         environment-file: conda_build_env.yml
         auto-activate-base: false
         auto-update-conda: true
@@ -48,4 +48,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with: 
           name: polyview_windows_conda_build
-          path: "C:/Miniconda3/envs/qtenv/conda-bld/win-64"
+          path: "C:/Miniconda3/envs/buildenv/conda-bld/win-64"
