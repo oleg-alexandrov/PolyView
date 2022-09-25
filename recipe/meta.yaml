@@ -5,7 +5,8 @@ package:
     version: {{ version }}
 
 source:
-  git_url: git@github.com:oleg-alexandrov/PolyView.git 
+    git_url: https://github.com/oleg-alexandrov/PolyView.git
+    #git_url: git@github.com:oleg-alexandrov/PolyView.git 
   
 build:
     number: 0
@@ -14,12 +15,17 @@ requirements:
     build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
-
+        - ninja
+#        - m2w64-gcc
+        - git
+#        - make
+        - qt=5.9.7
+        
     host:
-        - qt=5.9.6
+        - qt=5.9.7
 
     run:
-        - qt=5.9.6
+        - qt=5.9.7
 
 test: 
     files: 
