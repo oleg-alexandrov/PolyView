@@ -148,40 +148,30 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if ( (strcmp(currArg, "-bg") == 0 || strcmp(currArg, "-backgroundcolor") == 0 )
-         &&
-         argIter < argc - 1
-         ){
+    if ((strcmp(currArg, "-bg") == 0 || strcmp(currArg, "-backgroundcolor") == 0) &&
+        argIter < argc - 1) {
       opt.bgColor = argv[argIter + 1];
       argIter++;
       continue;
     }
 
-    if ( (strcmp(currArg, "-fs"      ) == 0 ||
-          strcmp(currArg, "-fontsize") == 0 )
-         &&
-         argIter < argc - 1
-         ){
+    if ((strcmp(currArg, "-fs") == 0 || strcmp(currArg, "-fontsize") == 0 ) &&
+        argIter < argc - 1) {
       int fs = (int)round(atof(argv[argIter + 1]));
       if (fs > 0) opt.fontSize = fs;
       argIter++;
       continue;
     }
 
-    if ( (strcmp(currArg, "-lw"       ) == 0 ||
-          strcmp(currArg, "-linewidth") == 0 )
-         &&
-         argIter < argc - 1
-         ){
+    if ((strcmp(currArg, "-lw") == 0 || strcmp(currArg, "-linewidth") == 0) &&
+         argIter < argc - 1) {
       int lw = (int)round(atof(argv[argIter + 1]));
       if (lw > 0) opt.lineWidth = lw;
       argIter++;
       continue;
     }
 
-    if ( strcmp(currArg, "-gridsize") == 0 &&
-         argIter < argc - 1
-         ){
+    if (strcmp(currArg, "-gridsize") == 0 && argIter < argc - 1){
       double gs = atof(argv[argIter + 1]);
       if (gs > 0) opt.gridSize = gs;
       argIter++;

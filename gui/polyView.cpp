@@ -1338,7 +1338,7 @@ void polyView::refreshPixmap() {
   // whenever possible for reasons of speed.
 
   m_pixmap = QPixmap(size());
-  m_pixmap.fill(QColor("black"));
+  m_pixmap.fill(QColor(m_prefs.bgColor.c_str()));
 
   QPainter paint(&m_pixmap);
   paint.initFrom(this);
@@ -1603,16 +1603,15 @@ void polyView::setBgFgColorsFromPrefs() {
 
   // Set the background. Watch for invalid colors.
   string bgColor   = m_prefs.bgColor;
-  QColor qtBgColor = QColor(bgColor.c_str());
-  if (qtBgColor == QColor::Invalid) {
-    bgColor   = "black";
-    qtBgColor = QColor(bgColor.c_str()); // fallback color
+  
+  if (QColor(bgColor.c_str()) == QColor::Invalid) {
+    // fallback color
+    bgColor = "black";
   }
-  QPalette pal(palette());
-  pal.setColor(QPalette::Background, qtBgColor);
-
+ 
   string fgColor = m_prefs.fgColor;
   if (QColor(fgColor.c_str()) == QColor::Invalid) {
+    // fallback color
     fgColor = "white";
   }
 
