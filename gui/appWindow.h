@@ -27,10 +27,13 @@
 #include <QEvent>
 #include <string>
 #include <vector>
+#include <utils.h>
+
 class polyView;
 class QCloseEvent;
-struct cmdLineOptions;
+class cmdLineOptions;
 class QTextEdit;
+class chooseFilesDlg;
 
 class cmdLine : public QLineEdit {
   Q_OBJECT
@@ -57,15 +60,14 @@ class appWindow : public QMainWindow {
 public:
   appWindow(QWidget* parent, std::string progName,
             const cmdLineOptions & options,
-            int windowWidX, int windowWidY
-            );
+            int windowWidX, int windowWidY);
   ~appWindow();
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);
 
 private slots:
-  void createMenusAndMainWidget(const cmdLineOptions & opt);
+  void createMenusAndMainWidget();
   void showDoc();
   void about();
   void procCmdLine();
@@ -74,15 +76,21 @@ private slots:
   void forceQuit();
 
 private:
+  void resizeEvent(QResizeEvent *);
   void closeEvent(QCloseEvent *);
   void insertCmdFromHist();
 
+  chooseFilesDlg * m_chooseFiles;
   polyView       * m_poly;
   cmdLine        * m_cmdLine;
   std::string      m_progName;
   std::vector<std::string> m_cmdHist;
   int m_histPos;
   docWindow m_docWindow;
+
+  std::vector<polyOptions> m_polyOptionsVec; // options for exiting polygons
+  polyOptions m_prefs;                       // options for future polygons
+  
 };
 
 

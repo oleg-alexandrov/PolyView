@@ -63,25 +63,16 @@ using namespace utils;
 // To do: Replace cmdLineOptions directly with polyOptionsVec.
 // To do: Make font size a preference.
 
-polyView::polyView(QWidget *parent, const cmdLineOptions & options): QWidget(parent) {
-
+polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
+                   std::vector<polyOptions> & polyOptionsVec, polyOptions & prefs):
+  QWidget(parent), m_polyOptionsVec(polyOptionsVec), m_prefs(prefs) {
 
   installEventFilter(this);
 
-  // Choose which files to hide/show in the GUI
-  QObject::connect(m_chooseFilesDlg.getFilesTable(), SIGNAL(itemSelectionChanged()),
-                   this, SLOT(showFilesChosenByUser()));
-
+  m_chooseFiles = chooseFiles;
+    
   setAttribute(Qt::WA_Hover); // To be able to do hovering
 
-  // Preferences per polygon file. The element in the vector
-  // m_polyOptionsVec below is not associated with any polygon
-  // file. Set it apart, it will be used for new polygons.
-  m_polyOptionsVec = options.polyOptionsVec;
-  assert(m_polyOptionsVec.size() >= 1);
-  m_prefs = m_polyOptionsVec.back();
-  m_polyOptionsVec.pop_back();
-  m_prefs.plotAsPoints = false; // most likely the user wants to see edges not points
   setBgFgColorsFromPrefs(); // must be called after m_prefs is set
 
   setStandardCursor();
@@ -331,8 +322,7 @@ void polyView::setupViewingWindow() {
   expandBoxToGivenRatio(// Inputs
                         m_screenRatio,
                         // Inputs-outputs
-                        m_viewXll, m_viewYll, m_viewWidX, m_viewWidY
-                        );
+                        m_viewXll, m_viewYll, m_viewWidX, m_viewWidY);
 
   // Create the new view
   double xll, yll, xur, yur, widx, widy;
@@ -1861,6 +1851,9 @@ void polyView::appendToPolyVec(const dPoly & P) {
     string fileName = "poly" + num2str(m_polyVec.size() - 1) + ".xg";
     m_polyOptionsVec.back().polyFileName     = fileName;
     m_polyOptionsVec.back().readPolyFromDisk = false;
+
+    m_chooseFiles->chooseFiles(m_polyOptionsVec);
+    
   }else{
     m_polyVec.back().appendPolygons(P);
   }
@@ -2144,6 +2137,7 @@ void polyView::toggleDifferentColors() {
     m_diffColorsMode    = false;
     m_polyVec           = m_polyVecBk;
     m_polyOptionsVec    = m_polyOptionsVecBk;
+    m_chooseFiles->chooseFiles(m_polyOptionsVec);
 
     refreshPixmap();
     return;
@@ -2923,38 +2917,33 @@ void polyView::readAllPolys() {
   return;
 }
 
-void polyView::chooseFilesToShow() {
-  m_chooseFilesDlg.chooseFiles(m_polyOptionsVec);
-  // User's choice is processed in showFilesChosenByUser().
-  return;
-}
+void polyView::showFilesChosenByUser(/*int rowClicked, int columnClicked*/){
 
-void polyView::showFilesChosenByUser() {
+  QTableWidget * filesTable = m_chooseFiles->getFilesTable();
 
-  // Process user's choice from chooseFilesToShow().
-
+  // Update m_filesToHide based on what is checked or not
   m_filesToHide.clear();
-  QTableWidget * filesTable = m_chooseFilesDlg.getFilesTable();
-  QList<QTableWidgetItem*> selectedRows = filesTable->selectedItems();
-  QListIterator<QTableWidgetItem*> i(selectedRows);
-  while (i.hasNext()) {
-    QTableWidgetItem* item = i.next();
-    string fileName = ((item->data(0)).toString()).toStdString();
-    m_filesToHide.insert(fileName);
+  int rows = filesTable->rowCount();
+  
+  for (int rowIter = 0; rowIter < rows; rowIter++) {
+    QTableWidgetItem *item = filesTable->item(rowIter, 0);
+    
+    std::string fileName = (item->data(0)).toString().toStdString();
+    if (item->checkState() != Qt::Checked)
+      m_filesToHide.insert(fileName);
   }
-
+  
   refreshPixmap();
-
+  
   return;
 }
 
 void polyView::openPoly() {
 
   QString s = QFileDialog::getOpenFileName(this,
-                                           "Open file dialog, Choose a file",
+                                           "Open file dialog; choose a file",
                                            QDir::currentPath(),
-                                           tr("(*.xg *.ly* *.pol)")
-                                           );
+                                           tr("(*.xg *.ly* *.pol)"));
 
   if (s.length() == 0) return;
 
@@ -2966,18 +2955,18 @@ void polyView::openPoly() {
   m_polyOptionsVec.back().polyFileName     = fileName;
   m_polyOptionsVec.back().readPolyFromDisk = true;
 
+  m_chooseFiles->chooseFiles(m_polyOptionsVec);
+  
   dPoly poly;
   bool success = readOnePoly(// inputs
                              m_polyOptionsVec.back().polyFileName,
                              m_polyOptionsVec.back().plotAsPoints,
                              m_polyOptionsVec.back().isPolyClosed,
                              // output
-                             poly
-                             );
+                             poly);
 
-  if (!success) {
+  if (!success)
     popUp("Warning: Could not read file: " + m_polyOptionsVec.back().polyFileName + ".");
-  }
 
   if (m_polyOptionsVec.back().useCmdLineColor) {
     poly.set_color(m_polyOptionsVec.back().cmdLineColor);

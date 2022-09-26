@@ -42,13 +42,13 @@ struct cmdLineOptions;
 class polyView : public QWidget{
   Q_OBJECT
 public:
-  polyView(QWidget *parent, const cmdLineOptions & options);
+  polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
+           std::vector<polyOptions> & polyOptionsVec, polyOptions & prefs);
   void runCmd(std::string cmd);
 
 public slots:
 
   // File menu
-  void chooseFilesToShow();
   void openPoly();
   void saveOnePoly();
   void overwriteMultiplePolys();
@@ -164,9 +164,9 @@ protected:
   void wheelEvent(QWheelEvent *E);
   void contextMenuEvent(QContextMenuEvent *E);
 
-private slots:
- void showFilesChosenByUser();
-
+public slots:
+  void showFilesChosenByUser (/*int rowClicked, int columnClicked*/);
+  
 private:
   void setupViewingWindow();
   void readAllPolys();
@@ -256,8 +256,8 @@ private:
   // Polygons
   std::vector<dPoly>       m_polyVec;
 
-  std::vector<polyOptions> m_polyOptionsVec; // options for exiting polygons
-  polyOptions m_prefs;                       // options for future polygons
+  std::vector<polyOptions> & m_polyOptionsVec; // alias, options for exiting polygons
+  polyOptions & m_prefs;                       // alias, options for future polygons
 
   // Used for undo
   int m_posInUndoStack;
@@ -342,8 +342,8 @@ private:
 
 
   // Choose which files to hide/show in the GUI
-  chooseFilesDlg        m_chooseFilesDlg;
-  std::set<std::string> m_filesToHide;
+  chooseFilesDlg        * m_chooseFiles;
+  std::set<std::string>   m_filesToHide;
 
   // Edit mode
   bool   m_movingVertsOrEdgesOrPolysNow;

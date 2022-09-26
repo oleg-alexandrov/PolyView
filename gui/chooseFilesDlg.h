@@ -30,7 +30,7 @@ class QWidget;
 class QTableWidget;
 struct polyOptions;
 
-class chooseFilesDlg: public QDialog{
+class chooseFilesDlg: public QWidget{
   Q_OBJECT
   
 public:
@@ -41,6 +41,7 @@ public:
   static QString selectFilesTag(){ return "Select files to hide/show"; }
 private:
   QTableWidget * m_filesTable;
+  void keyPressEvent(QKeyEvent * /*event*/);
 
 private slots:
 };

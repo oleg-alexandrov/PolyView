@@ -52,7 +52,7 @@ int main(int argc, char** argv){
   // m.setCaption(progName.c_str());
   m.show();
   
-  QObject::connect( qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit()) );
+  QObject::connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit()));
   
   return app.exec();
 }

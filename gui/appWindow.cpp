@@ -30,7 +30,10 @@
 #include <QMenu>
 #include <QEvent>
 #include <QTextEdit>
+#include <QTableWidget>
+#include <QSplitter>
 #include <QUrl>
+#include <QStyledItemDelegate>
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
@@ -42,20 +45,53 @@
 
 using namespace std;
 
+const double g_chooseFilesWidRatio = 0.3;
+
 cmdLine::cmdLine(QWidget* parent): QLineEdit(parent){}
 cmdLine::~cmdLine(){}
 
+// Need this class to manage what happens when keys are pressed while
+// the chooseFilesDlg table is in focus. Do not let it accept key
+// strokes, which just end up editing the table entries, but rather
+// pass them to the main program event filter.
+class chooseFilesFilterDelegate: public QStyledItemDelegate {
+public:
+  chooseFilesFilterDelegate(QObject *filter, QObject *parent = 0):
+    QStyledItemDelegate(parent), filter(filter){}
+
+  virtual QWidget *createEditor(QWidget *parent,
+                                const QStyleOptionViewItem &option,
+                                const QModelIndex &index) const {
+    QWidget *editor = QStyledItemDelegate::createEditor(parent, option, index);
+    editor->installEventFilter(filter);
+    return editor;
+  }
+  
+private:
+  QObject *filter;
+};
+
 appWindow::appWindow(QWidget* parent, std::string progName,
                      const cmdLineOptions & options,
-                     int windowWidX, int windowWidY
-                     ): QMainWindow(parent, Qt::Window), m_poly(NULL){
-
+                     int windowWidX, int windowWidY):
+  QMainWindow(parent, Qt::Window), m_chooseFiles(NULL), m_poly(NULL), m_cmdLine(NULL){
+  
   installEventFilter(this);
 
   m_progName = progName;
   resize(windowWidX, windowWidY);
 
-  createMenusAndMainWidget(options);
+  // Preferences per polygon file. The element in the vector
+  // m_polyOptionsVec below is not associated with any polygon
+  // file. Set it apart, it will be used for new polygons.
+  m_polyOptionsVec = options.polyOptionsVec;
+  assert(m_polyOptionsVec.size() >= 1);
+  m_prefs = m_polyOptionsVec.back();
+  m_polyOptionsVec.pop_back();
+  m_prefs.plotAsPoints = false; // most likely the user wants to see edges not points
+
+  // Must happen after m_polyOptionsVec and m_prefs are set
+  createMenusAndMainWidget();
 
   // Command line
   m_cmdLine = new cmdLine(this);
@@ -162,7 +198,13 @@ void appWindow::shiftDown (){
 
 }
 
-void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
+void appWindow::resizeEvent(QResizeEvent *) {
+  // Adjust the width of the chooseFiles dialog when resizing
+  if (m_chooseFiles)
+    m_chooseFiles->setMaximumSize(int(g_chooseFilesWidRatio * size().width()), size().height());
+}
+
+void appWindow::createMenusAndMainWidget(){
 
   // There is some twisted logic here. First initialize the menus,
   // then create the main widget, then finish creating the menus.
@@ -170,16 +212,49 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   // the main widget is created before the menus then it gets
   // incorrect geometry.
 
-  QMenuBar* menu = menuBar();
-  QMenu* file = new QMenu(QString("File"));
-  menu->addMenu(file);
+  m_chooseFiles = new chooseFilesDlg(this);
+  m_chooseFiles->chooseFiles(m_polyOptionsVec);
 
+  // See note at chooseFilesFilterDelegate
+  m_chooseFiles->getFilesTable()->setItemDelegate(new chooseFilesFilterDelegate(this));
+  m_chooseFiles->getFilesTable()->installEventFilter(this);
+
+  m_chooseFiles->setMaximumSize(int(g_chooseFilesWidRatio * size().width()), size().height());
+  
+  // Set up the dialog for choosing files
+  
   // Central widget
-  m_poly = new polyView (this, opt);
+  m_poly = new polyView(this, m_chooseFiles, m_polyOptionsVec, m_prefs);
   m_poly->setFocusPolicy(Qt::StrongFocus);
   m_poly->setFocus();
-  setCentralWidget(m_poly);
 
+  QWidget * centralWidget = new QWidget(this);
+  setCentralWidget(centralWidget);
+  QSplitter * splitter = new QSplitter(centralWidget);
+  
+  splitter->addWidget(m_chooseFiles);
+
+  QGridLayout *grid = new QGridLayout(centralWidget);
+  
+  QWidget *container = new QWidget(centralWidget);
+  container->setLayout(grid);
+  splitter->addWidget(container);
+
+  // Set new layout
+  QGridLayout *layout = new QGridLayout(centralWidget);
+  layout->addWidget (splitter, 0, 0, 0);
+  centralWidget->setLayout(layout);
+  
+  grid->addWidget(m_poly);
+
+  QObject::connect(m_chooseFiles->getFilesTable(), SIGNAL(cellClicked(int, int)),
+                   m_poly, SLOT(showFilesChosenByUser(/*int, int*/)));
+  
+  // TODO(oalexan1): Make this into a function
+    QMenuBar* menu = menuBar();
+  QMenu* file = new QMenu(QString("File"));
+  menu->addMenu(file);
+  
   file->addAction("Open", m_poly, SLOT(openPoly()), Qt::CTRL+Qt::Key_O);
   file->addAction("Save as a combined file", m_poly, SLOT(saveOnePoly()),
                    Qt::CTRL+Qt::Key_S);
@@ -192,8 +267,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   file->addAction("Exit", this, SLOT(forceQuit()), Qt::Key_Q);
 
   QMenu* view = new QMenu("View", menu );
-  menu->addMenu( view);
-  view->addAction(chooseFilesDlg::selectFilesTag(), m_poly, SLOT(chooseFilesToShow()));
+  menu->addMenu(view);
   view->addAction("Zoom out",             m_poly, SLOT(zoomOut()),      Qt::Key_Minus);
   view->addAction("Zoom in",              m_poly, SLOT(zoomIn()),       Qt::Key_Equal);
   view->addAction("Move left",            m_poly, SLOT(shiftLeft()),    Qt::Key_Left);
@@ -258,13 +332,13 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
                         Qt::CTRL+Qt::Key_X);
 #endif
 
-  QMenu* grid = new QMenu("Grid", menu );
-  menu->addMenu( grid);
-  grid->addAction("Toggle poly grid", m_poly, SLOT(toggleShowGrid()), Qt::Key_G);
-  grid->addAction("Enforce 45x deg angles and snap to grid", m_poly, SLOT(enforce45AndSnapToGrid()));
-  grid->addAction("Set grid size", m_poly, SLOT(setGridSize()));
-  grid->addAction("Set grid linewidth", m_poly, SLOT(setGridWidth()));
-  grid->addAction("Set grid color", m_poly, SLOT(setGridColor()));
+  QMenu* grid_menu = new QMenu("Grid", menu);
+  menu->addMenu(grid_menu);
+  grid_menu->addAction("Toggle poly grid", m_poly, SLOT(toggleShowGrid()), Qt::Key_G);
+  grid_menu->addAction("Enforce 45x deg angles and snap to grid", m_poly, SLOT(enforce45AndSnapToGrid()));
+  grid_menu->addAction("Set grid size", m_poly, SLOT(setGridSize()));
+  grid_menu->addAction("Set grid linewidth", m_poly, SLOT(setGridWidth()));
+  grid_menu->addAction("Set grid color", m_poly, SLOT(setGridColor()));
 
   QMenu* diff = new QMenu("Diff", menu );
   menu->addMenu( diff);
@@ -279,7 +353,7 @@ void appWindow::createMenusAndMainWidget(const cmdLineOptions & opt){
   options->addAction("Set background color", m_poly, SLOT(setBgColor()));
 
   QMenu* help = new QMenu("Help", menu );
-  menu->addMenu( help);
+  menu->addMenu(help);
   
   // Hide the doc as it is hard to regenerate the html each
   // time. GitHub has the latest documentation.
