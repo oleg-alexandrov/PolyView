@@ -28,6 +28,11 @@
 #include <algorithm>
 #include <gui/utils.h>
 
+// For Visual studio
+#ifdef _MSC_VER 
+#define strcasecmp _stricmp
+#endif
+
 using namespace std;
 
 void utils::printUsage(std::string progName){
