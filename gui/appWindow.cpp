@@ -45,8 +45,6 @@
 
 using namespace std;
 
-const double g_chooseFilesWidRatio = 0.3;
-
 cmdLine::cmdLine(QWidget* parent): QLineEdit(parent){}
 cmdLine::~cmdLine(){}
 
@@ -201,7 +199,7 @@ void appWindow::shiftDown (){
 void appWindow::resizeEvent(QResizeEvent *) {
   // Adjust the width of the chooseFiles dialog when resizing
   if (m_chooseFiles)
-    m_chooseFiles->setMaximumSize(int(g_chooseFilesWidRatio * size().width()), size().height());
+    m_chooseFiles->setMaximumSize(int(m_prefs.panelRatio * size().width()), size().height());
 }
 
 void appWindow::createMenusAndMainWidget(){
@@ -219,7 +217,7 @@ void appWindow::createMenusAndMainWidget(){
   m_chooseFiles->getFilesTable()->setItemDelegate(new chooseFilesFilterDelegate(this));
   m_chooseFiles->getFilesTable()->installEventFilter(this);
 
-  m_chooseFiles->setMaximumSize(int(g_chooseFilesWidRatio * size().width()), size().height());
+  m_chooseFiles->setMaximumSize(int(m_prefs.panelRatio * size().width()), size().height());
   
   // Set up the dialog for choosing files
   

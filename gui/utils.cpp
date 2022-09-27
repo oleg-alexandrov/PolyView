@@ -32,7 +32,7 @@ using namespace std;
 
 void utils::printUsage(std::string progName){
   cout << "Usage: " << progName << " "
-       << "[ -geo[metry] 1000x800 ] [-bg | -backgroundColor black ] "
+       << "[ -geo[metry] 1200x800 ] [-bg | -backgroundColor black ] "
        << "[ -c | -color yellow ] "
        << "[ -nc | -noColorOverride ] "
        << "[ -fs | -fontSize 10 ] "
@@ -40,19 +40,18 @@ void utils::printUsage(std::string progName){
        << "[ -p | -points ] [ -cp | -closedPoly ] [ -ncp | -nonClosedPoly ] "
        << "[ -f | -filledPoly ] [ -nf | -nonFilledPoly ] [ -cw | clockwisePoly ]"
        << "[ -grid on | off ] [ -gridSize 10 ] [ -gridWidth 1 ] "
-       << "[ -gridColor green ] "
+       << "[ -gridColor green ] [ -panelRatio 0.2] "
        << "file_1.xg ... file_N.xg " << endl;
 }
 
 void utils::extractWindowDims(// inputs
                               int numArgs, char ** args,
                               // outputs
-                              int & windowWidX, int & windowWidY
-                              ){
+                              int & windowWidX, int & windowWidY){
 
   // Parse the command line arguments '-geo[metry] 500x600'
 
-  windowWidX = 900; windowWidY = 700; // defaults
+  windowWidX = 1200; windowWidY = 800; // defaults
 
   for (int s = 1; s < numArgs; s++){
 
@@ -109,53 +108,53 @@ void utils::parseCmdOptions(//inputs
       transform(currArg, currArg + strlen(currArg), currArg, ::tolower);
     }
 
-    if (strcmp( currArg, "-h"     ) == 0 || strcmp( currArg, "--h"    ) == 0 ||
-        strcmp( currArg, "-help"  ) == 0 || strcmp( currArg, "--help" ) == 0 ||
-        strcmp( currArg, "-?"     ) == 0 || strcmp( currArg, "--?"    ) == 0 ){
+    if (strcasecmp( currArg, "-h"     ) == 0 || strcasecmp( currArg, "--h"    ) == 0 ||
+        strcasecmp( currArg, "-help"  ) == 0 || strcasecmp( currArg, "--help" ) == 0 ||
+        strcasecmp( currArg, "-?"     ) == 0 || strcasecmp( currArg, "--?"    ) == 0 ){
       printUsage(exeName);
       exit(0);
     }
 
-    if ( strcmp(currArg, "-p") == 0 || strcmp(currArg, "-points") == 0 ){
+    if ( strcasecmp(currArg, "-p") == 0 || strcasecmp(currArg, "-points") == 0 ){
       opt.plotAsPoints = !opt.plotAsPoints;
       continue;
     }
 
-    if ( strcmp(currArg, "-f") == 0 || strcmp(currArg, "-filledpoly") == 0 ){
+    if ( strcasecmp(currArg, "-f") == 0 || strcasecmp(currArg, "-filledpoly") == 0 ){
       opt.isPolyFilled = true;
       continue;
     }
 
-    if ( strcmp(currArg, "-nf") == 0 || strcmp(currArg, "-nonfilledpoly") == 0 ){
+    if ( strcasecmp(currArg, "-nf") == 0 || strcasecmp(currArg, "-nonfilledpoly") == 0 ){
       opt.isPolyFilled = false;
       continue;
     }
 
-    if ( strcmp(currArg, "-cw") == 0 || strcmp(currArg, "-clockwisepoly") == 0 ){
+    if ( strcasecmp(currArg, "-cw") == 0 || strcasecmp(currArg, "-clockwisepoly") == 0 ){
       opt.clockwisePoly = true;
       continue;
     }
 
-    if ( strcmp(currArg, "-cp") == 0 || strcmp(currArg, "-closedpoly") == 0 ){
+    if ( strcasecmp(currArg, "-cp") == 0 || strcasecmp(currArg, "-closedpoly") == 0 ){
       // Plot as closed polygons
       opt.isPolyClosed = forceClosedPoly;
       continue;
     }
 
-    if ( strcmp(currArg, "-ncp") == 0 || strcmp(currArg, "-nonclosedpoly") == 0 ){
+    if ( strcasecmp(currArg, "-ncp") == 0 || strcasecmp(currArg, "-nonclosedpoly") == 0 ){
       // Plot as polygonal lines
       opt.isPolyClosed = forceNonClosedPoly;
       continue;
     }
 
-    if ((strcmp(currArg, "-bg") == 0 || strcmp(currArg, "-backgroundcolor") == 0) &&
+    if ((strcasecmp(currArg, "-bg") == 0 || strcasecmp(currArg, "-backgroundcolor") == 0) &&
         argIter < argc - 1) {
       opt.bgColor = argv[argIter + 1];
       argIter++;
       continue;
     }
 
-    if ((strcmp(currArg, "-fs") == 0 || strcmp(currArg, "-fontsize") == 0 ) &&
+    if ((strcasecmp(currArg, "-fs") == 0 || strcasecmp(currArg, "-fontsize") == 0 ) &&
         argIter < argc - 1) {
       int fs = (int)round(atof(argv[argIter + 1]));
       if (fs > 0) opt.fontSize = fs;
@@ -163,7 +162,7 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if ((strcmp(currArg, "-lw") == 0 || strcmp(currArg, "-linewidth") == 0) &&
+    if ((strcasecmp(currArg, "-lw") == 0 || strcasecmp(currArg, "-linewidth") == 0) &&
          argIter < argc - 1) {
       int lw = (int)round(atof(argv[argIter + 1]));
       if (lw > 0) opt.lineWidth = lw;
@@ -171,14 +170,14 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if (strcmp(currArg, "-gridsize") == 0 && argIter < argc - 1){
+    if (strcasecmp(currArg, "-gridsize") == 0 && argIter < argc - 1){
       double gs = atof(argv[argIter + 1]);
       if (gs > 0) opt.gridSize = gs;
       argIter++;
       continue;
     }
 
-    if ( strcmp(currArg, "-gridwidth") == 0  &&
+    if ( strcasecmp(currArg, "-gridwidth") == 0  &&
          argIter < argc - 1
          ){
       int gw = (int)round(atof(argv[argIter + 1]));
@@ -187,7 +186,7 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if ( strcmp(currArg, "-gridcolor") == 0  &&
+    if ( strcasecmp(currArg, "-gridcolor") == 0  &&
          argIter < argc - 1
          ){
       opt.gridColor = argv[argIter + 1];
@@ -195,17 +194,17 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if ( strcmp(currArg, "-grid") == 0  &&
+    if ( strcasecmp(currArg, "-grid") == 0  &&
          argIter < argc - 1             &&
-         strcmp(argv[argIter + 1], "on") == 0
+         strcasecmp(argv[argIter + 1], "on") == 0
          ){
       opt.isGridOn = true;
       argIter++;
       continue;
     }
 
-    if ( (strcmp(currArg, "-c"    ) == 0 ||
-          strcmp(currArg, "-color") == 0 )
+    if ( (strcasecmp(currArg, "-c"    ) == 0 ||
+          strcasecmp(currArg, "-color") == 0 )
          && argIter < argc - 1){
       opt.useCmdLineColor = true;
       opt.cmdLineColor    = argv[argIter + 1];
@@ -213,8 +212,15 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if ((strcmp(currArg, "-nc") == 0 ||
-         strcmp(currArg, "-nocoloroverride") == 0)){
+    if ((strcasecmp(currArg, "-panelRatio") == 0) &&
+        argIter < argc - 1) {
+      opt.panelRatio = std::max(std::min(atof(argv[argIter + 1]), 0.9), 0.0);
+      argIter++;
+      continue;
+    }
+    
+    if ((strcasecmp(currArg, "-nc") == 0 ||
+         strcasecmp(currArg, "-nocoloroverride") == 0)){
       opt.useCmdLineColor = false;
       continue;
     }

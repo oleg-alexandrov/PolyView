@@ -35,7 +35,7 @@ directory for installation. If prompted to set up your shell and
 restart it, do so.
 
 On Windows, run the installer by double-clicking on it. When finished,
-launch the "Anaconda Powershell Prompt" from the "Start" menu.
+launch the "Anaconda PowerShell Prompt" from the "Start" menu.
 
 Install PolyView on all platforms as:
 
@@ -57,7 +57,9 @@ and then run it from that shell as:
 
     C:\Users\UserName\Miniconda3\envs\polyview\bin\polyview.exe
 
-See instructions further down for how to compile it.
+Replace ``UserName`` and the drive letter with specific values for your machine. 
+
+See instructions further down for how to compile PolyView.
 
 # License
 
@@ -246,13 +248,14 @@ polygons are displayed.
 * -gridSize `integer`	Grid size
 * -gridWidth `integer`	Grid width in pixels
 * -gridColor `color`	Grid color
+* -panelRatio `double`  Ratio of width of the left panel showing the files to window width. If set to zero, it will hide that panel (default = 0.2).
 
 # Compiling
 
 PolyView is written in C++. It was successfully compiled on Linux with
-g++, on OSX with clang, and on Windows with MinGW. It was written with
-portability in mind and it should be possible to build it on any
-platform and compiler.
+g++, on OSX with clang, and on Windows with Visual Studio. It was
+written with portability in mind and it should be possible to build it
+on any platform and compiler.
 
 To compile PolyView on Linux or OSX with a local compiler, run:
 

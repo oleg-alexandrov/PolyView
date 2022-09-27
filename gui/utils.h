@@ -49,6 +49,7 @@ struct polyOptions{
   double          gridSize;
   int             gridWidth;
   bool            readPolyFromDisk;
+  double          panelRatio;
   std::string     bgColor;
   std::string     fgColor;
   std::string     cmdLineColor;
@@ -67,6 +68,7 @@ struct polyOptions{
     gridWidth        = 1;
     gridSize         = -1;
     readPolyFromDisk = true;
+    panelRatio       = 0.2;
     bgColor          = "black";
     fgColor          = "white";
     cmdLineColor     = "green";
