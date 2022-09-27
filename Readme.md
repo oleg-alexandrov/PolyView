@@ -178,7 +178,7 @@ provides a basic level of scripting and reproducibility.
 
 #### Transform menu
 
-* Translate/rotate/scale selected polygons
+* Translate/rotate/scale/transform selected polygons
 * Reverse orientation of selected polygons
  
 #### Selection menu
@@ -252,7 +252,7 @@ polygons are displayed.
 * -gridSize `integer`	Grid size
 * -gridWidth `integer`	Grid width in pixels
 * -gridColor `color`	Grid color
-* -panelRatio `double`  Ratio of width of the left panel showing the files to window width. If set to zero, it will hide that panel (default = 0.2).
+* -panelRatio `double`  Ratio of width of the left panel showing the file names to window width. If set to zero, it will hide that panel (default = 0.2).
 
 # Compiling
 
