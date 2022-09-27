@@ -1,4 +1,6 @@
-![PolyView logo](images/polyview_logo.png)
+<p align="center" width="100%">
+    <img src="images/polyview_logo.png"> 
+</p>
 
 PolyView is a free and open source cross-platform program designed to
 quickly load, view, and edit multiple files containing polygons. It
@@ -7,9 +9,8 @@ text labels, print the coordinates of vertices and measure distances,
 change the order in which polygons are displayed, choose which
 polygons to show, etc.
 
-PolyView can add, delete, move, rotate, and scale polygons, add,
-delete, and move vertices and edges, add and delete text labels, and
-cut polygons to a box.
+PolyView can add, delete, move, and transform polygons, vertices,
+edges, and text labels. It can also cut polygons to a box.
 
 # Installation
 
@@ -261,7 +262,7 @@ g++, on OSX with clang, and on Windows with Visual Studio. It was
 written with portability in mind and it should be possible to build it
 on any platform and compiler.
 
-To compile PolyView on Linux or OSX with a local compiler, run:
+To compile PolyView, run:
 
     qmake polyview.pro
     make
