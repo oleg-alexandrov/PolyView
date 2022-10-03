@@ -299,6 +299,8 @@ void appWindow::createMenusAndMainWidget(){
   selection->addAction("Create highlight", m_poly, SLOT(createHlt()));
   selection->addAction("Cut polygons to highlight",
                         m_poly, SLOT(cutToHlt()), Qt::Key_C);
+  selection->addAction("Copy selected polygons",
+                        m_poly, SLOT(copySelectedPolys()));
   selection->addAction("Delete selected polygons",
                         m_poly, SLOT(deleteSelectedPolys()), Qt::CTRL+Qt::Key_D);
   selection->addAction("Paste selected polygons",

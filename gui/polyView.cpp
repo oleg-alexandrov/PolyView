@@ -763,7 +763,10 @@ void polyView::mousePressEvent(QMouseEvent *E) {
                             m_vertIndexInCurrPoly,
                             min_x, min_y, min_dist
                             );
-    }else if (m_movePolys->isChecked() && getNumElements(m_selectedPolyIndices) > 0) {
+    }else if (m_movePolys->isChecked() &&
+              (getNumElements(m_selectedPolyIndices) > 0 ||
+               getNumElements(m_selectedAnnoIndices) > 0 ||
+               m_highlights.size() > 0)) {
       m_highlights.clear(); // No need for these anymore
       m_polyVecBeforeShift = m_polyVec;
       m_movingPolysInHlts = true;
@@ -1277,8 +1280,7 @@ void polyView::reverseSelectedPolys() {
 void polyView::pasteSelectedPolys() {
 
   extractMarkedPolys(m_polyVec, m_selectedPolyIndices,  // Inputs
-                     m_copiedPolyVec                    // Outputs
-                     );
+                     m_copiedPolyVec);                  // Outputs
 
   double xll, yll, xur, yur;
   bdBox(m_copiedPolyVec,   // Inputs
@@ -1294,10 +1296,10 @@ void polyView::pasteSelectedPolys() {
                                            m_selectedPolyIndices[s],
                                            shift_x, shift_y);
   }
-  m_highlights.clear();
-  markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
 
+  // Remove the highlights, but keep the polygons selected
+  m_highlights.clear();
+  
   saveDataForUndo(false);
   refreshPixmap();
 
@@ -2698,7 +2700,7 @@ void polyView::createHlt() {
 }
 
 void polyView::moveSelectedPolys() {
-  popUp("To move the selected polygons use Shift-Mouse.");
+  popUp("To move the selected polygons, enable that with right-click, then use Shift-Mouse.");
   return;
 }
 
@@ -3374,6 +3376,10 @@ double polyView::calcGrid(double widx, double widy) {
   grid = v*round(grid/v);
 
   return grid;
+}
+
+void polyView::copySelectedPolys() {
+  popUp("Polygons were copied automatically when they were selected using highlights.");
 }
 
 void polyView::deleteSelectedPolys() {
