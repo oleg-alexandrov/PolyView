@@ -606,7 +606,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
       if (plotFilled && isPolyClosed[pIter]) {
         if (signedArea >= 0.0) paint->setBrush(color);
-        else                   paint->setBrush(pal.color(QPalette::Background));
+        else                   paint->setBrush(QColor(m_prefs.bgColor.c_str()));
         paint->setPen(color);
       }else {
         paint->setBrush(Qt::NoBrush);
