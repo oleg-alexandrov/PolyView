@@ -559,18 +559,8 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
     if (pIter > 0) start += numVerts[pIter - 1];
 
-    // Change the poly file color if it is the background color or invalid
     QColor color = QColor(colors[pIter].c_str());
     
-    QPalette pal(palette());
-    if (color == pal.color(QPalette::Background) || color == QColor::Invalid) {
-      if (pal.color(QPalette::Background) != QColor("white")) {
-        color = QColor("white");
-      }else{
-        color = QColor("black");
-      }
-    }
-
     int pSize = numVerts[pIter];
 
     // Determine the orientation of polygons
