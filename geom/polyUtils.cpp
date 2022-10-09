@@ -37,6 +37,7 @@
 #include <geomUtils.h>
 #include <kdTree.h>
 #include <dTree.h>
+//#include <chrono>
 
 // If all else fails
 #ifndef M_PI
@@ -45,6 +46,7 @@
 
 using namespace std;
 using namespace utils;
+//using namespace std::chrono;
 
 void utils::findClosestAnnotation(// inputs
                                   double x0, double y0,
@@ -471,6 +473,7 @@ void utils::markPolysInHlts(// Inputs
 
   markedPolyIndices.clear();
   markedAnnoIndices.clear();
+  //auto start = high_resolution_clock::now();
   
   for (int s = 0; s < (int)highlights.size(); s++) {
 
@@ -496,6 +499,9 @@ void utils::markPolysInHlts(// Inputs
 
     
   }
+  //auto stop = high_resolution_clock::now();
+  //auto duration = duration_cast<microseconds>(stop - start);
+  //cout <<"TIME: "<< duration.count() << endl;
 
   return;
 }
