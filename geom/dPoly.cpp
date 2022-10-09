@@ -1528,17 +1528,33 @@ void dPoly::markPolysIntersectingBox(// Inputs
 
   mark.clear();
 
+
+  dRect box(xll, yll, xur, yur);
+  int beg_inex = 0;
+
   dPoly onePoly, clippedPoly;
   for (int polyIndex = 0; polyIndex < m_numPolys; polyIndex++) {
-    extractOnePoly(polyIndex, // input
-                   onePoly);  // output
-    
-    // A polygon intersects a rectangle if cut to the rectangle
-    // it returns a non-empty polygon
-    onePoly.clipPoly(xll, yll, xur, yur, // inputs
-                     clippedPoly);       // outputs
-    if (clippedPoly.get_totalNumVerts() == 0) continue;
-    mark[polyIndex] = 1;
+
+	  if (m_numVerts[polyIndex] == 1){
+
+		  if (box.isInSide(m_xv[beg_inex], m_yv[beg_inex])){
+			  mark[polyIndex] = 1;
+		  }
+	  } else {
+		  extractOnePoly(polyIndex, // input
+				  onePoly);  // output
+
+		  // A polygon intersects a rectangle if cut to the rectangle
+		  // it returns a non-empty polygon
+		  onePoly.clipPoly(xll, yll, xur, yur, // inputs
+				  clippedPoly);       // outputs
+		  if (clippedPoly.get_totalNumVerts() != 0){
+			  mark[polyIndex] = 1;
+		  }
+	  }
+
+	  beg_inex += m_numVerts[polyIndex];
+
   }
 
   return;
