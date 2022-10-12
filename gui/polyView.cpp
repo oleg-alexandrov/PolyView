@@ -505,7 +505,11 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     currPoly.compVertIndexAnno();
   } else if (m_showVertOrPolyIndexAnno == 2) {
     currPoly.compPolyIndexAnno();
-  }else if (m_showLayerAnno) {
+
+  } else if (m_showVertOrPolyIndexAnno == 3) {
+      currPoly.compVertFullIndexAnno();
+
+    } else if (m_showLayerAnno) {
     currPoly.compLayerAnno();
   }
   
@@ -543,7 +547,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   vector<anno> annotations;
   annotations.clear();
   if (showAnno) {
-    if (m_showVertOrPolyIndexAnno == 1) {
+    if (m_showVertOrPolyIndexAnno == 1 || m_showVertOrPolyIndexAnno == 3) {
       clippedPoly.get_vertIndexAnno(annotations);
     } else if (m_showVertOrPolyIndexAnno == 2) {
       clippedPoly.get_polyIndexAnno(annotations);
@@ -2096,7 +2100,7 @@ void polyView::toggleAnno() {
 
 void polyView::toggleVertOrPolyIndexAnno() {
   m_showVertOrPolyIndexAnno++;
-  m_showVertOrPolyIndexAnno = m_showVertOrPolyIndexAnno % 3; // Wrap around
+  m_showVertOrPolyIndexAnno = m_showVertOrPolyIndexAnno % 4; // Wrap around
   m_showAnnotations         = false;
   m_showLayerAnno           = false;
   refreshPixmap();
