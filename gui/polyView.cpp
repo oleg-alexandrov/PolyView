@@ -2975,12 +2975,11 @@ void polyView::openPoly() {
 }
 
 bool polyView::readOnePoly(// inputs
-                           std::string   & filename,
-                           bool            plotPointsOnly,
-                           closedPolyInfo  isPolyClosed,
+                           std::string const& filename,
+                           bool               plotPointsOnly,
+                           closedPolyInfo     isPolyClosed,
                            // output
-                           dPoly & poly
-                           ) {
+                           dPoly            & poly) {
 
   poly.reset();
 

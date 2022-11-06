@@ -27,6 +27,8 @@
 #include <baseUtils.h>
 #include <geomUtils.h>
 
+namespace utils {
+  
 enum AnnoType {
   fileAnno = 0, vertAnno, polyAnno, layerAnno, lastAnno
 };
@@ -84,26 +86,32 @@ public:
   void shift(double shift_x, double shift_y);
   void rotate(double angle);
   void scale(double scale);
-  void transformMarkedPolys(std::map<int, int> const& mark, const utils::linTrans & T);
-  void transformMarkedAnnos(std::map<int, int> const& mark, const utils::linTrans & T);
+  void transformMarkedPolys(std::map<int, int> const& mark, const linTrans & T);
+  void transformMarkedAnnos(std::map<int, int> const& mark, const linTrans & T);
 
   void transformMarkedPolysAroundPt(std::map<int, int> const& mark,
-                                    const utils::matrix2 & M, dPoint P);
+                                    const matrix2 & M, dPoint P);
   void transformMarkedAnnosAroundPt(std::map<int, int> const& mark,
-                                    const utils::matrix2 & M, dPoint P);
+                                    const matrix2 & M, dPoint P);
 
   void applyTransform(double a11, double a12, double a21, double a22,
                       double sx, double sy,
-                      utils::linTrans & T); // save the transform here
+                      linTrans & T); // save the transform here
   
   void applyTransformAroundBdBoxCenter(double a11, double a12,
                                        double a21, double a22,
-                                       utils::linTrans & T
+                                       linTrans & T
                                        );
 
-  const int    * get_numVerts         () const { return utils::vecPtr(m_numVerts); }
-  const double * get_xv               () const { return utils::vecPtr(m_xv);       }
-  const double * get_yv               () const { return utils::vecPtr(m_yv);       }
+  const int    * get_numVerts         () const { return vecPtr(m_numVerts); }
+  const double * get_xv               () const { return vecPtr(m_xv);       }
+  const double * get_yv               () const { return vecPtr(m_yv);       }
+
+  // Non-const versions of the above
+  int    * get_numVerts         () { return vecPtr(m_numVerts); }
+  double * get_xv               () { return vecPtr(m_xv);       }
+  double * get_yv               () { return vecPtr(m_yv);       }
+  
   int get_numPolys                    () const { return m_numPolys;                }
   int get_totalNumVerts               () const { return m_totalNumVerts;           }
   std::vector<char> get_isPolyClosed  () const { return m_isPolyClosed;            }
@@ -217,6 +225,9 @@ public:
   void extractMarkedPolys(std::map<int, int> const& mark, // input
                           dPoly & polys) const;           // output
   
+  // Reverse orientation of all polygons
+  void reverse();
+  
   void reverseOnePoly(int polyIndex);
   void sortFromLargestToSmallest(bool counter_cc);
 
@@ -250,4 +261,5 @@ private:
   std::vector<anno>        m_layerAnno;     // Anno showing layer number
 };
 
+} // end namespace utils
 #endif

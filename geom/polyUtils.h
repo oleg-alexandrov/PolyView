@@ -34,14 +34,12 @@
 namespace utils{
 
   void findPolyDiff(const dPoly & P, const dPoly & Q, // inputs
-                    std::vector<dPoint> & vP, std::vector<dPoint> & vQ // outputs
-                    );
+                    std::vector<dPoint> & vP, std::vector<dPoint> & vQ); // outputs
+
   void bdBox(const std::vector<dPoly> & polyVec,
              // outputs
              double & xll, double & yll,
-             double & xur, double & yur
-             );
-
+             double & xur, double & yur);
 
   void findClosestAnnotation(// inputs
                              double x0, double y0,

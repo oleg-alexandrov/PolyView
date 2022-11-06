@@ -196,7 +196,7 @@ private:
                     const std::vector<double> & polyY,
                     QPainter * paint);
   void addPolyVert(int px, int py);
-  void appendToPolyVec(const dPoly & P);
+  void appendToPolyVec(const utils::dPoly & P);
   double pixelToWorldDist(int pd);
   void createHighlightWithPixelInputs(int pxll, int pyll, int pxur, int pyur);
 
@@ -206,15 +206,14 @@ private:
                        int & currX, int  & currY      // in-out
                        );
   bool readOnePoly(// inputs
-                   std::string   & filename,
-                   bool            plotPointsOnly,
-                   closedPolyInfo  isPolyClosed,
+                   std::string const& filename,
+                   bool               plotPointsOnly,
+                   closedPolyInfo     isPolyClosed,
                    // output
-                   dPoly & poly
-                   );
-  bool isClosestGridPtFree(std::vector< std::vector<int> > & Grid,
+                   utils::dPoly     & poly);
+  bool isClosestGridPtFree(std::vector<std::vector<int>> & Grid,
                            int x, int y);
-  void initTextOnScreenGrid(std::vector< std::vector<int> > & Grid);
+  void initTextOnScreenGrid(std::vector<std::vector<int>> & Grid);
   bool isPolyZeroDim(const QPolygon & pa);
   void centerViewAtPoint(double x, double y);
   void drawOneVertex(int x0, int y0, QColor color, int lineWidth,
@@ -227,10 +226,10 @@ private:
                  int lineWidth,
                  int drawVertIndex, // 0 is a good choice here
                  // An empty grid is a good choice if not text is present
-                 std::vector< std::vector<int> > & textOnScreenGrid,
+                 std::vector<std::vector<int>> & textOnScreenGrid,
                  QPainter *paint,
-                 dPoly currPoly // Make a local copy on purpose
-                 );
+                 utils::dPoly currPoly); // Make a local copy on purpose
+
   void resetTransformSettings();
   void pixelToWorldCoords(int px, int py,
                           double & wx, double & wy);
@@ -255,17 +254,17 @@ private:
   double m_screenRatio, m_pixelSize;
 
   // Polygons
-  std::vector<dPoly>       m_polyVec;
+  std::vector<utils::dPoly> m_polyVec;
 
   std::vector<polyOptions> & m_polyOptionsVec; // alias, options for exiting polygons
   polyOptions & m_prefs;                       // alias, options for future polygons
 
   // Used for undo
   int m_posInUndoStack;
-  std::vector< std::vector<dPoly> >       m_polyVecStack;
-  std::vector< std::vector<polyOptions> > m_polyOptionsVecStack;
-  std::vector< std::vector<dPoly> >       m_highlightsStack;
-  std::vector<char>                       m_resetViewStack;
+  std::vector<std::vector<utils::dPoly>> m_polyVecStack;
+  std::vector<std::vector<polyOptions>>  m_polyOptionsVecStack;
+  std::vector<std::vector<utils::dPoly>> m_highlightsStack;
+  std::vector<char>                      m_resetViewStack;
 
   bool m_resetView;
   bool m_prevClickExists;
@@ -284,7 +283,7 @@ private:
   bool m_showAnnotations;
   bool m_showFilledPolys;
 
-  std::vector<dPoly> m_highlights;
+  std::vector<utils::dPoly> m_highlights;
 
   int m_showEdges, m_showPoints, m_showPointsEdges, m_displayMode;
   bool m_changeDisplayOrder, m_showLayerAnno;
@@ -335,7 +334,7 @@ private:
   // For plotting in diff mode
   bool                        m_diffColorsMode;
   bool                        m_polyDiffMode;
-  std::vector<dPoly>          m_polyVecBk;
+  std::vector<utils::dPoly>   m_polyVecBk;
   std::vector<polyOptions>    m_polyOptionsVecBk;
   std::vector<utils::segDist> m_distVec;       // distances b/w polys to diff
   std::vector<double>         m_segX, m_segY;  // segment to plot
@@ -354,11 +353,11 @@ private:
   int    m_polyIndexInCurrPoly;
   int    m_vertIndexInCurrPoly;
   double m_mousePressWorldX, m_mousePressWorldY;
-  dPoly  m_polyBeforeShift;
+  utils::dPoly m_polyBeforeShift;
   std::map<int, std::map<int, int>> m_selectedPolyIndices;
   std::map<int, std::map<int, int>> m_selectedAnnoIndices;
-  std::vector<dPoly> m_polyVecBeforeShift;
-  std::vector<dPoly> m_copiedPolyVec;
+  std::vector<utils::dPoly> m_polyVecBeforeShift;
+  std::vector<utils::dPoly> m_copiedPolyVec;
   bool m_movingPolysInHlts;
 
   // Align mode (align one file with another file via linear transform)

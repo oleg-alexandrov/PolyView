@@ -71,7 +71,9 @@
 //                             double & closestX, double & closestY
 //                             );
 
-class dPoly;
+namespace utils {
+  class dPoly;
+}
 
 template <typename Box>
 inline bool leftLessThan (Box P, Box Q){
@@ -322,14 +324,13 @@ class edgeTree{
 
 public:
 
-  void putPolyEdgesInTree(const dPoly & poly);
+  void putPolyEdgesInTree(const utils::dPoly & poly);
 
   void findPolyEdgesInBox(// inputs
                           double xl, double yl,
                           double xh, double yh,
                           // outputs
-                          std::vector<utils::seg> & edgesInBox
-                          );
+                          std::vector<utils::seg> & edgesInBox);
 
   void findClosestEdgeToPoint(// inputs
                               double x0, double y0,

@@ -42,8 +42,8 @@
 #include <cutPoly.h>
 #include <dPoly.h>
 using namespace std;
-using namespace utils;
 
+namespace utils {
 // A double precision polygon class
 
 void dPoly::reset() {
@@ -424,7 +424,7 @@ void dPoly::scale(double scale) {
   return;
 }
 
-void dPoly::transformMarkedPolys(std::map<int, int> const& mark, const utils::linTrans & T) {
+void dPoly::transformMarkedPolys(std::map<int, int> const& mark, const linTrans & T) {
 
   int start = 0;
   for (int pIter = 0; pIter < m_numPolys; pIter++) {
@@ -446,7 +446,7 @@ void dPoly::transformMarkedPolys(std::map<int, int> const& mark, const utils::li
   return;
 }
 
-void dPoly::transformMarkedAnnos(std::map<int, int> const& mark, const utils::linTrans & T) {
+void dPoly::transformMarkedAnnos(std::map<int, int> const& mark, const linTrans & T) {
   for (size_t it = 0; it < m_annotations.size(); it++) {
 
     if (mark.find(it) == mark.end()) continue;
@@ -459,14 +459,14 @@ void dPoly::transformMarkedAnnos(std::map<int, int> const& mark, const utils::li
   }
 }
 
-void dPoly::transformMarkedPolysAroundPt(std::map<int, int> const& mark, const utils::matrix2 & M,
+void dPoly::transformMarkedPolysAroundPt(std::map<int, int> const& mark, const matrix2 & M,
                                          dPoint P) {
   linTrans T = transAroundPt(M, P);
   transformMarkedPolys(mark, T);
   return;
 }
 
-void dPoly::transformMarkedAnnosAroundPt(std::map<int, int> const& mark, const utils::matrix2 & M,
+void dPoly::transformMarkedAnnosAroundPt(std::map<int, int> const& mark, const matrix2 & M,
                                          dPoint P) {
   linTrans T = transAroundPt(M, P);
   transformMarkedAnnos(mark, T);
@@ -475,7 +475,7 @@ void dPoly::transformMarkedAnnosAroundPt(std::map<int, int> const& mark, const u
 
 void dPoly::applyTransform(double a11, double a12, double a21, double a22,
                            double sx, double sy,
-                           utils::linTrans & T) { // save the transform here
+                           linTrans & T) { // save the transform here
 
   // To do: Need to integrate the several very similar transform functions
 
@@ -508,8 +508,7 @@ void dPoly::applyTransform(double a11, double a12, double a21, double a22,
 
 void dPoly::applyTransformAroundBdBoxCenter(double a11, double a12,
                                             double a21, double a22,
-                                            utils::linTrans & T
-                                            ) {
+                                            linTrans & T) {
 
   if (m_totalNumVerts == 0) return;
 
@@ -754,6 +753,10 @@ void dPoly::findClosestAnnotation(// inputs
 }
 
 
+// Given a point and a set of polygons, find the polygon vertex
+// closest to the given point. Return the closest vertex and the
+// distance to it from the given point. Return DBL_MAX if the
+// polygon is empty.
 void dPoly::findClosestPolyVertex(// inputs
                                   double x0, double y0,
                                   // outputs
@@ -761,12 +764,7 @@ void dPoly::findClosestPolyVertex(// inputs
                                   int & vertIndex,
                                   double & min_x, double & min_y,
                                   double & min_dist
-                                  ) const {
-
-  // Given a point and a set of polygons, find the polygon vertex
-  // closest to the given point. Return the closest vertex and the
-  // distance to it from the given point. Return DBL_MAX if the
-  // polygon is empty.
+                                  ) const{
 
   min_x = x0; min_y = y0; min_dist = DBL_MAX;
   polyIndex = -1; vertIndex = -1;
@@ -792,18 +790,17 @@ void dPoly::findClosestPolyVertex(// inputs
   return;
 }
 
+// Given a point and a set of polygons, find the polygon edge
+// closest to the given point and the location on the edge where the
+// smallest distance is achieved. Return the index of the polygon
+// where the closest distance is achieved, as well as the point at
+// which that distance is achieved and the smallest distance itself.
 void dPoly::findClosestPolyEdge(//inputs
                                  double x0, double y0,
                                  // outputs
                                  int & polyIndex, int & vertIndex,
                                  double & minX, double & minY, double & minDist
-                                 ) const {
-
-  // Given a point and a set of polygons, find the polygon edge
-  // closest to the given point and the location on the edge where the
-  // smallest distance is achieved. Return the index of the polygon
-  // where the closest distance is achieved, as well as the point at
-  // which that distance is achieved and the smallest distance itself.
+                                 ) const{
 
   polyIndex = -1;
   vertIndex = -1;
@@ -1053,18 +1050,30 @@ void dPoly::extractMarkedPolys(std::map<int, int> const& mark, // input
   return;
 }
 
+// Reverse orientation of all polygons
+void dPoly::reverse(){
 
-void dPoly::reverseOnePoly(int polyIndex) {
+  int start = 0;
+  for (int pIter = 0; pIter < m_numPolys; pIter++){
+    if (pIter > 0) start += m_numVerts[pIter - 1];
+    std::reverse(vecPtr(m_xv) + start, vecPtr(m_xv) + start + m_numVerts[pIter]);
+    std::reverse(vecPtr(m_yv) + start, vecPtr(m_yv) + start + m_numVerts[pIter]);
+  }
+  
+  return;
+}
+  
+void dPoly::reverseOnePoly(int polyIndex){
 
   assert(0 <= polyIndex && polyIndex < m_numPolys);
 
   int start = 0;
-  for (int pIter = 0; pIter < polyIndex; pIter++) {
+  for (int pIter = 0; pIter < polyIndex; pIter++){
     start += m_numVerts[pIter];
   }
 
-  reverse(vecPtr(m_xv) + start, vecPtr(m_xv) + start + m_numVerts[polyIndex]);
-  reverse(vecPtr(m_yv) + start, vecPtr(m_yv) + start + m_numVerts[polyIndex]);
+  std::reverse(vecPtr(m_xv) + start, vecPtr(m_xv) + start + m_numVerts[polyIndex]);
+  std::reverse(vecPtr(m_yv) + start, vecPtr(m_yv) + start + m_numVerts[polyIndex]);
 
   return;
 }
@@ -1367,7 +1376,7 @@ void dPoly::writePoly(std::string filename, std::string defaultColor) {
 
     string layer = "";
     if (pIter < (int)m_layers.size()) layer = m_layers[pIter];
-    if (layer != "") layer = " ; " + layer;
+    if (!layer.empty()) layer = " ; " + layer;
 
     bool isPolyClosed = true;
     if ( pIter < (int)m_colors.size() ) isPolyClosed = m_isPolyClosed[pIter];
@@ -1420,8 +1429,7 @@ bool dPoly::getColorInCntFile(const std::string & line, std::string & color) {
 
 bool dPoly::read_pol_or_cnt_format(std::string filename,
                                    std::string type,
-                                   bool isPointCloud
-                                   ) {
+                                   bool isPointCloud){
 
   // Read in two very simple and related polygon formats, named pol and cnt.
 
@@ -1729,3 +1737,5 @@ void dPoly::appendAndShiftMarkedPolys(// Inputs
 
   return;
 }
+
+} // end namespace utils
