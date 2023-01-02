@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <geom/polyUtils.h>
+#include <QImage>
 
 enum closedPolyInfo{
   // If an array of points as read from file has the first vertex equal to the last
@@ -84,6 +85,15 @@ struct cmdLineOptions{
 
 namespace utils{
 
+  // An image buffer and its world position. The vector 'pos'
+  // has world coordinates of the center of the image lower-left
+  // pixel, and the vector from the lower-left image pixel to the next
+  // pixel along the 45 degree diagonal, so that pixel's dimensions.
+  struct PositionedImage {
+    QImage qimg;
+    std::vector<double> pos;
+  };
+  
   std::string getDocText();
 
   void extractWindowDims(// inputs
@@ -107,13 +117,31 @@ namespace utils{
 
   // Remove everything after the last dot and the dot itself
   std::string removeExtension(std::string filename);
-  
+
+  bool isImage(std::string const& filename);
+
   std::string replaceAll(std::string result,
                          const std::string & replaceWhat,
                          const std::string & replaceWithWhat);
 
   // Read a file with four numbers determining how the image will be plotted.
   bool readImagePosition(std::string const& filename, std::vector<double> & pos);
+
+  // Convert from world coordinates to this image's pixel coordinates.
+  void worldToImage(double wx, double wy, PositionedImage const& img, // inputs
+                    double & ix, double & iy); // outputs
+
+  // The inverse of worldToImage()
+  void imageToWorld(double ix, double iy, PositionedImage const& img,
+                    double & wx, double & wy);  // outputs
+
+  // Find the box containing all polygons and images
+  void setUpViewBox(// inputs
+                    const std::vector<dPoly> & polyVec,
+                    // outputs
+                    double & xll,  double & yll,
+                    double & widx, double & widy);
+
   
 }
 

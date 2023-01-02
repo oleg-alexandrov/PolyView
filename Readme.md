@@ -12,6 +12,12 @@ polygons to show, etc.
 PolyView can add, delete, move, and transform polygons, vertices,
 edges, and text labels. It can also cut polygons to a box.
 
+This program can overlay images and polygons, if each image has a
+plain-text metadata file describing how to place the image relative to
+the polygons.
+
+These features are documented in detail further down this document.
+
 # Installation
 
 This software is available for Linux, OSX, and Microsoft Windows. It
@@ -86,7 +92,7 @@ be improved in a collaborative manner.
 
 ## PolyView sample screenshot
 
-![PolyView sceenshot](images/polyview_screenshot.png)
+![PolyView screenshot](images/polyview_screenshot.png)
 
 ## File format
 
@@ -121,6 +127,21 @@ polygons, when the last vertex need not equal the first one. The last
 line above shows how to place a text label, with its coordinates and
 text.
 
+## Overlaying images
+
+PolyView can overlay images and polygons. The following image types
+are supported: JPG, PNG, GIF, BMP, and XPM.
+
+For each image, for example, named ``image.jpg``, there must
+exist an ``image.txt`` metadata file having four numbers, which are the
+coordinates of the center of the lower-left image pixel and
+pixel's width and height, in the coordinate system of the
+polygons. For example, if desired to place an image so that its
+lower-left corner is at coordinates (10, 20), and each pixel is 3
+units long and wide in polygon coordinates, then this file must have
+the entries: 10 20 3 3.
+
+This allows each image to be placed and scaled independently.
 
 ## Functionality
 

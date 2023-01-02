@@ -232,7 +232,6 @@ void utils::parseCmdOptions(//inputs
     // Other command line options are ignored
     if (currArg[0] == '-') continue;
 
-    std::cout << "--reading " << currArg << std::endl;
     opt.polyFileName = currArg;
 
     options.polyOptionsVec.push_back(opt);
@@ -288,7 +287,7 @@ std::string utils::getFilenameExtension(std::string filename){
   return ext;
 }
 
-  // Remove everything after the last dot and the dot itself
+// Remove everything after the last dot and the dot itself
 std::string utils::removeExtension(std::string filename){
 
   std::string ext;
@@ -299,6 +298,14 @@ std::string utils::removeExtension(std::string filename){
     return filename;
 
   return filename.substr(0, idx);
+}
+
+bool utils::isImage(std::string const& filename) {
+  string type = utils::getFilenameExtension(filename);
+
+  return (type == "jpg" || type == "jpeg" || type == "png" || type == "tif" || type == "gif" ||
+          type == "bmp" || type == "xpm");
+
 }
 
 std::string utils::replaceAll(std::string result,
@@ -317,7 +324,7 @@ bool utils::readImagePosition(std::string const& filename, std::vector<double> &
 
   std::ifstream fh(filename.c_str());
   if (!fh) {
-    cerr << "Error: Could not open " << filename << endl;
+    cerr << "Error: Could not open metadata file: " << filename << endl;
     return false;
   }
 
@@ -331,7 +338,7 @@ bool utils::readImagePosition(std::string const& filename, std::vector<double> &
   }
 
   if (pos.size() < 4) {
-    std::cerr << "Could not read four values from  file " << filename << ".\n";
+    std::cerr << "Could not read four values from metadata file " << filename << ".\n";
     return false;
   }
 
@@ -341,4 +348,62 @@ bool utils::readImagePosition(std::string const& filename, std::vector<double> &
   }
   
   return true;
+}
+
+// Convert from world coordinates to this image's pixel coordinates.
+void utils::worldToImage(double wx, double wy, utils::PositionedImage const& img, // inputs
+                  double & ix, double & iy) { // outputs
+   ix = (wx - img.pos[0]) / img.pos[2];
+   iy = (wy - img.pos[1]) / img.pos[3];
+
+   // Flip in y
+   iy = img.qimg.height() - 1 - iy;
+}
+
+// The inverse of worldToImage()
+void utils::imageToWorld(double ix, double iy, utils::PositionedImage const& img,
+                         double & wx, double & wy) { // outputs
+  
+   // Flip in y
+  iy = img.qimg.height() - 1 - iy;
+  
+  wx = ix * img.pos[2] + img.pos[0];
+  wy = iy * img.pos[3] + img.pos[1];
+}
+
+// Find the box containing all polygons and images
+void utils::setUpViewBox(// inputs
+                         const std::vector<dPoly> & polyVec,
+                         // outputs
+                         double & xll,  double & yll,
+                         double & widx, double & widy) {
+
+  // TODO(oalexan1): Must take into account images here
+  // TODO(oalexan1): This function must move to polyView.cc as it needs images.
+  
+  // Given a set of polygons, set up a box containing these polygons.
+
+  double xur, yur; // local variables
+
+  bdBox(polyVec,             // inputs
+        xll, yll, xur, yur); // outputs
+
+  // Treat the case of empty polygons
+  if (xur < xll || yur < yll) {
+    xll = 0.0; yll = 0.0; xur = 1000.0; yur = 1000.0;
+  }
+
+  // Treat the case when the polygons are degenerate
+  if (xur == xll) { xll -= 0.5; xur += 0.5; }
+  if (yur == yll) { yll -= 0.5; yur += 0.5; }
+
+  widx = xur - xll; assert(widx > 0.0);
+  widy = yur - yll; assert(widy > 0.0);
+
+  // Expand the box slightly for plotting purposes
+  double factor = 0.05;
+  xll -= widx*factor; xur += widx*factor; widx *= 1.0 + 2*factor;
+  yll -= widy*factor; yur += widy*factor; widy *= 1.0 + 2*factor;
+
+  return;
 }

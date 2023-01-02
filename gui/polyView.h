@@ -36,18 +36,8 @@
 #include <map>
 #include <utils.h>
 #include <chooseFilesDlg.h>
-#include <QImage>
 
 struct cmdLineOptions;
-
-// An image buffer and its world position. The vector 'pos'
-// has world coordinates of the center of the image lower-left
-// pixel, and the vector from the lower-left image pixel to the next
-// pixel along the 45 degree diagonal.
-struct PositionedImage {
-    QImage qimg;
-  std::vector<double> pos;
-};
 
 class polyView : public QWidget{
   Q_OBJECT
@@ -215,12 +205,12 @@ private:
   void printCurrCoords(const Qt::MouseButton & state, // input
                        int & currX, int  & currY      // in-out
                        );
-  bool readOnePoly(// inputs
-                   std::string const& filename,
-                   bool               plotPointsOnly,
-                   closedPolyInfo     isPolyClosed,
-                   // output
-                   utils::dPoly     & poly);
+  bool readPolyOrImage(// inputs
+                       std::string const& filename,
+                       bool               plotPointsOnly,
+                       closedPolyInfo     isPolyClosed,
+                       // output
+                       utils::dPoly     & poly);
   bool isClosestGridPtFree(std::vector<std::vector<int>> & Grid,
                            int x, int y);
   void initTextOnScreenGrid(std::vector<std::vector<int>> & Grid);
@@ -246,6 +236,18 @@ private:
   void worldToPixelCoords(double wx, double wy,
                           int & px,  int & py);
 
+  // Determine the portion of a given image that will be seen in the screen box.
+  // It is a little bigger than it need to be to avoid artifacts when zooming in.
+  void screenToImageRect(// inputs
+                         int screenWidX, int screenWidY,
+                         utils::PositionedImage const& positioned_img,
+                         QRect & imageRect); // output
+
+  // See where a given portion of an image will show up on screen
+  void imageToScreenRect(// inputs
+                         QRect const& imageRect,
+                         utils::PositionedImage const& positioned_img,
+                         QRect & screenRect); // output
 
   void setStandardCursor();
   void setPolyDrawCursor();
@@ -271,7 +273,7 @@ private:
   // handle the book-keeping. It is a bit error-prone that way, but
   // results in less copying around of image buffers. See the
   // definition of PositionedImage for more details.
-  std::map<std::string, PositionedImage> m_images;
+  std::map<std::string, utils::PositionedImage> m_images;
 
   std::vector<polyOptions> & m_polyOptionsVec; // alias, options for exiting polygons
   polyOptions & m_prefs;                       // alias, options for future polygons

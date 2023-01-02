@@ -102,12 +102,6 @@ namespace utils{
                                                 std::vector<segDist> & distVec);
 
 
-  void setUpViewBox(// inputs
-                    const std::vector<dPoly> & polyVec,
-                    // outputs
-                    double & xll,  double & yll,
-                    double & widx, double & widy);
-
   void markPolysInHlts(// Inputs
                        const std::vector<dPoly> & polyVec,
                        const std::vector<dPoly> & highlights,

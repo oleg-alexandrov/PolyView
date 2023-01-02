@@ -63,27 +63,8 @@ using namespace utils;
 // To do: Replace cmdLineOptions directly with polyOptionsVec.
 // To do: Make font size a preference.
 
-// TODO(oalexan1): Move this out
-// Convert from world coordinates to this image's pixel coordinates.
-void worldToImage(double wx, double wy, PositionedImage const& img, // inputs
-                  double & ix, double & iy) { // outputs
-   ix = (wx - img.pos[0]) / img.pos[2];
-   iy = (wy - img.pos[1]) / img.pos[3];
-
-   // Flip in y
-   iy = img.qimg.height() - 1 - iy;
-}
-
-void imageToWorld(double ix, double iy, PositionedImage const& img,
-                  double & wx, double & wy) { // outputs
-  
-   // Flip in y
-  iy = img.qimg.height() - 1 - iy;
-  
-  wx = ix * img.pos[2] + img.pos[0];
-  wy = iy * img.pos[3] + img.pos[1];
-}
-
+// Convert a screen rectangle to 
+//void screenToWorldRect
 polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
                    std::vector<polyOptions> & polyOptionsVec, polyOptions & prefs):
   QWidget(parent), m_polyOptionsVec(polyOptionsVec), m_prefs(prefs) {
@@ -394,6 +375,84 @@ void polyView::setupViewingWindow() {
   return;
 }
 
+// Determine the portion of a given image that will be seen in the screen box.
+// It is a little bigger than it need to be to avoid artifacts when zooming in.
+// It be adjusted if it goes beyond image bounds.
+void polyView::screenToImageRect(// Inputs
+                                 int screenWidX, int screenWidY, // inputs
+                                 utils::PositionedImage const& positioned_img,
+                                 QRect & imageRect) { // output
+  
+  // Go from screen to world and from there to image
+  std::vector<int> x = {0, screenWidX, screenWidX, 0};
+  std::vector<int> y = {0, 0, screenWidY, screenWidY};
+  
+  int big = std::numeric_limits<int>::max();
+  int min_ix = big, min_iy = big, max_ix = -big, max_iy = -big;
+  for (size_t c = 0; c < x.size(); c++) {
+    double wx, wy;
+    pixelToWorldCoords(x[c], y[c], wx, wy);
+    
+    double px, py;
+    utils::worldToImage(wx, wy, positioned_img, px, py);
+
+    // Note: It is fine if a screen region not seeing the image at all ends up
+    // with a valid image portion here. When we map this produced rectangle
+    // back to screen coordinates, it will end up outside the visible area,
+    // so it won't be displayed.
+    px = round(std::max(0.0, px));
+    py = round(std::max(0.0, py));
+    px = round(std::min(px, double(positioned_img.qimg.width() - 1)));
+    py = round(std::min(py, double(positioned_img.qimg.height() - 1)));
+    
+    min_ix = std::min(min_ix, (int)px); min_iy = std::min(min_iy, (int)py);
+    max_ix = std::max(max_ix, (int)px); max_iy = std::max(max_iy, (int)py);
+  }
+
+  // When zooming in, this box can get tiny. Keep it at least 3 pixels on each side,
+  // if possible. The extra pixels end up being rendered outside the viewing
+  // window, so in effect won't be displayed, but that isn't an issue.
+  if (min_ix > 0) 
+    min_ix--;
+  if (min_iy > 0)
+    min_iy--;
+  if (max_ix < positioned_img.qimg.width() - 1)
+    max_ix++;
+  if (max_iy < positioned_img.qimg.height() - 1)
+    max_iy++;
+  
+  // Set up the output
+  imageRect.setCoords(min_ix, min_iy, max_ix, max_iy);
+}
+
+// See where a given portion of an image will show up on screen
+void polyView::imageToScreenRect(// inputs
+                                 QRect const& imageRect,
+                                 utils::PositionedImage const& positioned_img,
+                                 QRect & screenRect) { // output
+
+  std::vector<int> x = {imageRect.left(), imageRect.right(),
+                        imageRect.right(), imageRect.left()};
+  std::vector<int> y = {imageRect.top(), imageRect.top(),
+                        imageRect.bottom(), imageRect.bottom()};
+  
+  int big = std::numeric_limits<int>::max();
+  int min_ix = big, min_iy = big, max_ix = -big, max_iy = -big;
+  for (size_t c = 0; c < x.size(); c++) {
+    double wx, wy;
+    utils::imageToWorld(x[c], y[c], positioned_img, wx, wy);
+    
+    int px, py;
+    worldToPixelCoords(wx, wy, px, py);
+    
+    min_ix = std::min(min_ix, px); min_iy = std::min(min_iy, py);
+    max_ix = std::max(max_ix, px); max_iy = std::max(max_iy, py);
+  }
+
+  // Set up the output
+  screenRect.setCoords(min_ix, min_iy, max_ix, max_iy);
+}
+
 // Plot the current data. See worldToPixelCoords() for how to convert
 // from world to screen coordinates.
 void polyView::displayData(QPainter *paint) {
@@ -442,77 +501,25 @@ void polyView::displayData(QPainter *paint) {
 
     if (m_polyVec[vecIter].img != NULL) {
       // Recover the image. This may crash if it was not populated correctly.
-      PositionedImage const & positioned_img = *(PositionedImage*)(m_polyVec[vecIter].img);
+      utils::PositionedImage const & positioned_img
+        = *(utils::PositionedImage*)(m_polyVec[vecIter].img);
+
+      // Find the image portion to display
+      QRect imageRect;
+      polyView::screenToImageRect(m_screenWidX, m_screenWidY, positioned_img, // inputs
+                                  imageRect); // output
       
-      // Go from screen to world and from there to image
-      std::vector<int> x = {0, (int)m_screenWidX, (int)m_screenWidX, 0};
-      std::vector<int> y = {0, 0, (int)m_screenWidY, (int)m_screenWidY};
+      // Crop the image to this rectangle
+      QImage cropped = positioned_img.qimg.copy(imageRect);
 
-      int big = std::numeric_limits<int>::max();
-      int min_ix = big, min_iy = big, max_ix = -big, max_iy = -big;
-      for (int c = 0; c < 4; c++) {
-        double wx, wy;
-        pixelToWorldCoords(x[c], y[c], wx, wy);
-
-        double px, py;
-        worldToImage(wx, wy, positioned_img, px, py);
-
-        // TODO(oalexan1): Handle here the case of empty image
-        px = round(std::max(0.0, px));
-        py = round(std::max(0.0, py));
-        px = round(std::min(px, double(positioned_img.qimg.width() - 1)));
-        py = round(std::min(py, double(positioned_img.qimg.height() - 1)));
-
-        min_ix = std::min(min_ix, (int)px); min_iy = std::min(min_iy, (int)py);
-        max_ix = std::max(max_ix, (int)px); max_iy = std::max(max_iy, (int)py);
-      }
-      // When zooming in, this box can get tiny. Keep it at least 3 pixels on each side,
-      // if possible. The extra pixels may not end up being displayed, but that isn't
-      // an issue.
-      if (min_ix > 0) 
-        min_ix--;
-      if (min_iy > 0)
-        min_iy--;
-      if (max_ix < positioned_img.qimg.width() - 1)
-        max_ix++;
-      if (max_iy < positioned_img.qimg.height() - 1)
-        max_iy++;
-     
-      std::cout << "--image minx, maxx, miny, maxy " << min_ix << ' ' << max_ix << ' ' << min_iy << ' ' << max_iy
-                << std::endl;
-      QRect irect;
-      irect.setCoords(min_ix, min_iy, max_ix, max_iy);
-      // Crop
-      QImage cropped = positioned_img.qimg.copy(irect);
-      //std::cout << "---width and height " << max_ix - min_ix + 1 << ' ' << max_iy - min_iy + 1 << std::endl;
-      //std::cout << "--cropped image size " << cropped.width() << ' ' << cropped.height() << std::endl;
+      // Now find the screen rectangle. This need not be precisely the
+      // actual screen region that is displayed. It must however be
+      // fully consistent with the image portion displayed in it.
+      QRect screenRect; 
+      polyView::imageToScreenRect(imageRect, positioned_img, // inputs
+                                  screenRect); // output
       
-      // Now find screen coords
-      x = std::vector<int>({min_ix, max_ix, max_ix, min_ix});
-      y = std::vector<int>({min_iy, min_iy, max_iy, max_iy});
-      min_ix = big; min_iy = big; max_ix = -big; max_iy = -big;
-      for (int c = 0; c < 4; c++) {
-        double wx, wy;
-        imageToWorld(x[c], y[c], positioned_img, wx, wy);
-
-        int px, py;
-        worldToPixelCoords(wx, wy, px, py);
-        
-        min_ix = std::min(min_ix, px); min_iy = std::min(min_iy, py);
-        max_ix = std::max(max_ix, px); max_iy = std::max(max_iy, py);
-      }
-
-      //std::cout << "---screen width and height " << max_ix - min_ix + 1 << ' ' << max_iy - min_iy + 1 << std::endl;
-      
-      QRect screen_rect;
-      screen_rect.setCoords(min_ix, min_iy, max_ix, max_iy);
-
-      std::cout << "--screen minx, maxx, miny, maxy " << min_ix << ' ' << max_ix << ' ' << min_iy << ' ' << max_iy
-                << std::endl;
-
-      //std::cout << "--screen image size " << screen_rect.width() << ' ' << screen_rect.height() << std::endl;
-      
-      paint->drawImage(screen_rect, cropped);
+      paint->drawImage(screenRect, cropped);
     }
   }
   
@@ -2979,12 +2986,12 @@ void polyView::readAllPolys() {
     // TODO(oalexan1): This may cause book-keeping problems.
     if (!m_polyOptionsVec[fileIter].readPolyFromDisk) continue;
 
-    bool success = readOnePoly(// inputs
-                               m_polyOptionsVec[fileIter].polyFileName,
-                               m_polyOptionsVec[fileIter].plotAsPoints,
-                               m_polyOptionsVec[fileIter].isPolyClosed,
-                               // output
-                               m_polyVec[fileIter]);
+    bool success = readPolyOrImage(// inputs
+                                   m_polyOptionsVec[fileIter].polyFileName,
+                                   m_polyOptionsVec[fileIter].plotAsPoints,
+                                   m_polyOptionsVec[fileIter].isPolyClosed,
+                                   // output
+                                   m_polyVec[fileIter]);
     if (!success) {
       missingFiles += " " + m_polyOptionsVec[fileIter].polyFileName;
       numMissing++;
@@ -3048,12 +3055,12 @@ void polyView::openPoly() {
   m_chooseFiles->chooseFiles(m_polyOptionsVec);
   
   dPoly poly;
-  bool success = readOnePoly(// inputs
-                             m_polyOptionsVec.back().polyFileName,
-                             m_polyOptionsVec.back().plotAsPoints,
-                             m_polyOptionsVec.back().isPolyClosed,
-                             // output
-                             poly);
+  bool success = readPolyOrImage(// inputs
+                                 m_polyOptionsVec.back().polyFileName,
+                                 m_polyOptionsVec.back().plotAsPoints,
+                                 m_polyOptionsVec.back().isPolyClosed,
+                                 // output
+                                 poly);
 
   if (!success)
     popUp("Warning: Could not read file: " + m_polyOptionsVec.back().polyFileName + ".");
@@ -3069,13 +3076,13 @@ void polyView::openPoly() {
   return;
 }
 
-bool polyView::readOnePoly(// inputs
-                           std::string const& filename,
-                           bool               plotPointsOnly,
-                           closedPolyInfo     isPolyClosed,
-                           // output
-                           dPoly            & poly) {
-
+bool polyView::readPolyOrImage(// inputs
+                               std::string const& filename,
+                               bool               plotPointsOnly,
+                               closedPolyInfo     isPolyClosed,
+                               // output
+                               dPoly            & poly) {
+  
   poly.reset();
 
   string type = getFilenameExtension(filename);
@@ -3091,8 +3098,7 @@ bool polyView::readOnePoly(// inputs
   if (!poly.readPoly(filename, plotPointsOnly))
     return false; // Will be false only if the file does not exist
   
-  if (type == "jpg" || type == "jpeg" || type == "png" || type == "tif" || type == "gif" ||
-      type == "bmp" || type == "xpm") {
+  if (utils::isImage(filename)) {
 
     // Read the image and its positioning info
     poly.reset();
@@ -3163,6 +3169,11 @@ void polyView::writeMultiplePolys(bool overwrite) {
     string fileName = m_polyOptionsVec[polyIter].polyFileName;
     if (!overwrite) fileName = inFileToOutFile(fileName);
 
+    if (utils::isImage(fileName)) {
+      std::string base = utils::removeExtension(fileName);
+      fileName = base + ".xg";
+    }
+    
     poly.writePoly(fileName.c_str());
     allFiles += " " + fileName;
   }
