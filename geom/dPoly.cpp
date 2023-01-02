@@ -36,7 +36,7 @@
 
 // If all else fails
 #ifndef M_PI
-    #define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 
 #include <cutPoly.h>
@@ -60,6 +60,7 @@ void dPoly::reset() {
   m_vertIndexAnno.clear();
   m_polyIndexAnno.clear();
   m_layerAnno.clear();
+  img = NULL; 
 }
 
 void dPoly::bdBox(double & xll, double & yll, double & xur, double & yur) const {
@@ -1231,8 +1232,7 @@ void dPoly::enforce45() {
 bool dPoly::readPoly(std::string filename,
                      // If isPointCloud is true, treat each point as a
                      // singleton polygon
-                     bool isPointCloud
-                     ) {
+                     bool isPointCloud) {
 
   reset();
 
@@ -1241,7 +1241,7 @@ bool dPoly::readPoly(std::string filename,
   // To do: The test below will succeed if filename is a directory.
   // This is probably not right.
   ifstream fh(filename.c_str());
-  if( !fh ) {
+  if (!fh) {
     cerr << "Error: Could not open " << filename << endl;
     return false;
   }

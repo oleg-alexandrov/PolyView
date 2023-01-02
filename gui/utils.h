@@ -102,11 +102,19 @@ namespace utils{
 
   void printUsage(std::string progName);
 
+  // Get filename extension and make it lowercase
   std::string getFilenameExtension(std::string filename);
+
+  // Remove everything after the last dot and the dot itself
+  std::string removeExtension(std::string filename);
+  
   std::string replaceAll(std::string result,
                          const std::string & replaceWhat,
                          const std::string & replaceWithWhat);
 
+  // Read a file with four numbers determining how the image will be plotted.
+  bool readImagePosition(std::string const& filename, std::vector<double> & pos);
+  
 }
 
 #endif

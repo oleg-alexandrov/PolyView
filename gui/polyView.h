@@ -36,8 +36,18 @@
 #include <map>
 #include <utils.h>
 #include <chooseFilesDlg.h>
+#include <QImage>
 
 struct cmdLineOptions;
+
+// An image buffer and its world position. The vector 'pos'
+// has world coordinates of the center of the image lower-left
+// pixel, and the vector from the lower-left image pixel to the next
+// pixel along the 45 degree diagonal.
+struct PositionedImage {
+    QImage qimg;
+  std::vector<double> pos;
+};
 
 class polyView : public QWidget{
   Q_OBJECT
@@ -249,12 +259,19 @@ private:
   double m_zoomFactor, m_shiftX, m_shiftY;
   int m_mousePrsX,  m_mousePrsY, m_mouseRelX,  m_mouseRelY;
   int m_screenXll,  m_screenYll, m_screenWidX, m_screenWidY;
-  double m_viewXll, m_viewYll,   m_viewWidX,   m_viewWidY;
+  double m_viewXll, m_viewYll,   m_viewWidX,   m_viewWidY; // view window in world coords
   double m_prevClickedX, m_prevClickedY;
   double m_screenRatio, m_pixelSize;
 
   // Polygons
   std::vector<utils::dPoly> m_polyVec;
+
+  // Store here the image buffers and positioning information (in the
+  // vector). A pointer to each will be kept in m_polyVec, which will
+  // handle the book-keeping. It is a bit error-prone that way, but
+  // results in less copying around of image buffers. See the
+  // definition of PositionedImage for more details.
+  std::map<std::string, PositionedImage> m_images;
 
   std::vector<polyOptions> & m_polyOptionsVec; // alias, options for exiting polygons
   polyOptions & m_prefs;                       // alias, options for future polygons

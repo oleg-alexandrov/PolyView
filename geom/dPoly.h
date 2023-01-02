@@ -238,6 +238,15 @@ public:
 
   void enforce45();
 
+  // Pointer to a structure storing an image and its positioning
+  // information in world coordinates. The image can be shown in the
+  // background of the given polygon. The user is responsible
+  // for managing this correctly. This approach makes it possible
+  // for this polygon class not to know a lot of GUI-related constructs,
+  // and for not having to allocate memory for an image, which can be
+  // an issue if polygons are copied around, such as in an undo buffer.
+  void * img;
+  
 private:
 
   bool getColorInCntFile(const std::string & line, std::string & color);

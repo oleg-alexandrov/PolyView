@@ -95,8 +95,7 @@ appWindow::appWindow(QWidget* parent, std::string progName,
   m_cmdLine = new cmdLine(this);
   m_cmdLine->setAlignment(Qt::AlignLeft);
   m_cmdLine->setFocusPolicy(Qt::StrongFocus);
-  connect( m_cmdLine, SIGNAL( returnPressed() ),
-          this, SLOT( procCmdLine() ) );
+  connect(m_cmdLine, SIGNAL(returnPressed()), this, SLOT(procCmdLine()));
   QStatusBar * status = statusBar();
   QRect Rp = status->rect();
   m_cmdLine->setGeometry(Rp);

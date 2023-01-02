@@ -199,18 +199,17 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if ( strcasecmp(currArg, "-grid") == 0  &&
-         argIter < argc - 1             &&
-         strcasecmp(argv[argIter + 1], "on") == 0
-         ){
+    if (strcasecmp(currArg, "-grid") == 0  &&
+        argIter < argc - 1             &&
+        strcasecmp(argv[argIter + 1], "on") == 0){
       opt.isGridOn = true;
       argIter++;
       continue;
     }
 
-    if ( (strcasecmp(currArg, "-c"    ) == 0 ||
-          strcasecmp(currArg, "-color") == 0 )
-         && argIter < argc - 1){
+    if ((strcasecmp(currArg, "-c"    ) == 0 ||
+         strcasecmp(currArg, "-color") == 0 )
+        && argIter < argc - 1){
       opt.useCmdLineColor = true;
       opt.cmdLineColor    = argv[argIter + 1];
       argIter++;
@@ -233,6 +232,7 @@ void utils::parseCmdOptions(//inputs
     // Other command line options are ignored
     if (currArg[0] == '-') continue;
 
+    std::cout << "--reading " << currArg << std::endl;
     opt.polyFileName = currArg;
 
     options.polyOptionsVec.push_back(opt);
@@ -241,6 +241,8 @@ void utils::parseCmdOptions(//inputs
   // Push one more time, to guarantee that the options vector is
   // non-empty even if no polygons were provided as input, and to make
   // sure we also parsed the options after the last polygon filename.
+  // TODO(oalexan1): This is awkward, it better be stored separately
+  // to start with.
   options.polyOptionsVec.push_back(opt);
 
   return;
@@ -271,13 +273,32 @@ std::string utils::inFileToOutFile(const std::string & inFile){
 
 }
 
+// Get filename extension and make it lowercase
 std::string utils::getFilenameExtension(std::string filename){
 
+  std::string ext;
   std::string::size_type idx;
   idx = filename.rfind('.');
 
-  if(idx != std::string::npos) return filename.substr(idx+1);
-  else                         return "";
+  if (idx != std::string::npos)
+    ext = filename.substr(idx+1);
+
+  std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+  
+  return ext;
+}
+
+  // Remove everything after the last dot and the dot itself
+std::string utils::removeExtension(std::string filename){
+
+  std::string ext;
+  std::string::size_type idx;
+  idx = filename.rfind('.');
+
+  if (idx == std::string::npos)
+    return filename;
+
+  return filename.substr(0, idx);
 }
 
 std::string utils::replaceAll(std::string result,
@@ -290,4 +311,34 @@ std::string utils::replaceAll(std::string result,
     result.replace(pos,replaceWhat.size(),replaceWithWhat);
   }
   return result;
+}
+
+bool utils::readImagePosition(std::string const& filename, std::vector<double> & pos) {
+
+  std::ifstream fh(filename.c_str());
+  if (!fh) {
+    cerr << "Error: Could not open " << filename << endl;
+    return false;
+  }
+
+  pos.clear();
+  double val = -1;
+  while (fh >> val) {
+    pos.push_back(val);
+    if (pos.size() >= 4) {
+      break;
+    }
+  }
+
+  if (pos.size() < 4) {
+    std::cerr << "Could not read four values from  file " << filename << ".\n";
+    return false;
+  }
+
+  if (pos[2] == 0 || pos[3] == 0) {
+    std::cerr << "Expecting last two values to be non-zero in " << filename << ".\n";
+    return false;
+  }
+  
+  return true;
 }

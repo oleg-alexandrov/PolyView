@@ -63,6 +63,27 @@ using namespace utils;
 // To do: Replace cmdLineOptions directly with polyOptionsVec.
 // To do: Make font size a preference.
 
+// TODO(oalexan1): Move this out
+// Convert from world coordinates to this image's pixel coordinates.
+void worldToImage(double wx, double wy, PositionedImage const& img, // inputs
+                  double & ix, double & iy) { // outputs
+   ix = (wx - img.pos[0]) / img.pos[2];
+   iy = (wy - img.pos[1]) / img.pos[3];
+
+   // Flip in y
+   iy = img.qimg.height() - 1 - iy;
+}
+
+void imageToWorld(double ix, double iy, PositionedImage const& img,
+                  double & wx, double & wy) { // outputs
+  
+   // Flip in y
+  iy = img.qimg.height() - 1 - iy;
+  
+  wx = ix * img.pos[2] + img.pos[0];
+  wy = iy * img.pos[3] + img.pos[1];
+}
+
 polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
                    std::vector<polyOptions> & polyOptionsVec, polyOptions & prefs):
   QWidget(parent), m_polyOptionsVec(polyOptionsVec), m_prefs(prefs) {
@@ -309,11 +330,8 @@ void polyView::setupViewingWindow() {
   //     << m_screenWidX << ' ' << m_screenWidY << endl;
 
   if (m_resetView) {
-    setUpViewBox(// inputs
-                 m_polyVec,
-                 // outputs
-                 m_viewXll, m_viewYll, m_viewWidX, m_viewWidY
-                 );
+    setUpViewBox(m_polyVec, // inputs
+                 m_viewXll, m_viewYll, m_viewWidX, m_viewWidY); // outputs
     m_resetView = false;
   }
 
@@ -376,6 +394,8 @@ void polyView::setupViewingWindow() {
   return;
 }
 
+// Plot the current data. See worldToPixelCoords() for how to convert
+// from world to screen coordinates.
 void polyView::displayData(QPainter *paint) {
 
   setupViewingWindow(); // Must happen before anything else
@@ -404,14 +424,102 @@ void polyView::displayData(QPainter *paint) {
 
 
   // Plot the polygons
-  setupDisplayOrder(m_polyVec.size(),                    //inputs
-                    m_changeDisplayOrder, m_polyVecOrder // inputs-outputs
-                    );
+  setupDisplayOrder(m_polyVec.size(),                      // inputs
+                    m_changeDisplayOrder, m_polyVecOrder); // inputs-outputs
+
   // Will draw a vertex with a shape dependent on this index
   int drawVertIndex = -1;
   // Use a grid to not draw text too densely as that's slow
-  initTextOnScreenGrid(textOnScreenGrid);
   assert(m_polyVec.size() == m_polyOptionsVec.size());
+
+  // First plot the images, if present
+  for (int vi = 0; vi < (int)m_polyVec.size(); vi++) {
+    int vecIter = m_polyVecOrder[vi];
+
+    // Skip the files the user does not want to see
+    string fileName = m_polyOptionsVec[vecIter].polyFileName;
+    if (m_filesToHide.find(fileName) != m_filesToHide.end()) continue;
+
+    if (m_polyVec[vecIter].img != NULL) {
+      // Recover the image. This may crash if it was not populated correctly.
+      PositionedImage const & positioned_img = *(PositionedImage*)(m_polyVec[vecIter].img);
+      
+      // Go from screen to world and from there to image
+      std::vector<int> x = {0, (int)m_screenWidX, (int)m_screenWidX, 0};
+      std::vector<int> y = {0, 0, (int)m_screenWidY, (int)m_screenWidY};
+
+      int big = std::numeric_limits<int>::max();
+      int min_ix = big, min_iy = big, max_ix = -big, max_iy = -big;
+      for (int c = 0; c < 4; c++) {
+        double wx, wy;
+        pixelToWorldCoords(x[c], y[c], wx, wy);
+
+        double px, py;
+        worldToImage(wx, wy, positioned_img, px, py);
+
+        // TODO(oalexan1): Handle here the case of empty image
+        px = round(std::max(0.0, px));
+        py = round(std::max(0.0, py));
+        px = round(std::min(px, double(positioned_img.qimg.width() - 1)));
+        py = round(std::min(py, double(positioned_img.qimg.height() - 1)));
+
+        min_ix = std::min(min_ix, (int)px); min_iy = std::min(min_iy, (int)py);
+        max_ix = std::max(max_ix, (int)px); max_iy = std::max(max_iy, (int)py);
+      }
+      // When zooming in, this box can get tiny. Keep it at least 3 pixels on each side,
+      // if possible. The extra pixels may not end up being displayed, but that isn't
+      // an issue.
+      if (min_ix > 0) 
+        min_ix--;
+      if (min_iy > 0)
+        min_iy--;
+      if (max_ix < positioned_img.qimg.width() - 1)
+        max_ix++;
+      if (max_iy < positioned_img.qimg.height() - 1)
+        max_iy++;
+     
+      std::cout << "--image minx, maxx, miny, maxy " << min_ix << ' ' << max_ix << ' ' << min_iy << ' ' << max_iy
+                << std::endl;
+      QRect irect;
+      irect.setCoords(min_ix, min_iy, max_ix, max_iy);
+      // Crop
+      QImage cropped = positioned_img.qimg.copy(irect);
+      //std::cout << "---width and height " << max_ix - min_ix + 1 << ' ' << max_iy - min_iy + 1 << std::endl;
+      //std::cout << "--cropped image size " << cropped.width() << ' ' << cropped.height() << std::endl;
+      
+      // Now find screen coords
+      x = std::vector<int>({min_ix, max_ix, max_ix, min_ix});
+      y = std::vector<int>({min_iy, min_iy, max_iy, max_iy});
+      min_ix = big; min_iy = big; max_ix = -big; max_iy = -big;
+      for (int c = 0; c < 4; c++) {
+        double wx, wy;
+        imageToWorld(x[c], y[c], positioned_img, wx, wy);
+
+        int px, py;
+        worldToPixelCoords(wx, wy, px, py);
+        
+        min_ix = std::min(min_ix, px); min_iy = std::min(min_iy, py);
+        max_ix = std::max(max_ix, px); max_iy = std::max(max_iy, py);
+      }
+
+      //std::cout << "---screen width and height " << max_ix - min_ix + 1 << ' ' << max_iy - min_iy + 1 << std::endl;
+      
+      QRect screen_rect;
+      screen_rect.setCoords(min_ix, min_iy, max_ix, max_iy);
+
+      std::cout << "--screen minx, maxx, miny, maxy " << min_ix << ' ' << max_ix << ' ' << min_iy << ' ' << max_iy
+                << std::endl;
+
+      //std::cout << "--screen image size " << screen_rect.width() << ' ' << screen_rect.height() << std::endl;
+      
+      paint->drawImage(screen_rect, cropped);
+    }
+  }
+  
+  // Init the grid if needed
+  initTextOnScreenGrid(textOnScreenGrid);
+
+  // Plot the polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
 
     int vecIter = m_polyVecOrder[vi];
@@ -430,7 +538,7 @@ void polyView::displayData(QPainter *paint) {
       plotEdges = true; // this is a bugfix, otherwise polygons with no interior do not show up
     
     bool plotPoints = m_polyOptionsVec[vecIter].plotAsPoints  ||
-      (m_displayMode == m_showPoints)             ||
+      (m_displayMode == m_showPoints)                         ||
       (m_displayMode == m_showPointsEdges);
 
     if (plotPoints) drawVertIndex++;
@@ -469,8 +577,7 @@ void polyView::displayData(QPainter *paint) {
   if (m_markX.size() > 0) {
     int x0, y0;
     worldToPixelCoords(m_markX[0], m_markY[0], // inputs
-                       x0, y0                  // outputs
-                       );
+                       x0, y0 );                // outputs
     drawMark(x0, y0, QColor(m_prefs.fgColor.c_str()),
              m_prefs.lineWidth, paint);
   }
@@ -485,6 +592,10 @@ void polyView::displayData(QPainter *paint) {
   return;
 }
 
+// Plot a given dPoly with given options.
+// The viewing window in world coordinates corresponding to current
+// drawing region on screen is:
+// m_viewXll,  m_viewYll, m_viewXll + m_viewWidX, m_viewYll + m_viewWidY.
 void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          bool plotFilled, bool showAnno,
                          int lineWidth,
@@ -492,10 +603,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          // An empty grid is a good choice if not text is present
                          std::vector< std::vector<int> > & textOnScreenGrid,
                          QPainter *paint,
-                         dPoly currPoly // Make a local copy on purpose
-                         ) {
-
-  // Plot a given dPoly with given options.
+                         dPoly currPoly) { // Make a local copy on purpose
 
   // Note: Having annotations at vertices can make the display
   // slow for large polygons.
@@ -516,7 +624,8 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   // When polys are filled, plot largest polys first
   if (plotFilled)
     currPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
-                                                    m_viewXll + m_viewWidX, m_viewYll + m_viewWidY,
+                                                    m_viewXll + m_viewWidX,
+                                                    m_viewYll + m_viewWidY,
                                                     m_counter_cc);
 
   // Clip the polygon a bit beyond the viewing window, as to not see
@@ -526,7 +635,6 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   double extra  = 2*m_pixelSize*lineWidth;
   double extraX = extra + tol*max(abs(m_viewXll), abs(m_viewXll + m_viewWidX));
   double extraY = extra + tol*max(abs(m_viewYll), abs(m_viewYll + m_viewWidY));
-
   dPoly clippedPoly;
   currPoly.clipPoly(//inputs
                     m_viewXll - extraX,
@@ -573,13 +681,13 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       signedArea = signedPolyArea(pSize, xv + start, yv + start, m_counter_cc);
     }
 
+    // Scale the polygon to screen (pixel) coordinates
     QPolygon pa(pSize);
     for (int vIter = 0; vIter < pSize; vIter++) {
 
       int x0, y0;
       worldToPixelCoords(xv[start + vIter], yv[start + vIter], // inputs
-                         x0, y0                                // outputs
-                         );
+                         x0, y0);                              // outputs
       pa[vIter] = QPoint(x0, y0);
 
       // Qt's built in points are too small. Instead of drawing a point
@@ -719,9 +827,8 @@ void polyView::mousePressEvent(QMouseEvent *E) {
        << m_mousePrsX << ' ' << m_mousePrsY << endl;
 #endif
 
-  pixelToWorldCoords(m_mousePrsX, m_mousePrsY,              // inputs
-                     m_mousePressWorldX, m_mousePressWorldY // outputs
-                     );
+  pixelToWorldCoords(m_mousePrsX, m_mousePrsY,               // inputs
+                     m_mousePressWorldX, m_mousePressWorldY); // outputs
 
   m_rubberBand = m_emptyRubberBand;
 
@@ -741,8 +848,7 @@ void polyView::mousePressEvent(QMouseEvent *E) {
                                      m_moveEdges->isChecked()    ||
                                      m_movePolys->isChecked())      &&
                                     isShiftLeftMouse(E)             &&
-                                    !m_createPoly && !m_deletingPolyNow
-                                    );
+                                    !m_createPoly && !m_deletingPolyNow);
   
   m_movingPolysInHlts = false;
   if (m_movingVertsOrEdgesOrPolysNow) {
@@ -755,8 +861,7 @@ void polyView::mousePressEvent(QMouseEvent *E) {
                             m_polyVecIndex,
                             m_polyIndexInCurrPoly,
                             m_vertIndexInCurrPoly,
-                            min_x, min_y, min_dist
-                            );
+                            min_x, min_y, min_dist);
     }else if (m_movePolys->isChecked() &&
               (getNumElements(m_selectedPolyIndices) > 0 ||
                getNumElements(m_selectedAnnoIndices) > 0 ||
@@ -772,8 +877,7 @@ void polyView::mousePressEvent(QMouseEvent *E) {
                           m_polyVecIndex,
                           m_polyIndexInCurrPoly,
                           m_vertIndexInCurrPoly,
-                          min_x, min_y, min_dist
-                          );
+                          min_x, min_y, min_dist);
       if (m_polyVecIndex >= 0) m_polyBeforeShift = m_polyVec[m_polyVecIndex];
     }
 
@@ -821,19 +925,16 @@ void polyView::mouseMoveEvent(QMouseEvent *E) {
     if (m_moveVertices->isChecked()) {
       m_polyVec[m_polyVecIndex].changeVertexValue(m_polyIndexInCurrPoly,
                                                   m_vertIndexInCurrPoly,
-                                                  wx, wy
-                                                  );
+                                                  wx, wy);
     }else if ((m_moveEdges->isChecked() || m_movePolys->isChecked()) && m_polyVecIndex >= 0) {
       m_polyVec[m_polyVecIndex] = m_polyBeforeShift;
       if (m_moveEdges->isChecked()) {
         m_polyVec[m_polyVecIndex].shiftEdge(m_polyIndexInCurrPoly,
                                             m_vertIndexInCurrPoly,
-                                            shift_x, shift_y
-                                            );
+                                            shift_x, shift_y);
       }else if (m_movePolys->isChecked()) {
         m_polyVec[m_polyVecIndex].shiftOnePoly(m_polyIndexInCurrPoly,
-                                               shift_x, shift_y
-                                               );
+                                               shift_x, shift_y);
       }
     }
     refreshPixmap(); // To do: Need to update just a small region, not the whole screen
@@ -1010,8 +1111,7 @@ void polyView::copyPoly() {
                       polyVecIndex,
                       polyIndexInCurrPoly,
                       vertIndexInCurrPoly,
-                      min_x, min_y, min_dist
-                      );
+                      min_x, min_y, min_dist);
   if (polyVecIndex < 0 || polyIndexInCurrPoly < 0) return;
 
   m_selectedPolyIndices.clear();
@@ -1173,8 +1273,7 @@ void polyView::scaleSelectedPolys(std::vector<double> & scale) {
                    m_selectedPolyIndices, m_selectedAnnoIndices, 
                    scale[0],
                    // Inputs-outputs
-                   m_polyVec
-                   );
+                   m_polyVec);
   
   printCmd("scale_selected", scale);
 
@@ -1875,8 +1974,7 @@ void polyView::drawPolyLine(const std::vector<double> & polyX,
   vector< vector<int> > textOnScreenGrid; textOnScreenGrid.clear();
   bool showAnno = false;
   plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, m_prefs.lineWidth,
-            drawVertIndex, textOnScreenGrid, paint, polyLine
-            );
+            drawVertIndex, textOnScreenGrid, paint, polyLine);
 
   return;
 }
@@ -2616,16 +2714,13 @@ void polyView::deleteVertex() {
                         m_polyVecIndex,
                         m_polyIndexInCurrPoly,
                         m_vertIndexInCurrPoly,
-                        min_x, min_y, min_dist
-                        );
+                        min_x, min_y, min_dist);
 
   if (m_polyVecIndex        < 0 ||
       m_polyIndexInCurrPoly < 0 ||
       m_vertIndexInCurrPoly < 0) return;
 
-  m_polyVec[m_polyVecIndex].eraseVertex(m_polyIndexInCurrPoly,
-                                        m_vertIndexInCurrPoly
-                                        );
+  m_polyVec[m_polyVecIndex].eraseVertex(m_polyIndexInCurrPoly, m_vertIndexInCurrPoly);
 
   saveDataForUndo(false);
   refreshPixmap();
@@ -2647,9 +2742,8 @@ void polyView::deletePoly() {
                       minX, minY, minDist
                       );
 
-  if (minVecIndex >= 0 && minPolyIndex >= 0) {
+  if (minVecIndex >= 0 && minPolyIndex >= 0)
     m_polyVec[minVecIndex].eraseOnePoly(minPolyIndex);
-  }
 
   saveDataForUndo(false);
   refreshPixmap();
@@ -2873,7 +2967,8 @@ void polyView::readAllPolys() {
 
   int numFiles = m_polyOptionsVec.size();
   m_polyVec.resize(numFiles);
-
+  m_images.clear();
+  
   string missingFiles = "";
   int numMissing = 0;
 
@@ -2881,6 +2976,7 @@ void polyView::readAllPolys() {
 
     // Do not read polygons which were created by the program itself
     // rather than read from disk.
+    // TODO(oalexan1): This may cause book-keeping problems.
     if (!m_polyOptionsVec[fileIter].readPolyFromDisk) continue;
 
     bool success = readOnePoly(// inputs
@@ -2888,8 +2984,7 @@ void polyView::readAllPolys() {
                                m_polyOptionsVec[fileIter].plotAsPoints,
                                m_polyOptionsVec[fileIter].isPolyClosed,
                                // output
-                               m_polyVec[fileIter]
-                               );
+                               m_polyVec[fileIter]);
     if (!success) {
       missingFiles += " " + m_polyOptionsVec[fileIter].polyFileName;
       numMissing++;
@@ -2992,10 +3087,29 @@ bool polyView::readOnePoly(// inputs
     cerr << msg << endl;
   }
 
-  if (! poly.readPoly(filename, plotPointsOnly)) {
-    return false;
-  }
+  // Read the poly (may be empty if the file is an image)
+  if (!poly.readPoly(filename, plotPointsOnly))
+    return false; // Will be false only if the file does not exist
+  
+  if (type == "jpg" || type == "jpeg" || type == "png" || type == "tif" || type == "gif" ||
+      type == "bmp" || type == "xpm") {
 
+    // Read the image and its positioning info
+    poly.reset();
+    
+    std::string base = utils::removeExtension(filename);
+    std::string posFile = base + ".txt";
+    std::vector<double> pos;
+    if (!readImagePosition(posFile, pos))
+        return false;
+    
+    m_images[filename].qimg = QImage(filename.c_str());
+    m_images[filename].pos = pos;
+    // Keep the pointer here. It ensures the poly and its background image
+    // are always handled together.
+    poly.img = (void*)(&m_images[filename]);
+  }
+  
   bool isClosed;
   if (isPolyClosed == forceClosedPoly) {
     isClosed = true;
