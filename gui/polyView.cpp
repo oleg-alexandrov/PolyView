@@ -56,15 +56,12 @@ using namespace utils;
 // To do: handle colors correctly (convert dark-gray to darkGray, etc.).
 // To do: In the geom directory, put everything in a namespace, say called 'pv'.
 //        Here too. Clean up, modularize, and structure the code more.
-// To do: Fix other "To do" mentioned in the code.
 // To do: The viewer does not render correctly in fill mode overlapping polygons
 //        with each polygon having holes. A fix would require a thorough analysis
 //        which would identify which hole belongs to which polygon.
 // To do: Replace cmdLineOptions directly with polyOptionsVec.
 // To do: Make font size a preference.
 
-// Convert a screen rectangle to 
-//void screenToWorldRect
 polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
                    std::vector<polyOptions> & polyOptionsVec, polyOptions & prefs):
   QWidget(parent), m_polyOptionsVec(polyOptionsVec), m_prefs(prefs) {

@@ -16,7 +16,7 @@ This program can overlay images and polygons, if each image has a
 plain-text metadata file describing how to place the image relative to
 the polygons.
 
-These features are documented in detail further down this document.
+These features are explained in detail further down this document.
 
 # Installation
 
