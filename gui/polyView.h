@@ -230,6 +230,8 @@ private:
                  QPainter *paint,
                  utils::dPoly currPoly); // Make a local copy on purpose
 
+  void plotImage(QPainter *paint, utils::dPoly const& poly);
+
   void resetTransformSettings();
   void pixelToWorldCoords(int px, int py,
                           double & wx, double & wy);

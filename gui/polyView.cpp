@@ -498,42 +498,10 @@ void polyView::displayData(QPainter *paint) {
   // Use a grid to not draw text too densely as that's slow
   assert(m_polyVec.size() == m_polyOptionsVec.size());
 
-  // First plot the images, if present
-  for (int vi = 0; vi < (int)m_polyVec.size(); vi++) {
-    int vecIter = m_polyVecOrder[vi];
-
-    // Skip the files the user does not want to see
-    string fileName = m_polyOptionsVec[vecIter].polyFileName;
-    if (m_filesToHide.find(fileName) != m_filesToHide.end()) continue;
-
-    if (m_polyVec[vecIter].img != NULL) {
-      // Recover the image. This may crash if it was not populated correctly.
-      utils::PositionedImage const & positioned_img
-        = *(utils::PositionedImage*)(m_polyVec[vecIter].img);
-
-      // Find the image portion to display
-      QRect imageRect;
-      polyView::screenToImageRect(m_screenWidX, m_screenWidY, positioned_img, // inputs
-                                  imageRect); // output
-      
-      // Crop the image to this rectangle
-      QImage cropped = positioned_img.qimg.copy(imageRect);
-
-      // Now find the screen rectangle. This need not be precisely the
-      // actual screen region that is displayed. It must however be
-      // fully consistent with the image portion displayed in it.
-      QRect screenRect; 
-      polyView::imageToScreenRect(imageRect, positioned_img, // inputs
-                                  screenRect); // output
-      
-      paint->drawImage(screenRect, cropped);
-    }
-  }
-  
   // Init the grid if needed
   initTextOnScreenGrid(textOnScreenGrid);
 
-  // Plot the polygons
+  // Plot the images and polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
 
     int vecIter = m_polyVecOrder[vi];
@@ -542,6 +510,10 @@ void polyView::displayData(QPainter *paint) {
     string fileName = m_polyOptionsVec[vecIter].polyFileName;
     if (m_filesToHide.find(fileName) != m_filesToHide.end()) continue;
 
+    // Plot the image component
+    if (m_polyVec[vecIter].img != NULL)
+      polyView::plotImage(paint, m_polyVec[vecIter]);
+      
     int lineWidth = m_polyOptionsVec[vecIter].lineWidth;
 
     // Note: plotFilled, plotEdges, and plotPoints are not mutually exclusive.
@@ -772,6 +744,34 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     }
 
   } // End placing annotations
+
+  return;
+}
+
+void polyView::plotImage(QPainter *paint, utils::dPoly const& poly) {
+  if (poly.img == NULL)
+    return;
+  
+  // Recover the image. This may crash if it was not populated correctly.
+  utils::PositionedImage const & positioned_img
+    = *(utils::PositionedImage*)(poly.img);
+  
+  // Find the image portion to display
+  QRect imageRect;
+  polyView::screenToImageRect(m_screenWidX, m_screenWidY, positioned_img, // inputs
+                              imageRect); // output
+  
+  // Crop the image to this rectangle
+  QImage cropped = positioned_img.qimg.copy(imageRect);
+  
+  // Now find the screen rectangle. This need not be precisely the
+  // actual screen region that is displayed. It must however be
+  // fully consistent with the image portion displayed in it.
+  QRect screenRect; 
+  polyView::imageToScreenRect(imageRect, positioned_img, // inputs
+                              screenRect); // output
+  
+  paint->drawImage(screenRect, cropped);
 
   return;
 }

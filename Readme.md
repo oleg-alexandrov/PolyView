@@ -46,7 +46,7 @@ launch the "Anaconda PowerShell Prompt" from the "Start" menu.
 
 Install PolyView on all platforms as:
 
-    conda create -c oleg-alexandrov -c conda-forge -n polyview polyview=1.0
+    conda create -c oleg-alexandrov -c conda-forge -n polyview polyview=1.1
 
 This will take a while to run and will download Qt and other
 supporting libraries.
@@ -64,7 +64,7 @@ and then run it from that shell as:
 
     C:\Users\UserName\Miniconda3\envs\polyview\bin\polyview.exe
 
-Replace ``UserName`` and the drive letter with specific values for your machine. 
+Replace ``UserName`` and the drive letter with specific values for your system. 
 
 See instructions further down for how to compile PolyView.
 
@@ -93,9 +93,11 @@ be improved in a collaborative manner.
 
 # Documentation
 
-## PolyView sample screenshot showing overlayed polygons and images
+## Screenshot
 
 ![PolyView screenshot](images/polyview_screenshot.png)
+
+An illustration of PolyView showing overlayed polygons and images.
 
 ## File format
 
@@ -133,7 +135,7 @@ text.
 ## Overlaying images
 
 PolyView can overlay images and polygons. The following image types
-are supported: JPG, PNG, GIF, BMP, and XPM.
+are supported: JPG, PNG, GIF, TIF, BMP, and XPM.
 
 For each image, for example, named ``image.jpg``, there must
 exist an ``image.txt`` metadata file having four numbers, which are the
