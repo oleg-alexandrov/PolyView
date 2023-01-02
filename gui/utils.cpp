@@ -374,20 +374,20 @@ void utils::imageToWorld(double ix, double iy, utils::PositionedImage const& img
 // Find the box containing all polygons and images
 void utils::setUpViewBox(// inputs
                          const std::vector<dPoly> & polyVec,
+                         // Ensure the produced box contains this box
+                         double in_xll, double in_yll, double in_xur, double in_yur,
                          // outputs
                          double & xll,  double & yll,
                          double & widx, double & widy) {
-
-  // TODO(oalexan1): Must take into account images here
-  // TODO(oalexan1): This function must move to polyView.cc as it needs images.
-  
-  // Given a set of polygons, set up a box containing these polygons.
 
   double xur, yur; // local variables
 
   bdBox(polyVec,             // inputs
         xll, yll, xur, yur); // outputs
 
+  xll = std::min(xll, in_xll); yll = std::min(yll, in_yll);
+  xur = std::max(xur, in_xur); yur = std::max(yur, in_yur);
+  
   // Treat the case of empty polygons
   if (xur < xll || yur < yll) {
     xll = 0.0; yll = 0.0; xur = 1000.0; yur = 1000.0;
@@ -407,3 +407,58 @@ void utils::setUpViewBox(// inputs
 
   return;
 }
+
+// The bounding box of an image in world coordinates
+void utils::imageToWorldBdBox(// inputs
+                              utils::PositionedImage const& positioned_img,
+                              // outputs
+                              double & xll, double & yll, double & xur, double & yur) {
+  
+  std::vector<int> x = {0, positioned_img.qimg.width(), positioned_img.qimg.width(), 0};
+  std::vector<int> y = {0, 0, positioned_img.qimg.height(), positioned_img.qimg.height()};
+  
+  double big = std::numeric_limits<double>::max();
+  xll = big; yll = big; xur = -big; yur = -big;
+  for (size_t c = 0; c < x.size(); c++) {
+    double wx, wy;
+    utils::imageToWorld(x[c], y[c], positioned_img, wx, wy);
+    
+    xll = std::min(xll, wx); yll = std::min(yll, wy);
+    xur = std::max(xur, wx); yur = std::max(yur, wy);
+  }
+
+  return;
+}
+
+// The bounding box of a sequence of images in world coordinates
+void utils::imageToWorldBdBox(// inputs
+                              const std::vector<dPoly> & polyVec,
+                              // outputs
+                              double & image_xll, double & image_yll,
+                              double & image_xur, double & image_yur) {
+
+  double big = DBL_MAX;
+  image_xll = big; image_yll = big; image_xur = -big; image_yur = -big;
+  
+  for (int vi = 0; vi < (int)polyVec.size(); vi++) {
+    
+    if (polyVec[vi].img == NULL)
+      continue;
+    
+    // Recover the image. This may crash if it was not populated correctly.
+    utils::PositionedImage const & positioned_img
+      = *(utils::PositionedImage*)(polyVec[vi].img);
+    
+    double xll, yll, xur, yur;
+    utils::imageToWorldBdBox(// inputs
+                             positioned_img,  
+                             // outputs
+                             xll, yll, xur, yur);
+    
+    image_xll = std::min(image_xll, xll); image_yll = std::min(image_yll, yll);
+    image_xur = std::max(image_xur, xur); image_yur = std::max(image_yur, yur);
+  }
+
+  return;
+}
+

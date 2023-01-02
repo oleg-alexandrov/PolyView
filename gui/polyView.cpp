@@ -311,8 +311,15 @@ void polyView::setupViewingWindow() {
   //     << m_screenWidX << ' ' << m_screenWidY << endl;
 
   if (m_resetView) {
-    setUpViewBox(m_polyVec, // inputs
-                 m_viewXll, m_viewYll, m_viewWidX, m_viewWidY); // outputs
+    // Find the bounding box of images
+    double big = DBL_MAX;
+    double image_xll = big, image_yll = big, image_xur = -big, image_yur = -big;
+    utils::imageToWorldBdBox(m_polyVec, // input  
+                             image_xll, image_yll, image_xur, image_yur); // outputs
+
+    // Add the bounding box of polygons and adjust a bit
+    utils::setUpViewBox(m_polyVec, image_xll, image_yll, image_xur, image_yur, // inputs
+                        m_viewXll, m_viewYll, m_viewWidX, m_viewWidY); // outputs
     m_resetView = false;
   }
 

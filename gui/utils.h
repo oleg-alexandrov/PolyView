@@ -138,10 +138,23 @@ namespace utils{
   // Find the box containing all polygons and images
   void setUpViewBox(// inputs
                     const std::vector<dPoly> & polyVec,
+                    // Ensure the produced box contains this box
+                    double in_xll, double in_yll, double in_xur, double in_yur,
                     // outputs
                     double & xll,  double & yll,
                     double & widx, double & widy);
 
+  // The bounding box of an image in world coordinates
+  void imageToWorldBdBox(// inputs
+                         PositionedImage const& positioned_img,
+                         // outputs
+                         double & xll, double & yll, double & xur, double & yur);
+
+  // The bounding box of a sequence of images in world coordinates
+  void imageToWorldBdBox(// inputs
+                         const std::vector<dPoly> & polyVec,
+                         // outputs
+                         double & xll, double & yll, double & xur, double & yur);
   
 }
 
