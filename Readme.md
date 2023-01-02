@@ -90,7 +90,7 @@ be improved in a collaborative manner.
 
 # Documentation
 
-## PolyView sample screenshot
+## PolyView sample screenshot showing overlayed polygons and images
 
 ![PolyView screenshot](images/polyview_screenshot.png)
 
