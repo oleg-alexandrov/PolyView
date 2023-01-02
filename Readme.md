@@ -253,9 +253,12 @@ provides a basic level of scripting and reproducibility.
 
 # Command line options
 
-PolyView will open simultaneously all polygon files supplied as inputs
-on the command line. Various command line options can modify how the
-polygons are displayed.
+PolyView will open simultaneously all polygon and image files supplied as inputs
+on the command line. Example:
+
+    polyview poly.xg image.png 
+
+Various command line options can modify how the polygons are displayed.
 
 * -h | -help	Show the available command line options
 * -geo[metry] `width`x`height`	The window size in pixels (for example, 800x800)
