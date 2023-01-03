@@ -85,8 +85,8 @@ large floating point vertex coordinates without overflowing and
 showing incorrect results. Credit for responsiveness goes to Qt, and
 issues with overflow required careful handling.
 
-PolyView can place alongside polygons images with desired location and
-scale.
+PolyView can place images alongside polygons, with desired position
+and scale.
 
 Lastly, PolyView is open-source and under a liberal license, and can
 be improved in a collaborative manner.
