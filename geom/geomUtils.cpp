@@ -43,6 +43,20 @@
 using namespace std;
 using namespace utils;
 
+
+void utils::Timer::tick(){
+	m_start = std::chrono::steady_clock::now();
+}
+void utils::Timer::tock(const std::string &prefix){
+	auto time_end = std::chrono::steady_clock::now();
+
+	std::chrono::duration<double> elapsed_seconds = time_end - m_start;
+
+	std::cout <<prefix <<" Time = "<< elapsed_seconds.count()<<  std::endl;
+
+	m_start = std::chrono::steady_clock::now();
+}
+
 std::ostream& operator<<(std::ostream& os, const anno& A){
   os << A.x << ' ' << A.y << ' ' << A.label << std::endl;
   return os;

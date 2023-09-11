@@ -27,6 +27,7 @@
 #include <cmath>
 #include <set>
 #include <cassert>
+#include <chrono>
 
 struct dPoint{
   double x, y;
@@ -58,6 +59,17 @@ struct anno {
 std::ostream& operator<<(std::ostream& os, const anno& A);
 
 namespace utils{
+
+class Timer {
+public:
+	Timer() = default;
+	void tick();
+	void tock(const std::string &prefix);
+
+private:
+	std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
+
+};
 
   void snapPolyLineTo45DegAngles(bool isClosedPolyLine,
                                  int numVerts, double * xv, double * yv);
@@ -101,6 +113,10 @@ namespace utils{
 
     bool isInSide(double x, double y) const {
     	return (x >= xl && x <= xh && y >= yl && y <= yh);
+    }
+
+    bool contains(const dRect &rec){
+    	return (xl <= rec.xl && xh >= rec.xh && yl <= rec.yl && yh >= rec.yh);
     }
   };
 

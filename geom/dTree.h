@@ -126,11 +126,13 @@ public:
 
   void getBoxesInRegion(double xl, double yl, double xh, double yh, // Inputs
                         std::vector<Box> & outBoxes                 // Outputs
-                        );
+                        ) const;
 
   boxNode<Box> * getTreeRoot(){
     return m_root;
   }
+  void clear();
+  size_t size() const { return m_nodePool.size();}
 
 private:
 
@@ -144,7 +146,7 @@ private:
                                 double xl, double yl, double xh, double yh,
                                 boxNode<Box> * root,
                                 // Outputs
-                                std::vector<Box> & outBoxes);
+                                std::vector<Box> & outBoxes) const;
 
   void reset();
   boxNode<Box> * getNewboxNode();
@@ -163,6 +165,10 @@ boxTree<Box>::boxTree(){
   return;
 }
 
+template <typename Box>
+void boxTree<Box>::clear(){
+	reset();
+}
 template <typename Box>
 void boxTree<Box>::reset(){
   m_freeNodeIndex = 0;
@@ -275,7 +281,7 @@ void boxTree<Box>::getBoxesInRegion(// Inputs
                                     double xl, double yl, double xh, double yh,
                                     // Output
                                     std::vector<Box> & outBoxes
-                                    ){
+                                    ) const{
 
   outBoxes.clear();
   if (xl > xh || yl > yh || m_root == NULL) return;
@@ -292,7 +298,7 @@ void boxTree<Box>::getBoxesInRegionInternal(// Inputs
                                             boxNode<Box> * root,
                                             // Outputs
                                             std::vector<Box> & outBoxes
-                                            ){
+                                            ) const{
 
   assert (root != NULL);
 

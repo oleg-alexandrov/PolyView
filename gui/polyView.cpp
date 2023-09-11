@@ -2007,6 +2007,10 @@ void polyView::createHighlightWithPixelInputs(int pxll, int pyll, int pxur, int 
 
 void polyView::createHighlightWithRealInputs(double xll, double yll, double xur, double yur) {
 
+
+  //utils::Timer my_clock;
+  //my_clock.tick();
+
   dPoly R;
   bool isPolyClosed = true;
   string color = m_prefs.fgColor, layer = "";
@@ -2017,6 +2021,8 @@ void polyView::createHighlightWithRealInputs(double xll, double yll, double xur,
   // Flag the polygons and annotations in the highlights
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
                   m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+
+  //my_clock.tock("markPolysInHlts");
 
   toggleMovePolys();
   saveDataForUndo(false);

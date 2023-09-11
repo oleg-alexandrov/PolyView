@@ -26,6 +26,7 @@
 #include <map>
 #include <baseUtils.h>
 #include <geomUtils.h>
+#include "dTree.h"
 
 namespace utils {
   
@@ -248,11 +249,13 @@ public:
   void * img;
   
 private:
+  const boxTree< dRectWithId> & getBoundingBoxTree() const;
+  void clearExtraData();
 
   bool getColorInCntFile(const std::string & line, std::string & color);
   void get_annoByType(std::vector<anno> & annotations, AnnoType annoType);
   void set_annoByType(const std::vector<anno> & annotations, AnnoType annoType);
-  std::vector<int> get_startingIndices() const;
+  const std::vector<int> & getStartingIndices() const;
   // If isPointCloud is true, treat each point as a set of unconnected points
   bool                     m_isPointCloud;
 
@@ -268,6 +271,10 @@ private:
   std::vector<anno>        m_vertIndexAnno; // Anno showing vertex index
   std::vector<anno>        m_polyIndexAnno; // Anno showing poly index in a set of polys
   std::vector<anno>        m_layerAnno;     // Anno showing layer number
+
+  mutable boxTree< dRectWithId> m_boundingBoxTree;
+  mutable std::vector<int>  m_startingIndices;
+
 };
 
 } // end namespace utils
