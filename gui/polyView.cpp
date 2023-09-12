@@ -660,7 +660,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     QColor color = QColor(colors[pIter].c_str());
     
     int pSize = numVerts[pIter];
-
+    if (pSize == 0) continue;
     // Determine the orientation of polygons
     double signedArea = 0.0;
     if (plotFilled && isPolyClosed[pIter]) {
@@ -668,10 +668,12 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     }
 
     // Scale the polygon to screen (pixel) coordinates
-    QPolygon pa(pSize);
+    // For closed polygons add the first point to the end so that all edges are drawn
+    QPolygon pa(isPolyClosed[pIter] ? pSize+1: pSize);
+    int x0, y0;
     for (int vIter = 0; vIter < pSize; vIter++) {
 
-      int x0, y0;
+
       worldToPixelCoords(xv[start + vIter], yv[start + vIter], // inputs
                          x0, y0);                              // outputs
       pa[vIter] = QPoint(x0, y0);
@@ -686,6 +688,11 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
           ) {
         drawOneVertex(x0, y0, color, lineWidth, drawVertIndex, paint);
       }
+    }
+    if (isPolyClosed[pIter]){
+    	worldToPixelCoords(xv[start], yv[start], // inputs
+    			x0, y0);                              // outputs
+    	pa[pSize] = QPoint(x0, y0);
     }
 
     if (pa.size() <= 0) continue;
@@ -706,27 +713,15 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
         int l_drawVertIndex = -1;
         drawOneVertex(pa[0].x(), pa[0].y(), color, lineWidth, l_drawVertIndex,
                       paint);
-      }else if (isPolyClosed[pIter]) {
+      }else {
 
         if (plotFilled) {
           paint->drawPolygon(pa);
         }else{
-          // In some versions of Qt, drawPolygon is buggy when not
-          // called to fill polygons. Don't use it, just draw the
-          // edges one by one.
-          int n = pa.size();
-          for (int k = 0; k < n; k++) {
-            QPolygon pb;
-            int x0, y0; pa.point(k, &x0, &y0);       pb << QPoint(x0, y0);
-            int x1, y1; pa.point((k+1)%n, &x1, &y1); pb << QPoint(x1, y1);
-            paint->drawPolyline(pb);
-          }
+        	paint->drawPolyline(pa); // don't join the last vertex to the first
         }
 
-      }else{
-        paint->drawPolyline(pa); // don't join the last vertex to the first
       }
-
     }
   }
 
