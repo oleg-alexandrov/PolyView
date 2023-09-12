@@ -81,7 +81,8 @@ public:
   void clipPoly(// inputs
                 double clip_xll, double clip_yll,
                 double clip_xur, double clip_yur,
-                dPoly & clippedPoly // output
+                dPoly & clippedPoly, // output
+				const std::map<int, int> *selected = nullptr // optional input, if provided only clip selected polygons
                 );
 
   void shift(double shift_x, double shift_y);

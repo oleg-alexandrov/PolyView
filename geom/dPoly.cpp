@@ -246,7 +246,8 @@ void dPoly::set_annoByType(const std::vector<anno> & annotations, AnnoType annoT
 void dPoly::clipPoly(// inputs
                      double clip_xll, double clip_yll,
                      double clip_xur, double clip_yur,
-                     dPoly & clippedPoly) { // output
+                     dPoly & clippedPoly, // output
+					 const std::map<int, int> *selected ) {
 
   assert(this != &clippedPoly); // source and destination must be different
 
@@ -275,6 +276,8 @@ void dPoly::clipPoly(// inputs
 
   for (auto &box : boxes) {
 	  int pIter = box.id;
+	  if (selected && selected->find(pIter) == selected->end()) continue;
+
 	  int start = starting_ids[pIter];
 
 	  int  isClosed = isPolyClosed [pIter];
@@ -1432,7 +1435,7 @@ const boxTree< dRectWithId> * dPoly::getBoundingBoxTree() const{
 	// We check the size too as an extra caution to make sure tree size matches polygons size.
 	// Size check is not needed ideally.
 	if (!m_boundingBoxTree || m_boundingBoxTree->size() != m_numVerts.size()){
-		//cout <<"DEBUG building tree "<< m_numVerts.size()<< endl;
+
 		if (m_boundingBoxTree) delete m_boundingBoxTree;
 		m_boundingBoxTree = new boxTree< dRectWithId>();
 
@@ -1443,8 +1446,6 @@ const boxTree< dRectWithId> * dPoly::getBoundingBoxTree() const{
 			rects.push_back(dRectWithId(xll[i],  yll[i], xur[i], yur[i], i));
 		}
 		m_boundingBoxTree->formTreeOfBoxes(rects);
-	} else {
-		//cout <<"DEBUG TREE exists"<<endl;
 	}
 	return m_boundingBoxTree;
 }

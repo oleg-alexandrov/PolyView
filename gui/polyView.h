@@ -228,7 +228,10 @@ private:
                  // An empty grid is a good choice if not text is present
                  std::vector<std::vector<int>> & textOnScreenGrid,
                  QPainter *paint,
-                 utils::dPoly &currPoly); // Make a local copy on purpose
+                 utils::dPoly &currPoly,
+				 // optional input, if provided only clip selected polygons
+				 const std::map<int, int> *selected = nullptr
+				 );
 
   void plotImage(QPainter *paint, utils::dPoly const& poly);
 

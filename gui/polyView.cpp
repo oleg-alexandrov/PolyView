@@ -530,15 +530,14 @@ void polyView::displayData(QPainter *paint) {
     bool showAnno = true;
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
               drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter]);
+
     if (!plotFilled && !m_selectedPolyIndices[vecIter].empty()) {
       // Plot the selected polys on top with thicker lines
-      dPoly lPolys;
+
       int lineWidth2 = 2*lineWidth;
-      m_polyVec[vecIter].extractMarkedPolys(m_selectedPolyIndices[vecIter], // input
-                                            lPolys                          // output
-                                            );
+
       plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth2,
-                drawVertIndex, textOnScreenGrid, paint, lPolys);
+                drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter], &m_selectedPolyIndices[vecIter] );
     }
 
   } // End iterating over sets of polygons
@@ -587,7 +586,8 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          // An empty grid is a good choice if not text is present
                          std::vector< std::vector<int> > & textOnScreenGrid,
                          QPainter *paint,
-                         dPoly &currPoly) { // Make a local copy on purpose
+                         dPoly &currPoly,
+						 const std::map<int, int> *selected) {
 
   //utils::Timer my_clock("polyView::plotDPoly");
   // Note: Having annotations at vertices can make the display
@@ -606,12 +606,6 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     currPoly.compLayerAnno();
   }
   
-  // When polys are filled, plot largest polys first
-  if (plotFilled)
-    currPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
-                                                    m_viewXll + m_viewWidX,
-                                                    m_viewYll + m_viewWidY,
-                                                    m_counter_cc);
 
   // Clip the polygon a bit beyond the viewing window, as to not see
   // the edges where the cut took place. It is a bit tricky to
@@ -627,7 +621,8 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                     m_viewXll + m_viewWidX + extraX,
                     m_viewYll + m_viewWidY + extraY,
                     // output
-                    clippedPoly);
+                    clippedPoly,
+					selected);
 
   //utils::Timer my_clock2("polyView::Paint");
   const double * xv               = clippedPoly.get_xv();
@@ -651,6 +646,13 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       clippedPoly.get_annotations(annotations);
     }
   }
+  // When polys are filled, plot largest polys first
+   if (plotFilled)
+	   clippedPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
+                                                     m_viewXll + m_viewWidX,
+                                                     m_viewYll + m_viewWidY,
+                                                     m_counter_cc);
+
 
   int start = 0;
   for (int pIter = 0; pIter < numPolys; pIter++) {
