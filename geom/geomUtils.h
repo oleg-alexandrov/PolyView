@@ -61,14 +61,21 @@ std::ostream& operator<<(std::ostream& os, const anno& A);
 namespace utils{
 
 class Timer {
+	// A class that prints time in seconds
 public:
-	Timer() = default;
-	void tick();
-	void tock(const std::string &prefix);
+	// Constructor will start the clock, prefix is the string to print before the time
+	Timer(const std::string &prefix);
+
+	// Destructor will print the time accumalated since the last tock or
+	// since the constructor if tock was not called before
+	~Timer();
+
+	// Print the accumulated time and restart the clock, append will be added to prefix when printing the time
+	void tock(const std::string &append);
 
 private:
-	std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
-
+	std::chrono::time_point<std::chrono::steady_clock> m_start;
+	std::string m_prefix;
 };
 
   void snapPolyLineTo45DegAngles(bool isClosedPolyLine,

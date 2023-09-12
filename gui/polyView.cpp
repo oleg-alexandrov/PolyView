@@ -461,6 +461,7 @@ void polyView::imageToScreenRect(// inputs
 // from world to screen coordinates.
 void polyView::displayData(QPainter *paint) {
 
+  //utils::Timer my_clock("polyView::displayData");
   setupViewingWindow(); // Must happen before anything else
 
   // This vector is used for sparsing out text on screen
@@ -586,8 +587,9 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          // An empty grid is a good choice if not text is present
                          std::vector< std::vector<int> > & textOnScreenGrid,
                          QPainter *paint,
-                         dPoly currPoly) { // Make a local copy on purpose
+                         dPoly &currPoly) { // Make a local copy on purpose
 
+  //utils::Timer my_clock("polyView::plotDPoly");
   // Note: Having annotations at vertices can make the display
   // slow for large polygons.
   // The operations below must happen before cutting,
@@ -627,6 +629,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                     // output
                     clippedPoly);
 
+  //utils::Timer my_clock2("polyView::Paint");
   const double * xv               = clippedPoly.get_xv();
   const double * yv               = clippedPoly.get_yv();
   const int    * numVerts         = clippedPoly.get_numVerts();
@@ -2008,8 +2011,6 @@ void polyView::createHighlightWithPixelInputs(int pxll, int pyll, int pxur, int 
 void polyView::createHighlightWithRealInputs(double xll, double yll, double xur, double yur) {
 
 
-  //utils::Timer my_clock;
-  //my_clock.tick();
 
   dPoly R;
   bool isPolyClosed = true;
@@ -2022,7 +2023,6 @@ void polyView::createHighlightWithRealInputs(double xll, double yll, double xur,
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
                   m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
 
-  //my_clock.tock("markPolysInHlts");
 
   toggleMovePolys();
   saveDataForUndo(false);

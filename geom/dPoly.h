@@ -249,7 +249,11 @@ public:
   void * img;
   
 private:
-  const boxTree< dRectWithId> & getBoundingBoxTree() const;
+  // This will create the bounding box tree and return a pointer to it
+  // If three is already created it will just return the pointer
+  const boxTree< dRectWithId> * getBoundingBoxTree() const;
+
+  // Clear pre-computed data if geometry changes
   void clearExtraData();
 
   bool getColorInCntFile(const std::string & line, std::string & color);
@@ -272,7 +276,9 @@ private:
   std::vector<anno>        m_polyIndexAnno; // Anno showing poly index in a set of polys
   std::vector<anno>        m_layerAnno;     // Anno showing layer number
 
-  mutable boxTree< dRectWithId> m_boundingBoxTree;
+  // The following items are used for performance.
+  // They should be cleared if geometry changes by calling clearExtraData()
+  mutable boxTree< dRectWithId> *m_boundingBoxTree = nullptr;
   mutable std::vector<int>  m_startingIndices;
 
 };

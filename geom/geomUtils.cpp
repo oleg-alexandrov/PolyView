@@ -43,16 +43,21 @@
 using namespace std;
 using namespace utils;
 
-
-void utils::Timer::tick(){
+utils::Timer::Timer(const std::string &prefix){
+	m_prefix = prefix;
 	m_start = std::chrono::steady_clock::now();
 }
-void utils::Timer::tock(const std::string &prefix){
+utils::Timer::~Timer(){
+	tock("");
+}
+
+void utils::Timer::tock(const std::string &append){
 	auto time_end = std::chrono::steady_clock::now();
 
 	std::chrono::duration<double> elapsed_seconds = time_end - m_start;
-
-	std::cout <<prefix <<" Time = "<< elapsed_seconds.count()<<  std::endl;
+	std::string msg = m_prefix + " " + append;
+	while(msg.size() < 50) msg +=("-");
+	std::cout <<msg <<" Time = "<< elapsed_seconds.count()<<  std::endl;
 
 	m_start = std::chrono::steady_clock::now();
 }

@@ -250,6 +250,7 @@ void dPoly::clipPoly(// inputs
 
   assert(this != &clippedPoly); // source and destination must be different
 
+
   clippedPoly.reset();
   clippedPoly.set_isPointCloud(m_isPointCloud);
 
@@ -262,10 +263,10 @@ void dPoly::clipPoly(// inputs
   const vector<string> layers     = get_layers();
 
   const std::vector<int>& starting_ids = getStartingIndices();
-  auto &box_tree = getBoundingBoxTree();
+  const auto *box_tree = getBoundingBoxTree();
 
   vector< dRectWithId> boxes;
-  box_tree.getBoxesInRegion(clip_xll, clip_yll, clip_xur, clip_yur, boxes);
+  box_tree->getBoxesInRegion(clip_xll, clip_yll, clip_xur, clip_yur, boxes);
 
   dRect clip_box(clip_xll, clip_yll, clip_xur, clip_yur);
 
@@ -1418,22 +1419,32 @@ void dPoly::writePoly(std::string filename, std::string defaultColor) {
   return;
 }
 void dPoly::clearExtraData(){
-	m_boundingBoxTree.clear();
+	delete m_boundingBoxTree;
+	m_boundingBoxTree = nullptr;
 	m_vertIndexAnno.clear();
 	m_polyIndexAnno.clear();
 
 }
-const boxTree< dRectWithId> & dPoly::getBoundingBoxTree() const{
+const boxTree< dRectWithId> * dPoly::getBoundingBoxTree() const{
 
-	if (m_boundingBoxTree.size() != m_numVerts.size()){
-		m_boundingBoxTree.clear();
+
+	// When polygons are changed m_boundingBoxTree,
+	// We check the size too as an extra caution to make sure tree size matches polygons size.
+	// Size check is not needed ideally.
+	if (!m_boundingBoxTree || m_boundingBoxTree->size() != m_numVerts.size()){
+		//cout <<"DEBUG building tree "<< m_numVerts.size()<< endl;
+		if (m_boundingBoxTree) delete m_boundingBoxTree;
+		m_boundingBoxTree = new boxTree< dRectWithId>();
+
 		std::vector<double> xll,  yll, xur, yur;
 		bdBoxes(xll,  yll, xur, yur);
 		std::vector<dRectWithId> rects; rects.reserve(xll.size());
 		for (size_t i = 0; i < xll.size(); i++){
 			rects.push_back(dRectWithId(xll[i],  yll[i], xur[i], yur[i], i));
 		}
-		m_boundingBoxTree.formTreeOfBoxes(rects);
+		m_boundingBoxTree->formTreeOfBoxes(rects);
+	} else {
+		//cout <<"DEBUG TREE exists"<<endl;
 	}
 	return m_boundingBoxTree;
 }
@@ -1601,23 +1612,47 @@ void dPoly::buildGrid(double xl, double yl, double xh, double yh,
 }
 
 void dPoly::markPolysIntersectingBox(// Inputs
-                                     double xll, double yll,
-                                     double xur, double yur,
-                                     // Outputs
-                                     std::map<int, int> & mark) const {
+		double xll, double yll,
+		double xur, double yur,
+		// Outputs
+		std::map<int, int> & mark) const {
 
-  mark.clear();
+	// If bounding box of a polygon intersects the region we will check that polygon for selection
 
-  auto &box_tree = getBoundingBoxTree();
+	mark.clear();
+	const std::vector<int>& starting_ids = getStartingIndices();
+	const auto *box_tree = getBoundingBoxTree();
 
-  vector< dRectWithId> boxes;
-  box_tree.getBoxesInRegion(xll, yll, xur, yur, boxes);
+	vector< dRectWithId> boxes;
+	box_tree->getBoxesInRegion(xll, yll, xur, yur, boxes);
 
-  for (auto &box : boxes) {
-	  mark[box.id] = 1;
-  }
+	dPoly onePoly, clippedPoly;
+	for (auto &box : boxes) {
+		int polyIndex = box.id;
+		int beg_inex = starting_ids[polyIndex];
+		if (m_numVerts[polyIndex] == 1){
 
-  return;
+			if (box.isInSide(m_xv[beg_inex], m_yv[beg_inex])){
+				mark[polyIndex] = 1;
+			}
+		} else {
+			extractOnePoly(polyIndex, // input
+					onePoly,
+					beg_inex);  // output
+
+			// A polygon intersects a rectangle if cut to the rectangle
+			// it returns a non-empty polygon
+			onePoly.clipPoly(xll, yll, xur, yur, // inputs
+					clippedPoly);       // outputs
+			if (clippedPoly.get_totalNumVerts() != 0){
+				mark[polyIndex] = 1;
+			}
+		}
+
+		mark[box.id] = 1;
+	}
+
+	return;
 }
 
 void dPoly::markAnnosIntersectingBox(// Inputs
