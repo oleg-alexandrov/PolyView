@@ -1179,9 +1179,9 @@ void polyView::translateSelectedPolys(std::vector<double> & shiftVec) {
   printCmd("translate_selected", shiftVec);
 
   m_highlights.clear();
-  markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
-  
+  m_selectedPolyIndices.clear();
+  m_selectedAnnoIndices.clear();
+
   saveDataForUndo(false);
 
   std::cout << "Resetting the view after the translation was applied." << std::endl;
@@ -1235,8 +1235,9 @@ void polyView::rotateSelectedPolys(std::vector<double> & angle) {
   printCmd("rotate_selected", angle);
 
   m_highlights.clear();
-  markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+  m_selectedPolyIndices.clear();
+  m_selectedAnnoIndices.clear();
+
 
   saveDataForUndo(false);
 
@@ -1289,8 +1290,9 @@ void polyView::scaleSelectedPolys(std::vector<double> & scale) {
   printCmd("scale_selected", scale);
 
   m_highlights.clear();
-  markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+  m_selectedPolyIndices.clear();
+  m_selectedAnnoIndices.clear();
+
 
   saveDataForUndo(false);
   refreshPixmap();
@@ -1345,8 +1347,9 @@ void polyView::transformSelectedPolys(std::vector<double> & T) {
   printCmd("transform_selected", T);
 
   m_highlights.clear();
-  markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+  m_selectedPolyIndices.clear();
+  m_selectedAnnoIndices.clear();
+
 
   saveDataForUndo(false);
 
@@ -1371,9 +1374,9 @@ void polyView::reverseSelectedPolys() {
   printCmd("reverse_selected");
 
   m_highlights.clear();
-  markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
-  
+  m_selectedPolyIndices.clear();
+  m_selectedAnnoIndices.clear();
+
   saveDataForUndo(false);
 
   refreshPixmap();
@@ -2014,7 +2017,11 @@ void polyView::createHighlightWithRealInputs(double xll, double yll, double xur,
   string color = m_prefs.fgColor, layer = "";
   R.setRectangle(min(xll, xur), min(yll, yur), max(xll, xur), max(yll, yur),
                  isPolyClosed, color, layer);
-  m_highlights.push_back(R);
+
+  // Only keep one highlight, multiple highlights are not really used
+  // and they increase painting time since inside of each highlight is painted separately
+  m_highlights.resize(1);
+  m_highlights[0] = R;
 
   // Flag the polygons and annotations in the highlights
   markPolysInHlts(m_polyVec, m_highlights, // Inputs
@@ -2467,7 +2474,6 @@ void polyView::toggleMovePolys() {
     m_displayMode = m_displayModeBk;
   }    
 
-  refreshPixmap();
   return;
 }
 
@@ -2534,8 +2540,8 @@ void polyView::toggleAlignMode() {
     m_moveEdges->setChecked(false);
 
     m_highlights.clear();
-    markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                    m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+    m_selectedPolyIndices.clear();
+    m_selectedAnnoIndices.clear();
 
     m_totalT.reset();
   }else{
@@ -2808,9 +2814,8 @@ void polyView::moveSelectedPolys() {
 
 void polyView::deselectPolysDeleteHlts() {
   m_highlights.clear();
-  markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
-
+  m_selectedPolyIndices.clear();
+  m_selectedAnnoIndices.clear();
 
   saveDataForUndo(false);
   refreshPixmap();
@@ -3515,9 +3520,8 @@ void polyView::deleteSelectedPolys() {
                    m_polyVec);
 
   m_highlights.clear();
-
-  markPolysInHlts(m_polyVec, m_highlights, // Inputs
-                  m_selectedPolyIndices, m_selectedAnnoIndices);  // Outputs
+  m_selectedPolyIndices.clear();
+  m_selectedAnnoIndices.clear();
 
   saveDataForUndo(false);
   refreshPixmap();
