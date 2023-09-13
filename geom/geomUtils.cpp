@@ -243,11 +243,6 @@ void utils::searchForColor(std::string lineStr, // input, not a reference on pur
 //      "orange", "yellow", "pink", "cyan", "lightGray",
 //      "darkGray", "fuchsia", "aqua", "navy", "gold"};
 
-  const char * xgraph_colors[] =
-    {"black", "white", "red", "blue", "green", "violet", // 0,  ..., 5
-     "orange", "yellow", "pink", "cyan", "#A2B5CD",      // 6,  ..., 10
-     "#6C7B8B", "#FF00FF", "#00CDCD", "navy", "gold"     // 11, ..., 15
-    };
 
   char       * line  = (char*)lineStr.c_str();
   const char * col   = "color";
@@ -272,6 +267,13 @@ void utils::searchForColor(std::string lineStr, // input, not a reference on pur
 
   color = string(pch);
 
+  const char * xgraph_colors[] =
+    {"black", "white", "red", "blue", "green", "violet", // 0,  ..., 5
+     "orange", "yellow", "pink", "cyan", "#A2B5CD",      // 6,  ..., 10
+     "#6C7B8B", "#FF00FF", "#00CDCD", "navy", "gold"     // 11, ..., 15
+    };
+
+
   int numColors = sizeof(xgraph_colors)/sizeof(char*);
 
   // If the color is given as a number, per xgraph's conventions
@@ -291,13 +293,15 @@ bool utils::searchForAnnotation(std::string lineStr, anno & annotation){
   // Return true on success.
 
   istringstream iss (lineStr);
-  string an, label;
+  string an;
   double x, y;
+  if ( ( !(iss >> an)) || an != "anno") return false;
 
-  if ( ( !(iss >> an >> x >> y) ) || an != "anno" ){
+  if ( !(iss >> x >> y) ){
     return false;
   }
 
+  string label;
   getline(iss, label); // Everything else goes to the label
 
   annotation.x     = x;
