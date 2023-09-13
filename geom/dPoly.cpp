@@ -1650,7 +1650,6 @@ void dPoly::markPolysIntersectingBox(// Inputs
 			}
 		}
 
-		mark[box.id] = 1;
 	}
 
 	return;
