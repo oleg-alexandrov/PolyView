@@ -1198,7 +1198,7 @@ void polyView::translateSelectedPolys(std::vector<double> & shiftVec) {
 
   saveDataForUndo(false);
 
-  std::cout << "Resetting the view after the translation was applied." << std::endl;
+  std::cout << " Resetting the view after the translation was applied." << std::endl;
   resetView();  
   
   return;
@@ -1255,7 +1255,7 @@ void polyView::rotateSelectedPolys(std::vector<double> & angle) {
 
   saveDataForUndo(false);
 
-  std::cout << "Resetting the view after the rotation was applied." << std::endl;
+  std::cout << " Resetting the view after the rotation was applied." << std::endl;
   resetView();  
 
   return;
@@ -1311,7 +1311,7 @@ void polyView::scaleSelectedPolys(std::vector<double> & scale) {
   saveDataForUndo(false);
   refreshPixmap();
 
-  std::cout << "Resetting the view after the scale was applied." << std::endl;
+  std::cout << " Resetting the view after the scale was applied." << std::endl;
   resetView();
   
   return;
@@ -1367,7 +1367,7 @@ void polyView::transformSelectedPolys(std::vector<double> & T) {
 
   saveDataForUndo(false);
 
-  std::cout << "Resetting the view after the transform was applied." << std::endl;
+  std::cout << " Resetting the view after the transform was applied." << std::endl;
   resetView();  
 
   return;
@@ -2099,7 +2099,7 @@ void polyView::printCurrCoords(const Qt::MouseButton & state, // input
 
   }
 
-  cout << "Point" << " ("
+  cout <<setprecision(16)<< " Point" << " ("
        << wx << ", " << wy << ")";
   if (m_prevClickExists) {
     cout  << " dist from prev: ("
@@ -2288,11 +2288,11 @@ void polyView::toggleDifferentColors() {
   m_polyVecBk        = m_polyVec;
   m_polyOptionsVecBk = m_polyOptionsVec;
 
-  cout << "Changing the polygons colors" << endl;
+  cout << " Changing the polygons colors" << endl;
   for (int pIter = 0; pIter < (int)m_polyVec.size(); pIter++) {
     string color = colors[pIter % numColors];
     m_polyVec[pIter].set_color(color);
-    cout << color << "\t" << m_polyOptionsVec[pIter].polyFileName << endl;
+    cout <<" "<< color << "\t" << m_polyOptionsVec[pIter].polyFileName << endl;
   }
 
   refreshPixmap();
@@ -2331,7 +2331,7 @@ void polyView::toggleShowPolyDiff() {
   }
 
   if (m_polyVec.size() > 2) {
-    cout << "Showing the differences of the first two polygon files "
+    cout << " Showing the differences of the first two polygon files "
          << "and ignoring the rest" << endl;
   }
 
@@ -2355,7 +2355,7 @@ void polyView::toggleShowPolyDiff() {
                vP, vQ // outputs
                );
 
-  cout << "Changing the polygons colors to " << color1 << " and "
+  cout << " Changing the polygons colors to " << color1 << " and "
        << color2 << " in show-poly-diff mode." << endl;
 
   P.set_color(color1);
@@ -2427,7 +2427,7 @@ void polyView::plotDiff(int direction) {
   // The segment to plot
   segDist S = m_distVec[m_indexOfDistToPlot];
 
-  cout << "Distance: " << S.dist << endl;
+  cout << " Distance: " << S.dist << endl;
   
   if (S.dist == 0) {
     // Skip 0 diffs, as those are not interesting. First see if there's a non-zero diff.
@@ -2440,7 +2440,7 @@ void polyView::plotDiff(int direction) {
     }
 
     if (has_nonzero_diff) {
-      std::cout << "Skipping vertex at which the polygons are agree fully." << std::endl;
+      std::cout << " Skipping vertex at which the polygons are agree fully." << std::endl;
       plotDiff(direction); // call itself
       return;
     }
@@ -2559,7 +2559,7 @@ void polyView::toggleAlignMode() {
 
     m_totalT.reset();
   }else{
-    cout << "\nCombined transform:" << endl;
+    cout << "\n Combined transform:" << endl;
     m_totalT.print();
     cout << endl;
   }
@@ -2799,7 +2799,7 @@ void polyView::saveMark() {
 
   plotMark(m_menuX, m_menuY);
 
-  cout << "Saving the mark to " << markFile << endl;
+  cout << " Saving the mark to " << markFile << endl;
   ofstream mark(markFile.c_str());
   mark << "color = white" << endl;
   mark << m_menuX << ' ' << m_menuY << endl;
@@ -2959,7 +2959,7 @@ void polyView::restoreDataAtUndoPos() {
 void polyView::undo() {
 
   if (m_posInUndoStack <= 0) {
-    cout << "No actions to undo" << endl;
+    cout << " No actions to undo" << endl;
     return;
   }
 
@@ -2976,7 +2976,7 @@ void polyView::undo() {
 void polyView::redo() {
 
   if (m_posInUndoStack + 1 >= (int)m_polyVecStack.size()) {
-    cout << "No actions to redo" << endl;
+    cout << " No actions to redo" << endl;
     return;
   }
 
@@ -3170,7 +3170,7 @@ void polyView::saveOnePoly() {
   }
 
   poly.writePoly(fileName);
-  cout << "Polygons saved to " << fileName << endl;
+  cout << " Polygons saved to " << fileName << endl;
 
   return;
 }
@@ -3205,7 +3205,7 @@ void polyView::writeMultiplePolys(bool overwrite) {
   }
 
   if ((int)m_polyVec.size() > 0) {
-    cout << "Polygons saved to" << allFiles << endl;
+    cout << " Polygons saved to" << allFiles << endl;
   }
 
   return;
@@ -3341,7 +3341,7 @@ void polyView::printCmd(std::string cmd, const std::vector<double> & vals) {
   }
   S << endl;
 
-  cout << S.str();
+  cout <<" "<< S.str();
 
   return;
 }
@@ -3353,7 +3353,7 @@ void polyView::printCmd(std::string cmd, double xll, double yll,
   int prec = 16;
   S.precision(prec);
   S << cmd << ' ' << xll << ' ' << yll << ' ' << widX << ' ' << widY << endl;
-  cout << S.str();
+  cout <<" "<< S.str();
 
   return;
 }
@@ -3364,7 +3364,7 @@ void polyView::printCmd(std::string cmd) {
   int prec = 16;
   S.precision(prec);
   S << cmd << endl;
-  cout << S.str();
+  cout <<" "<< S.str();
 
   return;
 }
@@ -3507,7 +3507,7 @@ double polyView::calcGrid(double widx, double widy) {
   double grid = max(widx, widy)/50;
 
   if (grid <= 0) {
-    cout << "Warning: non-positive width and height" << endl;
+    cout << " Warning: non-positive width and height" << endl;
     return 1.0;
   }
 
