@@ -62,6 +62,22 @@ void dPoly::reset() {
   clearExtraData();
 }
 
+void dPoly::annoBdBox(double & xll, double & yll, double & xur, double & yur) const {
+
+	xll = yll = DBL_MAX/4.0;
+	xur = yur = -DBL_MAX/4.0; // Use 1/4.0 to avoid overflow when ...
+	// ... finding width and height
+
+	for (int s = 0; s < (int)m_annotations.size(); s++) {
+		const anno & A = m_annotations[s];
+		xll = min(xll, A.x);
+		xur = max(xur, A.x);
+		yll = min(yll, A.y);
+		yur = max(yur, A.y);
+	}
+
+}
+
 void dPoly::bdBox(double & xll, double & yll, double & xur, double & yur) const {
 
   // The bounding box of all polygons

@@ -170,6 +170,7 @@ public:
   void compLayerAnno();
 
   void bdBox(double & xll, double & yll, double & xur, double & yur) const;
+  void annoBdBox(double & xll, double & yll, double & xur, double & yur) const;
 
   void bdBoxes(std::vector<double> & xll, std::vector<double> & yll,
                std::vector<double> & xur, std::vector<double> & yur) const;

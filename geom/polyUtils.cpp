@@ -413,11 +413,17 @@ void utils::bdBox(const std::vector<dPoly> & polyVec,
   double big = DBL_MAX;
   xll = big; yll = big; xur = -big; yur = -big;
   for (int p = 0; p < (int)polyVec.size(); p++) {
-    if (polyVec[p].get_totalNumVerts() == 0) continue;
+
     double xll0, yll0, xur0, yur0;
     polyVec[p].bdBox(xll0, yll0, xur0, yur0);
     xll = min(xll, xll0); xur = max(xur, xur0);
     yll = min(yll, yll0); yur = max(yur, yur0);
+
+    polyVec[p].annoBdBox(xll0, yll0, xur0, yur0);
+
+    xll = min(xll, xll0); xur = max(xur, xur0);
+    yll = min(yll, yll0); yur = max(yur, yur0);
+
   }
 
   return;
