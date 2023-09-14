@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 env:
-  PATH: "/usr/bin:/c/Users/runneradmin/bin:/c/aliyun-cli:/c/tools/zstd:/c/Program Files/Mercurial:/c/hostedtoolcache/windows/stack/2.11.1/x64:/c/cabal/bin:/c/ghcup/bin:/c/Program Files/dotnet:/c/mysql/bin:/c/Program Files/R/R-4.3.1/bin/x64:/c/SeleniumWebDrivers/GeckoDriver:/c/Program Files (x86)/sbt/bin:/c/Program Files (x86)/GitHub CLI:/bin:/c/Program Files (x86)/pipx_bin:/c/npm/prefix:/c/Windows/system32:/c/Windows:/c/Windows/System32/Wbem:/c/Windows/System32/WindowsPowerShell/v1.0:/c/Program Files/PowerShell/7:/c/Strawberry/c/bin:/c/Strawberry/perl/site/bin:/c/Strawberry/perl/bin:/usr/bin:/c/Program Files/GitHub CLI:C:\Program Files\Git\bin:C:\Program Files\Git\usr\bin:C:\Program Files\Git\mingw64\bin"
+  PATH: "/usr/bin:/c/Users/runneradmin/bin:/c/aliyun-cli:/c/tools/zstd:/c/Program Files/Mercurial:/c/hostedtoolcache/windows/stack/2.11.1/x64:/c/cabal/bin:/c/ghcup/bin:/c/Program Files/dotnet:/c/mysql/bin:/c/Program Files/R/R-4.3.1/bin/x64:/c/SeleniumWebDrivers/GeckoDriver:/c/Program Files (x86)/sbt/bin:/c/Program Files (x86)/GitHub CLI:/bin:/c/Program Files (x86)/pipx_bin:/c/npm/prefix:/c/Windows/system32:/c/Windows:/c/Windows/System32/Wbem:/c/Windows/System32/WindowsPowerShell/v1.0:/c/Program Files/PowerShell/7:/c/Strawberry/c/bin:/c/Strawberry/perl/site/bin:/c/Strawberry/perl/bin:/usr/bin:/c/Program Files/GitHub CLI:C:/Program Files/Git/bin:C:/Program Files/Git/usr/bin:C:/Program Files/Git/mingw64/bin"
 
 jobs:
   WindowsCondaBuild:
