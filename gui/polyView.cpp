@@ -86,7 +86,6 @@ polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
 
   m_resetView       = true;
   m_prevClickExists = false;
-  m_firstPaintEvent = true;
 
   m_showAnnotations    = true;
   m_showVertOrPolyIndexAnno  = 0;
@@ -1479,14 +1478,7 @@ void polyView::refreshPixmap() {
 
 void polyView::paintEvent(QPaintEvent *) {
 
-  if (m_firstPaintEvent) {
-    // This will be called the very first time the display is
-    // initialized. There must be a better way.
-    m_firstPaintEvent = false;
-    refreshPixmap(); // Create m_pixmap which we will use as cache
-  }
-
-  // Note that we draw from the cached pixmap, instead of redrawing
+    // Note that we draw from the cached pixmap, instead of redrawing
   // the image from scratch.
   QStylePainter paint(this);
   paint.drawPixmap(0, 0, m_pixmap);
