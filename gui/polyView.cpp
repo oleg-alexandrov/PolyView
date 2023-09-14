@@ -527,11 +527,25 @@ void polyView::displayData(QPainter *paint) {
 
     if (plotPoints) drawVertIndex++;
 
-    bool showAnno = true;
-    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
-              drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter]);
+    bool has_selected = !plotFilled && !m_selectedPolyIndices[vecIter].empty();
 
-    if (!plotFilled && !m_selectedPolyIndices[vecIter].empty()) {
+    // Mark un-selected polygons and plot un-selected ones before selected ones
+    std::map<int, int> un_selected;
+    if (has_selected){
+    	int Np = m_polyVec[vecIter].get_numPolys();
+    	for (int i = 0; i < Np; i++) {
+    		auto it = m_selectedPolyIndices[vecIter].find(i);
+    		if (it == m_selectedPolyIndices[vecIter].end()) un_selected[i] = 1;
+    	}
+    }
+
+    bool showAnno = true;
+    // Plot all or un-selected ones if there are selected ones
+    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
+              drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter],
+			  has_selected ? &un_selected : nullptr);
+
+    if (has_selected) {
       // Plot the selected polys on top with thicker lines
 
       int lineWidth2 = 2*lineWidth;
