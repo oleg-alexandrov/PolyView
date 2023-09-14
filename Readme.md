@@ -318,8 +318,8 @@ the flags ``--dirty --keep-old-work``. See also the
 On Windows, Visual Studio is needed. On OSX, XCode may be
 necessary. On Linux, the compiler is fetched by conda.
 
-# Author
+# Authors
 
-Oleg Alexandrov (oleg.alexandrov@gmail.com)
+Oleg Alexandrov (oleg.alexandrov@gmail.com), Bayram Yenikaya
 
 Many thanks to Anish Rasal Raj for porting PolyView to Qt 5.
