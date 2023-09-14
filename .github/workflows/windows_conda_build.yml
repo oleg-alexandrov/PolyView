@@ -12,10 +12,19 @@ jobs:
     runs-on: windows-latest
 
     steps:
+
+    - name: Check env variables
+      shell: bash
+      id: env_check
+      run: |
+        env
+
+    - name: Checkout  
     - uses: actions/checkout@v2
       with:
         submodules: recursive
 
+    - name: Setup Ninja
     - uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: Setup MSVC
