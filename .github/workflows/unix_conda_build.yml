@@ -9,7 +9,7 @@ on:
 env:
   # Note that this the Ubuntu version shows up twice below, because of
   # limitations of the synax of this file.
-  LINUX_VERSION: ubuntu-18.04
+  LINUX_VERSION: ubuntu-22.04
 
 jobs:
   UnixCondaBuild:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-       os: [ubuntu-18.04, macos-latest]
+       os: [ubuntu-22.04, macos-latest]
 
     defaults:
       run:
