@@ -666,6 +666,16 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                                                      m_viewYll + m_viewWidY,
                                                      m_counter_cc);
 
+   if (!selected && clippedPoly.get_totalNumVerts() >= 50000){
+       // This is done for performance
+       // when too many polygons/points are drawn in a large area we don't need
+       // to use larger lineWidth; we cannot tell them apart anyways.
+       // When we zoom in fewer polygons are in the view and it uses
+       // user setting for lineWidth.
+       // Don't do this if there are selected polygons, in that case we want to draw
+       // with specified lineWidth to tell them apart
+       lineWidth = 1;
+   }
 
   int start = 0;
   for (int pIter = 0; pIter < numPolys; pIter++) {
@@ -695,12 +705,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
       // Qt's built in points are too small. Instead of drawing a point
       // draw a small shape.
-      int tol = 4; // This is a bug fix for missing points. I don't understand
-      //           // why this is necessary and why the number 4 is right.
-      if (plotPoints                                                      &&
-          x0 > m_screenXll - tol && x0 < m_screenXll + m_screenWidX + tol &&
-          y0 > m_screenYll - tol && y0 < m_screenYll + m_screenWidY + tol
-          ) {
+      if (plotPoints) {
         drawOneVertex(x0, y0, color, lineWidth, drawVertIndex, paint);
       }
     }
@@ -2183,19 +2188,28 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
 
   }else if (drawVertIndex%numTypes == 2) {
 
-    // Draw an empty triangle
-    paint->setBrush(Qt::NoBrush);
-    paint->drawLine(x0 - len, y0 - len, x0 + len, y0 - len);
-    paint->drawLine(x0 - len, y0 - len, x0 + 0,   y0 + len);
-    paint->drawLine(x0 + len, y0 - len, x0 + 0,   y0 + len);
+      // Draw an empty triangle
+      paint->setBrush(Qt::NoBrush);
+      int xl = x0 - len;
+      int xr = x0 + len;
+      int yl = y0 - len;
+      int yr = y0 + len;
+
+      paint->drawLine(xl, yl, xr, yl);
+      paint->drawLine(xl, yl, x0,   yr);
+      paint->drawLine(xr, yl, x0,   yr);
 
   }else{
+      int xl = x0 - len;
+      int xr = x0 + len;
+      int yl = y0 - len;
+      int yr = y0 + len;
 
-    // Draw an empty reversed triangle
-    paint->setBrush(Qt::NoBrush);
-    paint->drawLine(x0 - len, y0 + len, x0 + len, y0 + len);
-    paint->drawLine(x0 - len, y0 + len, x0 + 0,   y0 - len);
-    paint->drawLine(x0 + len, y0 + len, x0 + 0,   y0 - len);
+      // Draw an empty reversed triangle
+      paint->setBrush(Qt::NoBrush);
+      paint->drawLine(xl, yr, xr, yr);
+      paint->drawLine(xl, yr, x0,   yl);
+      paint->drawLine(xr, yr, x0,   yl);
 
   }
 
