@@ -1438,8 +1438,7 @@ void dPoly::writePoly(std::string filename, std::string defaultColor) {
   return;
 }
 void dPoly::clearExtraData(){
-	delete m_boundingBoxTree;
-	m_boundingBoxTree = nullptr;
+	m_boundingBoxTree.clear();
 	m_vertIndexAnno.clear();
 	m_polyIndexAnno.clear();
 
@@ -1447,13 +1446,10 @@ void dPoly::clearExtraData(){
 const boxTree< dRectWithId> * dPoly::getBoundingBoxTree() const{
 
 
-	// When polygons are changed m_boundingBoxTree,
+	// When polygons are changed m_boundingBoxTree must be updated,
 	// We check the size too as an extra caution to make sure tree size matches polygons size.
 	// Size check is not needed ideally.
-	if (!m_boundingBoxTree || m_boundingBoxTree->size() != m_numVerts.size()){
-
-		if (m_boundingBoxTree) delete m_boundingBoxTree;
-		m_boundingBoxTree = new boxTree< dRectWithId>();
+	if ( m_boundingBoxTree.size() != m_numVerts.size()){
 
 		std::vector<double> xll,  yll, xur, yur;
 		bdBoxes(xll,  yll, xur, yur);
@@ -1461,9 +1457,9 @@ const boxTree< dRectWithId> * dPoly::getBoundingBoxTree() const{
 		for (size_t i = 0; i < xll.size(); i++){
 			rects.push_back(dRectWithId(xll[i],  yll[i], xur[i], yur[i], i));
 		}
-		m_boundingBoxTree->formTreeOfBoxes(rects);
+		m_boundingBoxTree.formTreeOfBoxes(rects);
 	}
-	return m_boundingBoxTree;
+	return &m_boundingBoxTree;
 }
 bool dPoly::getColorInCntFile(const std::string & line, std::string & color) {
 

@@ -280,7 +280,7 @@ private:
 
   // The following items are used for performance.
   // They should be cleared if geometry changes by calling clearExtraData()
-  mutable boxTree< dRectWithId> *m_boundingBoxTree = nullptr;
+  mutable boxTree< dRectWithId> m_boundingBoxTree;
   mutable std::vector<int>  m_startingIndices;
 
 };

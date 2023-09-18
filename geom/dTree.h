@@ -120,6 +120,9 @@ class boxTree{
 
 public:
   boxTree();
+  // copy constructor
+  boxTree(const boxTree &btree);
+
   void formTreeOfBoxes(// Boxes will be reordered but otherwise
                        // unchanged inside this function
                        std::vector<Box> & Boxes);
@@ -163,6 +166,21 @@ template <typename Box>
 boxTree<Box>::boxTree(){
   reset();
   return;
+}
+
+// copy constructor
+// We copy boxes and rebuild the tree
+// This is inefficient but a proper copy constructor requires
+// a lot of tedious code.
+template <typename Box>
+boxTree<Box>::boxTree(const boxTree &btree){
+	reset();
+	std::vector<Box>  Boxes;
+	Boxes.reserve(btree.size());
+	for (const auto &node : btree.m_nodePool){
+		Boxes.push_back(node.Rect);
+	}
+	formTreeOfBoxes(Boxes);
 }
 
 template <typename Box>
