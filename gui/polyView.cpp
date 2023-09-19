@@ -680,14 +680,12 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                                                      m_viewYll + m_viewWidY,
                                                      m_counter_cc);
 
-   if (!selected && clippedPoly.get_totalNumVerts() >= 50000){
+   if (clippedPoly.get_totalNumVerts() >= 50000){
        // This is done for performance
        // when too many polygons/points are drawn in a large area we don't need
        // to use larger lineWidth; we cannot tell them apart anyways.
        // When we zoom in fewer polygons are in the view and it uses
        // user setting for lineWidth.
-       // Don't do this if there are selected polygons, in that case we want to draw
-       // with specified lineWidth to tell them apart
        lineWidth = 1;
    }
 
