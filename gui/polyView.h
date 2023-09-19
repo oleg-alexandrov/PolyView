@@ -220,6 +220,8 @@ private:
                      int drawVertIndex, QPainter * paint);
   void updateRubberBand(QRect & R);
 
+  bool hasSelectedPolygons() const;
+
   void displayData( QPainter *paint );
   void plotDPoly(bool plotPoints, bool plotEdges,
                  bool plotFilled, bool showAnno,
@@ -230,7 +232,9 @@ private:
                  QPainter *paint,
                  utils::dPoly &currPoly,
 				 // optional input, if provided only clip selected polygons
-				 const std::map<int, int> *selected = nullptr
+				 const std::map<int, int> *selected = nullptr,
+				 int lighter_darker = 0 // draw color as  0: normal, 1: darker, -1: lighter
+
 				 );
 
   void plotImage(QPainter *paint, utils::dPoly const& poly);

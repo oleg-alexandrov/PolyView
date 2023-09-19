@@ -456,6 +456,16 @@ void polyView::imageToScreenRect(// inputs
   screenRect.setCoords(min_ix, min_iy, max_ix, max_iy);
 }
 
+// Return true if there are selected polygons
+bool polyView::hasSelectedPolygons() const{
+    for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
+        bool plotFilled = m_polyOptionsVec[vi].isPolyFilled || m_showFilledPolys;
+        if (plotFilled) continue;
+        if (m_selectedPolyIndices.find(vi) == m_selectedPolyIndices.end()) continue;
+        if (!m_selectedPolyIndices.at(vi).empty()) return true;
+    }
+    return false;
+}
 // Plot the current data. See worldToPixelCoords() for how to convert
 // from world to screen coordinates.
 void polyView::displayData(QPainter *paint) {
@@ -497,6 +507,9 @@ void polyView::displayData(QPainter *paint) {
 
   // Init the grid if needed
   initTextOnScreenGrid(textOnScreenGrid);
+
+  // Draw un-selected polygons darker
+  int lighter_darker = hasSelectedPolygons() ? 1 : 0;
 
   // Plot the images and polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
@@ -541,16 +554,16 @@ void polyView::displayData(QPainter *paint) {
     bool showAnno = true;
     // Plot all or un-selected ones if there are selected ones
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
-              drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter],
-			  has_selected ? &un_selected : nullptr);
+            drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter],
+            has_selected ? &un_selected : nullptr,
+            lighter_darker // plot un-selected polygons darker
+            );
 
     if (has_selected) {
-      // Plot the selected polys on top with thicker lines
-
-      int lineWidth2 = 2*lineWidth;
-
-      plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth2,
-                drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter], &m_selectedPolyIndices[vecIter] );
+      plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
+                drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter], &m_selectedPolyIndices[vecIter],
+                -lighter_darker // plot selected polygons lighter
+                );
     }
 
   } // End iterating over sets of polygons
@@ -600,7 +613,8 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          std::vector< std::vector<int> > & textOnScreenGrid,
                          QPainter *paint,
                          dPoly &currPoly,
-						 const std::map<int, int> *selected) {
+						 const std::map<int, int> *selected,
+						 int lighter_darker) {
 
   //utils::Timer my_clock("polyView::plotDPoly");
   // Note: Having annotations at vertices can make the display
@@ -683,7 +697,14 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     if (pIter > 0) start += numVerts[pIter - 1];
 
     QColor color = QColor(colors[pIter].c_str());
-    
+
+    if (lighter_darker == 1) {
+        color = color.darker(150); // 50% darker
+    }
+    if (lighter_darker == -1){
+        color = color.lighter(130); // 30% lighter
+    }
+
     int pSize = numVerts[pIter];
     if (pSize == 0) continue;
     // Determine the orientation of polygons
