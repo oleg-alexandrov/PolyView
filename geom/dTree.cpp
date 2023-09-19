@@ -128,8 +128,8 @@ void edgeTree::findClosestEdgeToPoint(// inputs
   
   closestDist = DBL_MAX;
 
-  boxNode<dRectWithId> * root = m_boxTree.getTreeRoot();
-  if (root == NULL) return;
+  int root = m_boxTree.getTreeRoot();
+  if (root == -1) return;
     
   findClosestEdgeToPointInternal(x0, y0, root,            // inputs 
                                  closestEdge, closestDist // outputs
@@ -149,7 +149,7 @@ void edgeTree::findClosestEdgeToPoint(// inputs
 
 void edgeTree::findClosestEdgeToPointInternal(// inputs
                                               double x0, double y0,
-                                              boxNode<utils::dRectWithId> * root,
+                                              int root,
                                               // outputs
                                               utils::seg & closestEdge,
                                               double     & closestDist
@@ -159,9 +159,10 @@ void edgeTree::findClosestEdgeToPointInternal(// inputs
   // node. Decide if first to visit the left or right subtree from the
   // root depending on which looks more promising.
   
-  assert (root != NULL);
+  assert (root != -1);
+ const auto &bnode = m_boxTree.getBoxNode(root);
   
-  dRectWithId R = root->Rect;
+  dRectWithId R = bnode.Rect;
   double bx, by, ex, ey;
   boxToEdge(R,             // input
             bx, by, ex, ey // outputs
@@ -184,31 +185,31 @@ void edgeTree::findClosestEdgeToPointInternal(// inputs
 
   // Unify the left-right and down-up cases to avoid duplicating code.
   double lx0 = x0, ly0 = y0, lmidx = midx, lmidy = midy;
-  if (!root->isLeftRightSplit){ // down-up split
+  if (!bnode.isLeftRightSplit){ // down-up split
     swap(lx0,   ly0);
     swap(lmidx, lmidy);
   }
   
   if (lx0 <= lmidx){
     // Search the entire left subtree first
-    if (root->left != NULL)
-      findClosestEdgeToPointInternal(x0, y0, root->left,      // inputs 
+    if (bnode.left != -1)
+      findClosestEdgeToPointInternal(x0, y0, bnode.left,      // inputs
                                      closestEdge, closestDist // outputs
                                      );
     // Don't go right unless there's any chance on improving what we already found
-    bool bad = (root->right == NULL || lx0 + closestDist <= root->minInRightChild);
-    if (!bad) findClosestEdgeToPointInternal(x0, y0, root->right,     // inputs 
+    bool bad = (bnode.right == -1 || lx0 + closestDist <= bnode.minInRightChild);
+    if (!bad) findClosestEdgeToPointInternal(x0, y0, bnode.right,     // inputs
                                              closestEdge, closestDist // outputs
                                              );
   }else{
     // Search the entire right subtree first
-    if (root->right != NULL)
-      findClosestEdgeToPointInternal(x0, y0, root->right,     // inputs 
+    if (bnode.right != -1)
+      findClosestEdgeToPointInternal(x0, y0, bnode.right,     // inputs
                                      closestEdge, closestDist // outputs
                                      );
     // Don't go left unless there's any chance on improving what we already found
-    bool bad = (root->left == NULL || root->maxInLeftChild + closestDist <= lx0);
-    if (!bad) findClosestEdgeToPointInternal(x0, y0, root->left,      // inputs 
+    bool bad = (bnode.left == -1 || bnode.maxInLeftChild + closestDist <= lx0);
+    if (!bad) findClosestEdgeToPointInternal(x0, y0, bnode.left,      // inputs
                                              closestEdge, closestDist // outputs
                                              );
     

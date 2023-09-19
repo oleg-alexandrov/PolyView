@@ -1019,7 +1019,8 @@ void dPoly::reverseMarkedPolys(std::map<int, int> const & mark) {
 
 const std::vector<int>& dPoly::getStartingIndices() const{
 
-	if ((int) m_startingIndices.size() == m_numPolys +1) return m_startingIndices;
+
+	if ((int) m_startingIndices.size() == (m_numPolys +1)) return m_startingIndices;
 
 	m_startingIndices.clear();
 	int start = 0;
@@ -1642,13 +1643,12 @@ void dPoly::markPolysIntersectingBox(// Inputs
 	dPoly onePoly, clippedPoly;
 	for (auto &box : boxes) {
 		int polyIndex = box.id;
-		int beg_inex = starting_ids[polyIndex];
-		if (m_numVerts[polyIndex] == 1){
 
-			if (box.isInSide(m_xv[beg_inex], m_yv[beg_inex])){
-				mark[polyIndex] = 1;
-			}
+		if (m_numVerts[polyIndex] == 1){
+		    mark[polyIndex] = 1;
+
 		} else {
+		    int beg_inex = starting_ids[polyIndex];
 			extractOnePoly(polyIndex, // input
 					onePoly,
 					beg_inex);  // output

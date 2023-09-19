@@ -106,12 +106,12 @@ inline bool lexLessThan(Box P, Box Q){
 
 template <typename Box>
 struct boxNode{
-  boxNode<Box> * left;
-  boxNode<Box> * right;
+  int left; // implement pointer as index into node pool vector, this makes copy of the tree trivial
+  int right;
   Box       Rect;
   bool      isLeftRightSplit;
   double    maxInLeftChild, minInRightChild;
-  boxNode<Box>(): left(NULL), right(NULL), isLeftRightSplit(false),
+  boxNode<Box>(): left(-1), right(-1), isLeftRightSplit(false),
                   maxInLeftChild(-DBL_MAX), minInRightChild(DBL_MAX){}
 };
 
@@ -120,8 +120,6 @@ class boxTree{
 
 public:
   boxTree();
-  // copy constructor
-  boxTree(const boxTree &btree);
 
   void formTreeOfBoxes(// Boxes will be reordered but otherwise
                        // unchanged inside this function
@@ -131,34 +129,35 @@ public:
                         std::vector<Box> & outBoxes                 // Outputs
                         ) const;
 
-  boxNode<Box> * getTreeRoot(){
+  int getTreeRoot(){
     return m_root;
   }
   void clear();
   size_t size() const { return m_nodePool.size();}
 
+  const boxNode<Box> & getBoxNode(int ind) const {return m_nodePool[ind];}
 private:
 
   void formTreeOfBoxesInternal(Box * Boxes, int numBoxes,
                                bool isLeftRightSplit,
-                               boxNode<Box> *&  root
+                               int&  root
                                );
 
 
   void getBoxesInRegionInternal(//Inputs
                                 double xl, double yl, double xh, double yh,
-                                boxNode<Box> * root,
+                                int root,
                                 // Outputs
                                 std::vector<Box> & outBoxes) const;
 
   void reset();
-  boxNode<Box> * getNewboxNode();
+  int getNewboxNode();
 
   // Will get nodes from this pool (for performance reasons)
   std::vector< boxNode<Box> > m_nodePool;
 
   int m_freeNodeIndex;
-  boxNode<Box> * m_root;
+  int m_root;
 
 };
 
@@ -168,21 +167,6 @@ boxTree<Box>::boxTree(){
   return;
 }
 
-// copy constructor
-// We copy boxes and rebuild the tree
-// This is inefficient but a proper copy constructor requires
-// a lot of tedious code.
-template <typename Box>
-boxTree<Box>::boxTree(const boxTree &btree){
-	reset();
-	std::vector<Box>  Boxes;
-	Boxes.reserve(btree.size());
-	for (const auto &node : btree.m_nodePool){
-		Boxes.push_back(node.Rect);
-	}
-	formTreeOfBoxes(Boxes);
-}
-
 template <typename Box>
 void boxTree<Box>::clear(){
 	reset();
@@ -190,18 +174,18 @@ void boxTree<Box>::clear(){
 template <typename Box>
 void boxTree<Box>::reset(){
   m_freeNodeIndex = 0;
-  m_root          = NULL;
+  m_root          = -1;
   m_nodePool.clear();
   return;
 }
 
 template <typename Box>
-boxNode<Box> * boxTree<Box>::getNewboxNode(){
+int boxTree<Box>::getNewboxNode(){
   // Get a node from the pool
-  boxNode<Box> * ptr = vecPtr(m_nodePool) + m_freeNodeIndex;
   assert( m_freeNodeIndex < (int)m_nodePool.size() );
+  int node_id = m_freeNodeIndex;
   m_freeNodeIndex++;
-  return ptr;
+  return node_id;
 }
 
 template <typename Box>
@@ -221,7 +205,7 @@ void boxTree<Box>::formTreeOfBoxes(// Boxes will be reordered but otherwise
 template <typename Box>
 void boxTree<Box>::formTreeOfBoxesInternal(Box * Boxes, int numBoxes,
                                            bool isLeftRightSplit,
-                                           boxNode<Box> *&  root
+                                           int &root
                                            ){
 
 
@@ -237,12 +221,12 @@ void boxTree<Box>::formTreeOfBoxesInternal(Box * Boxes, int numBoxes,
   assert(numBoxes >= 0);
 
   if (numBoxes == 0){
-    root = NULL;
+    root = -1;
     return;
   }
 
   root = getNewboxNode();
-  root->isLeftRightSplit = isLeftRightSplit;
+  m_nodePool[root].isLeftRightSplit = isLeftRightSplit;
 
   if (isLeftRightSplit){ // Left-most boxes go in the left child
     std::sort(Boxes, Boxes + numBoxes, leftLessThan<Box>);
@@ -253,7 +237,7 @@ void boxTree<Box>::formTreeOfBoxesInternal(Box * Boxes, int numBoxes,
   int mid = numBoxes/2;
   assert( 0 <= mid && mid < numBoxes);
 
-  root->Rect = Boxes[mid]; // Must happen after sorting
+  m_nodePool[root].Rect = Boxes[mid]; // Must happen after sorting
 
   // A box is not a point, it has non-zero width. A box whose midpoint
   // is to the left of the root box midpoint, may still overlap with
@@ -281,15 +265,15 @@ void boxTree<Box>::formTreeOfBoxesInternal(Box * Boxes, int numBoxes,
 
   }
 
-  root->maxInLeftChild  = maxInLeftChild;
-  root->minInRightChild = minInRightChild;
+  m_nodePool[root].maxInLeftChild  = maxInLeftChild;
+  m_nodePool[root].minInRightChild = minInRightChild;
 
   // At the next split we will split perpendicularly to the direction
   // of the current split
   formTreeOfBoxesInternal( Boxes,            mid,
-                           !isLeftRightSplit, root->left  );
+                           !isLeftRightSplit, m_nodePool[root].left  );
   formTreeOfBoxesInternal( Boxes + mid + 1,  numBoxes - mid - 1,
-                           !isLeftRightSplit, root->right );
+                           !isLeftRightSplit, m_nodePool[root].right );
 
   return;
 }
@@ -302,7 +286,7 @@ void boxTree<Box>::getBoxesInRegion(// Inputs
                                     ) const{
 
   outBoxes.clear();
-  if (xl > xh || yl > yh || m_root == NULL) return;
+  if (xl > xh || yl > yh || m_root == -1) return;
   getBoxesInRegionInternal(xl, yl, xh, yh, m_root, // Inputs
                            outBoxes                // Outputs
                            );
@@ -313,31 +297,31 @@ template <typename Box>
 void boxTree<Box>::getBoxesInRegionInternal(// Inputs
                                             double xl, double yl,
                                             double xh, double yh,
-                                            boxNode<Box> * root,
+                                            int root,
                                             // Outputs
                                             std::vector<Box> & outBoxes
                                             ) const{
 
-  assert (root != NULL);
+  assert (root != -1);
 
-  const Box & B = root->Rect; // alias
+  const Box & B = m_nodePool[root].Rect; // alias
 
   if (utils::boxesIntersect(B.xl, B.yl, B.xh, B.yh, xl, yl, xh, yh))
     outBoxes.push_back(B);
 
-  if (root->isLeftRightSplit){
+  if (m_nodePool[root].isLeftRightSplit){
 
-    if (root->left != NULL  && xl <= root->maxInLeftChild)
-      getBoxesInRegionInternal(xl, yl, xh, yh, root->left,  outBoxes);
-    if (root->right != NULL && xh >= root->minInRightChild)
-      getBoxesInRegionInternal(xl, yl, xh, yh, root->right, outBoxes);
+    if (m_nodePool[root].left != -1  && xl <= m_nodePool[root].maxInLeftChild)
+      getBoxesInRegionInternal(xl, yl, xh, yh, m_nodePool[root].left,  outBoxes);
+    if (m_nodePool[root].right != -1 && xh >= m_nodePool[root].minInRightChild)
+      getBoxesInRegionInternal(xl, yl, xh, yh, m_nodePool[root].right, outBoxes);
 
   }else{
 
-    if (root->left != NULL  && yl <= root->maxInLeftChild)
-      getBoxesInRegionInternal(xl, yl, xh, yh, root->left,  outBoxes);
-    if (root->right != NULL && yh >= root->minInRightChild)
-      getBoxesInRegionInternal(xl, yl, xh, yh, root->right, outBoxes);
+    if (m_nodePool[root].left != -1  && yl <= m_nodePool[root].maxInLeftChild)
+      getBoxesInRegionInternal(xl, yl, xh, yh, m_nodePool[root].left,  outBoxes);
+    if (m_nodePool[root].right != -1 && yh >= m_nodePool[root].minInRightChild)
+      getBoxesInRegionInternal(xl, yl, xh, yh, m_nodePool[root].right, outBoxes);
 
   }
 
@@ -396,7 +380,7 @@ private:
 
   void findClosestEdgeToPointInternal(// inputs
                                       double x0, double y0,
-                                      boxNode<utils::dRectWithId> * root,
+                                      int root,
                                       // outputs
                                       utils::seg & closestEdge,
                                       double     & closestDist);
