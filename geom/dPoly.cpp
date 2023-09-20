@@ -79,22 +79,28 @@ void dPoly::annoBdBox(double & xll, double & yll, double & xur, double & yur) co
 }
 
 void dPoly::updateBoundingBox() const{
-    if (m_totalNumVerts <= 0) return;
+  if (m_totalNumVerts <= 0) return;
 
-    double  xll = *min_element( vecPtr(m_xv), vecPtr(m_xv) + m_totalNumVerts );
-    double  yll = *min_element( vecPtr(m_yv), vecPtr(m_yv) + m_totalNumVerts );
-    double  xur = *max_element( vecPtr(m_xv), vecPtr(m_xv) + m_totalNumVerts );
-    double  yur = *max_element( vecPtr(m_yv), vecPtr(m_yv) + m_totalNumVerts );
-    m_BoundingBox = dRect(xll, yll, xur, yur);
+  double  xll = *min_element( vecPtr(m_xv), vecPtr(m_xv) + m_totalNumVerts );
+  double  yll = *min_element( vecPtr(m_yv), vecPtr(m_yv) + m_totalNumVerts );
+  double  xur = *max_element( vecPtr(m_xv), vecPtr(m_xv) + m_totalNumVerts );
+  double  yur = *max_element( vecPtr(m_yv), vecPtr(m_yv) + m_totalNumVerts );
+  m_BoundingBox = dRect(xll, yll, xur, yur);
 }
 void dPoly::bdBox(double & xll, double & yll, double & xur, double & yur) const {
+  const auto &bbox = bdBox();
 
-    xll = m_BoundingBox.xl;
-    yll = m_BoundingBox.yl;
-    xur = m_BoundingBox.xh;
-    yur = m_BoundingBox.yh;
+  xll = bbox.xl;
+  yll = bbox.yl;
+  xur = bbox.xh;
+  yur = bbox.yh;
 
 };
+
+const dRect& dPoly::bdBox() const{
+  if (!m_BoundingBox.isValid()) updateBoundingBox();
+  return m_BoundingBox;
+}
 
 void dPoly::bdBoxes(std::vector<double> & xll, std::vector<double> & yll,
                     std::vector<double> & xur, std::vector<double> & yur) const {
@@ -259,6 +265,33 @@ void dPoly::set_annoByType(const std::vector<anno> & annotations, AnnoType annoT
   return;
 }
 
+// Clip point clouds, this is faster than clipping polygons when geometry is in point clouds
+// We use actual point tree instead of box tree for clipping
+void  dPoly::clipPointCloud(const dRect &clip_box,
+                        dPoly & clippedPoly, // output
+                        const std::map<int, int> *selected) {
+
+  assert(m_isPointCloud);
+
+  const auto *pttree = getPointTree();
+  std::vector<utils::PointWithId> outPts;
+  pttree->getPointsInBox(clip_box.xl, clip_box.yl, clip_box.xh, clip_box.yh, outPts);
+
+  clippedPoly.reset();
+  clippedPoly.set_isPointCloud(m_isPointCloud);
+
+  for (auto &pt : outPts) {
+    int pIter = pt.id;
+    if (selected && selected->find(pIter) == selected->end()) continue;
+    string color  = m_colors       [pIter];
+    string layer  = m_layers       [pIter];
+
+    clippedPoly.appendPolygon(1, &pt.x, &pt.y, false, color, layer);
+
+  }
+
+}
+
 void dPoly::clipPoly(// inputs
     double clip_xll, double clip_yll,
     double clip_xur, double clip_yur,
@@ -266,12 +299,13 @@ void dPoly::clipPoly(// inputs
     const std::map<int, int> *selected ) {
 
   assert(this != &clippedPoly); // source and destination must be different
+  //utils::Timer my_clock("dPoly::clipPoly");
 
   dRect clip_box(clip_xll, clip_yll, clip_xur, clip_yur);
   const std::vector<int>& starting_ids = getStartingIndices();
   vector<anno> annotations, annoInBox;
 
-  if (clip_box.contains(m_BoundingBox)){
+  if (clip_box.contains(bdBox())){
     for (int pIter = 0; pIter < m_numPolys; pIter++) {
       if (selected && selected->find(pIter) == selected->end()) continue;
       int start = starting_ids[pIter];
@@ -279,9 +313,9 @@ void dPoly::clipPoly(// inputs
       string color  = m_colors       [pIter];
       string layer  = m_layers       [pIter];
       clippedPoly.appendPolygon(m_numVerts[pIter],
-          vecPtr(m_xv) + start,
-          vecPtr(m_yv) + start,
-          isClosed, color, layer);
+                                vecPtr(m_xv) + start,
+                                vecPtr(m_yv) + start,
+                                isClosed, color, layer);
     }
 
     for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
@@ -291,78 +325,86 @@ void dPoly::clipPoly(// inputs
   } else {
     clippedPoly.reset();
     clippedPoly.set_isPointCloud(m_isPointCloud);
+    if (m_isPointCloud ){
+      // If point clouds then call the faster clipping function clipPointCloud
+      clipPointCloud(clip_box, clippedPoly, selected);
+    } else {
 
-    const double * xv               = get_xv();
-    const double * yv               = get_yv();
-    const int    * numVerts         = get_numVerts();
+      const double * xv               = get_xv();
+      const double * yv               = get_yv();
+      const int    * numVerts         = get_numVerts();
 
-    const vector<char> isPolyClosed = get_isPolyClosed();
-    const vector<string> colors     = get_colors();
-    const vector<string> layers     = get_layers();
+      const vector<char> isPolyClosed = get_isPolyClosed();
+      const vector<string> colors     = get_colors();
+      const vector<string> layers     = get_layers();
 
 
-    const auto *box_tree = getBoundingBoxTree();
+      const auto *box_tree = getBoundingBoxTree();
 
-    vector< dRectWithId> boxes;
-    box_tree->getBoxesInRegion(clip_xll, clip_yll, clip_xur, clip_yur, boxes);
+      vector< dRectWithId> boxes;
+      box_tree->getBoxesInRegion(clip_xll, clip_yll, clip_xur, clip_yur, boxes);
 
-    vector<double> cutXv, cutYv;
-    vector<int> cutNumVerts;
+      vector<double> cutXv, cutYv;
+      vector<int> cutNumVerts;
+      int count = 0;
+      for (auto &box : boxes) {
+        count++;
+        int pIter = box.id;
+        if (selected && selected->find(pIter) == selected->end()) continue;
 
-    for (auto &box : boxes) {
-      int pIter = box.id;
-      if (selected && selected->find(pIter) == selected->end()) continue;
+        int start = starting_ids[pIter];
 
-      int start = starting_ids[pIter];
+        int  isClosed = isPolyClosed [pIter];
+        string color  = colors       [pIter];
+        string layer  = layers       [pIter];
 
-      int  isClosed = isPolyClosed [pIter];
-      string color  = colors       [pIter];
-      string layer  = layers       [pIter];
+        cutXv.clear(); cutYv.clear(); cutNumVerts.clear();
 
-      cutXv.clear(); cutYv.clear(); cutNumVerts.clear();
+        if (m_isPointCloud || clip_box.contains(box)) {
+          //cout <<"count "<< count<<endl;
+          // To cut a point cloud to a box all is needed is to select
+          // which points are in the box
+          for (int vIter = 0; vIter < numVerts[pIter]; vIter++) {
+            cutXv.push_back(xv[start + vIter]);
+            cutYv.push_back(yv[start + vIter]);
 
-      if (m_isPointCloud || clip_box.contains(box)) {
-        // To cut a point cloud to a box all is needed is to select
-        // which points are in the box
-        for (int vIter = 0; vIter < numVerts[pIter]; vIter++) {
-          cutXv.push_back(xv[start + vIter]);
-          cutYv.push_back(yv[start + vIter]);
+          }
+          cutNumVerts.push_back( cutXv.size() );
+
+        } else if (isClosed) {
+
+
+          cutPoly(1, numVerts + pIter, xv + start, yv + start,
+                  clip_xll, clip_yll, clip_xur, clip_yur,
+                  cutXv, cutYv, cutNumVerts // outputs
+          );
+
+        }else{
+
+          cutPolyLine(numVerts[pIter], xv + start, yv + start,
+                      clip_xll, clip_yll, clip_xur, clip_yur,
+                      cutXv, cutYv, cutNumVerts // outputs
+          );
 
         }
-        cutNumVerts.push_back( cutXv.size() );
 
-      } else if (isClosed) {
+        int cstart = 0;
+        for (int cIter = 0; cIter < (int)cutNumVerts.size(); cIter++) {
 
+          if (cIter > 0) cstart += cutNumVerts[cIter - 1];
+          int cSize = cutNumVerts[cIter];
+          clippedPoly.appendPolygon(cSize,
+                                    vecPtr(cutXv) + cstart,
+                                    vecPtr(cutYv) + cstart,
+                                    isClosed, color, layer
+          );
 
-        cutPoly(1, numVerts + pIter, xv + start, yv + start,
-            clip_xll, clip_yll, clip_xur, clip_yur,
-            cutXv, cutYv, cutNumVerts // outputs
-        );
+        }
 
-      }else{
-
-        cutPolyLine(numVerts[pIter], xv + start, yv + start,
-            clip_xll, clip_yll, clip_xur, clip_yur,
-            cutXv, cutYv, cutNumVerts // outputs
-        );
 
       }
-
-
-      int cstart = 0;
-      for (int cIter = 0; cIter < (int)cutNumVerts.size(); cIter++) {
-
-        if (cIter > 0) cstart += cutNumVerts[cIter - 1];
-        int cSize = cutNumVerts[cIter];
-        clippedPoly.appendPolygon(cSize,
-            vecPtr(cutXv) + cstart,
-            vecPtr(cutYv) + cstart,
-            isClosed, color, layer
-        );
-
-      }
-
     }
+
 
 
     // Cutting inherits the annotations at the vertices of the uncut
@@ -370,8 +412,8 @@ void dPoly::clipPoly(// inputs
 
     for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
 
-      const auto &annotations = get_annoByType((AnnoType)annoType);
 
+      const auto &annotations = get_annoByType((AnnoType)annoType);
       annoInBox.clear();
       for (int s = 0; s < (int)annotations.size(); s++) {
         const anno & A = annotations[s];
@@ -1439,10 +1481,19 @@ void dPoly::writePoly(std::string filename, std::string defaultColor) {
 }
 void dPoly::clearExtraData(){
 	m_boundingBoxTree.clear();
+	m_pointTree.clear();
 	m_vertIndexAnno.clear();
 	m_polyIndexAnno.clear();
-	updateBoundingBox();
+	m_BoundingBox.setInvalid();
+}
 
+const kdTree * dPoly::getPointTree() const{
+  // we need to check of tree is empty.
+  if ( m_pointTree.size() != m_xv.size()){
+    //utils::Timer my_clock("dPoly::getPointTree");
+    m_pointTree.formTreeOfPoints( m_xv.size(), vecPtr(m_xv), vecPtr(m_yv));
+  }
+  return &m_pointTree;
 }
 const boxTree< dRectWithId> * dPoly::getBoundingBoxTree() const{
 
@@ -1459,9 +1510,15 @@ const boxTree< dRectWithId> * dPoly::getBoundingBoxTree() const{
 			rects.push_back(dRectWithId(xll[i],  yll[i], xur[i], yur[i], i));
 		}
 		m_boundingBoxTree.formTreeOfBoxes(rects);
+
 	}
 	return &m_boundingBoxTree;
 }
+
+std::vector<int> dPoly::getPolyIdsInBox(const dRect &box) const{
+     return getBoundingBoxTree()->getIndicesInRegion(box);
+ }
+
 bool dPoly::getColorInCntFile(const std::string & line, std::string & color) {
 
   // Minor function. Out of the line: "#Color = #ff00" return the string "#ff00"

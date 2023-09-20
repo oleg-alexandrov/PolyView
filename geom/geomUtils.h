@@ -36,11 +36,11 @@ struct dPoint{
 };
 
 
-inline bool operator< (dPoint P, dPoint Q){
+inline bool operator< (const dPoint &P, const dPoint &Q){
   return ( P.x < Q.x ) || (P.x == Q.x && P.y < Q.y);
 }
 
-inline bool greaterThan (dPoint P, dPoint Q){
+inline bool greaterThan (const dPoint &P, const dPoint &Q){
   return ( P.x > Q.x ) || (P.x == Q.x && P.y > Q.y);
 }
 
@@ -118,6 +118,10 @@ private:
       xl(xl_in), yl(yl_in), xh(xh_in), yh(yh_in) {}
     double xl, yl, xh, yh;
 
+    void setInvalid(){// set to invalid so we know that it is not set
+      xl = yl = 1;
+      xh = yh = -1;
+    }
     bool isInSide(double x, double y) const {
     	return (x >= xl && x <= xh && y >= yl && y <= yh);
     }
@@ -125,6 +129,10 @@ private:
     bool contains(const dRect &rec){
     	return (xl <= rec.xl && xh >= rec.xh && yl <= rec.yl && yh >= rec.yh);
     }
+    bool isValid() const {
+      return xl <= xh || yl <= yh;
+    }
+
   };
 
 

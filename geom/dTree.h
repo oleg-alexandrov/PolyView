@@ -126,8 +126,11 @@ public:
                        std::vector<Box> & Boxes);
 
   void getBoxesInRegion(double xl, double yl, double xh, double yh, // Inputs
-                        std::vector<Box> & outBoxes                 // Outputs
-                        ) const;
+                          std::vector<Box> & outBoxes                 // Outputs
+                          ) const;
+
+  std::vector<int> getIndicesInRegion(const utils::dRect &box) const;
+
 
   int getTreeRoot(){
     return m_root;
@@ -276,6 +279,15 @@ void boxTree<Box>::formTreeOfBoxesInternal(Box * Boxes, int numBoxes,
                            !isLeftRightSplit, m_nodePool[root].right );
 
   return;
+}
+template <typename Box>
+std::vector<int> boxTree<Box>::getIndicesInRegion(const utils::dRect &box) const{
+  std::vector<Box>  outBoxes;
+  getBoxesInRegion(box.xl, box.yl, box.xh, box.yh, outBoxes);
+
+  std::vector<int>  indices; indices.reserve(outBoxes.size());
+  for (auto &bb : outBoxes) indices.push_back(bb.id);
+  return indices;
 }
 
 template <typename Box>

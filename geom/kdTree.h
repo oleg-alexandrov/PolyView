@@ -42,11 +42,11 @@ namespace utils{
   }
 
   struct Node{
-    Node * left;
-    Node * right;
+    int left = -1; // implement left right pointers as indices into the node pool
+    int right = -1; // This makes tree copying trivial
     utils::PointWithId  P;
     bool   isLeftRightSplit;
-    Node(): left(NULL), right(NULL), isLeftRightSplit(false){}
+    Node(): left(-1), right(-1), isLeftRightSplit(false){}
   };
   
 }
@@ -63,40 +63,45 @@ public:
                         std::vector<utils::PointWithId> & Pts 
                         );
   void getPointsInBox(double xl, double yl, double xh, double yh, // input box
-                      std::vector<utils::PointWithId> & outPts);
+                      std::vector<utils::PointWithId> & outPts) const;
 
   void findClosestVertexToPoint(// inputs
                                 double x0, double y0,
                                 // outputs
                                 utils::PointWithId & closestVertex,
                                 double & closestDist
-                                );
+                                ) const;
+void clear() {reset();}
+size_t size() const { return m_nodePool.size();}
 
 private:
   void findClosestVertexToPointInternal(// inputs
                                         double x0, double y0,
-                                        utils::Node * root,
+                                        int root,
                                         // outputs
                                         utils::PointWithId & closestVertex,
                                         double & closestDist
-                                        );
+                                        ) const;
 
   void formTreeOfPointsInternal(utils::PointWithId * Pts, int numPts, bool isLeftRightSplit,
-                                utils::Node *&  root);
+                                int  &root);
 
   void getPointsInBoxInternal(//Inputs
                               double xl, double yl, double xh, double yh,
-                              utils::Node * root,
+                              int root,
                               // Outputs
-                              std::vector<utils::PointWithId> & outPts);
+                              std::vector<utils::PointWithId> & outPts) const;
   void reset();
-  utils::Node * getNewNode();
+  int getNewNode();
   
+  utils::Node & getNode(int ind) {return m_nodePool[ind];}
+  const utils::Node & getNode(int ind) const {return m_nodePool[ind];}
+
   // Will get nodes from this pool (for performance reasons)
   std::vector<utils::Node> m_nodePool; 
 
   int m_freeNodeIndex;
-  utils::Node * m_root;
+  int m_root;
     
 };
   

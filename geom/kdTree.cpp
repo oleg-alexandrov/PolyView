@@ -40,18 +40,18 @@ kdTree::kdTree(){
 
 void kdTree::reset(){
   m_freeNodeIndex = 0;
-  m_root          = NULL;
+  m_root          = -1;
   m_nodePool.clear();
   return;
 }
 
 
-utils::Node * kdTree::getNewNode(){
+int kdTree::getNewNode(){
   // Get a node from the pool
-  Node * ptr = vecPtr(m_nodePool) + m_freeNodeIndex;
   assert( m_freeNodeIndex < (int)m_nodePool.size() );
+  int new_ind = m_freeNodeIndex;
   m_freeNodeIndex++;
-  return ptr;  
+  return new_ind;
 }
 
 void kdTree::formTreeOfPoints(int numPts, const double * xv, const double * yv){
@@ -85,7 +85,7 @@ void kdTree::formTreeOfPoints(// Pts will be reordered but otherwise
 
 
 void kdTree::formTreeOfPointsInternal(utils::PointWithId * Pts, int numPts, bool isLeftRightSplit,
-                                      utils::Node *&  root){
+                                      int &root){
 
   // To do: Implement this without recursion.
   // To do: No need to store the point P in the tree. Store just a pointer to P
@@ -96,12 +96,13 @@ void kdTree::formTreeOfPointsInternal(utils::PointWithId * Pts, int numPts, bool
   assert(numPts >= 0);
   
   if (numPts == 0){
-    root = NULL;
+    root = -1;
     return; 
   }
   
   root = getNewNode();
-  root->isLeftRightSplit = isLeftRightSplit;
+  utils::Node &node = getNode(root);
+  node.isLeftRightSplit = isLeftRightSplit;
   
   if (isLeftRightSplit){ // Split points into left and right halves
     sort(Pts, Pts + numPts, leftLessThan);
@@ -112,21 +113,21 @@ void kdTree::formTreeOfPointsInternal(utils::PointWithId * Pts, int numPts, bool
   int mid = numPts/2;
   assert( 0 <= mid && mid < numPts);
   
-  root->P = Pts[mid]; // Must happen after sorting
+  node.P = Pts[mid]; // Must happen after sorting
 
   // At the next split we will split perpendicularly to the direction
   // of the current split.
   formTreeOfPointsInternal( Pts,            mid,
-                            !isLeftRightSplit, root->left
+                            !isLeftRightSplit, node.left
                             );
   formTreeOfPointsInternal( Pts + mid + 1,  numPts - mid - 1,
-                            !isLeftRightSplit, root->right
+                            !isLeftRightSplit, node.right
                             );
 
 }
 
 void kdTree::getPointsInBox(double xl, double yl, double xh, double yh, // input box
-                            std::vector<utils::PointWithId> & outPts){
+                            std::vector<utils::PointWithId> & outPts) const{
 
   outPts.clear();
   if (xl > xh || yl > yh) return;
@@ -138,24 +139,26 @@ void kdTree::getPointsInBox(double xl, double yl, double xh, double yh, // input
 
 void kdTree::getPointsInBoxInternal(//Inputs
                                     double xl, double yl, double xh, double yh,
-                                    utils::Node * root,
+                                    int root,
                                     // Outputs
-                                    std::vector<utils::PointWithId> & outPts){
+                                    std::vector<utils::PointWithId> & outPts) const{
 
   // To do: Can this be done without recursion?
   
-  if (root == NULL) return;
+  if (root == -1) return;
 
-  const PointWithId & P = root->P; // alias
+  const utils::Node &node = getNode(root);
+
+  const PointWithId & P = node.P; // alias
   
   if (xl <= P.x && P.x <= xh && yl <= P.y && P.y <= yh) outPts.push_back(P);
   
-  if (root->isLeftRightSplit){
-    if (xl <= P.x) getPointsInBoxInternal(xl, yl, xh, yh, root->left,  outPts);
-    if (xh >= P.x) getPointsInBoxInternal(xl, yl, xh, yh, root->right, outPts);
+  if (node.isLeftRightSplit){
+    if (xl <= P.x) getPointsInBoxInternal(xl, yl, xh, yh, node.left,  outPts);
+    if (xh >= P.x) getPointsInBoxInternal(xl, yl, xh, yh, node.right, outPts);
   }else{
-    if (yl <= P.y) getPointsInBoxInternal(xl, yl, xh, yh, root->left,  outPts);
-    if (yh >= P.y) getPointsInBoxInternal(xl, yl, xh, yh, root->right, outPts);
+    if (yl <= P.y) getPointsInBoxInternal(xl, yl, xh, yh, node.left,  outPts);
+    if (yh >= P.y) getPointsInBoxInternal(xl, yl, xh, yh, node.right, outPts);
   }
     
   return;
@@ -166,7 +169,7 @@ void kdTree::findClosestVertexToPoint(// inputs
                                       // outputs
                                       utils::PointWithId & closestVertex,
                                       double & closestDist
-                                      ){
+                                      ) const{
 
   // Fast searching for the closest vertex in the tree to a given
   // point. We assume that the tree of vertices is formed by now. The
@@ -181,7 +184,7 @@ void kdTree::findClosestVertexToPoint(// inputs
   
   closestDist = DBL_MAX;
 
-  if (m_root == NULL) return;
+  if (m_root == -1) return;
     
   findClosestVertexToPointInternal(x0, y0, m_root,            // inputs 
                                    closestVertex, closestDist // outputs
@@ -193,19 +196,20 @@ void kdTree::findClosestVertexToPoint(// inputs
 
 void kdTree::findClosestVertexToPointInternal(// inputs
                                               double x0, double y0,
-                                              utils::Node * root,
+                                              int root,
                                               // outputs
                                               utils::PointWithId & closestVertex,
                                               double & closestDist
-                                              ){
+                                              ) const{
 
   // Find the distance from the input point to the vertex at the root
   // node. Decide if first to visit the left or right subtree from the
   // root depending on which looks more promising.
   
-  assert (root != NULL);
+  assert (root != -1);
   
-  const PointWithId & P = root->P; // alias
+  const utils::Node &node = getNode(root);
+  const PointWithId & P = node.P; // alias
 
   double dist = distance(x0, y0, P.x, P.y);
   
@@ -216,31 +220,31 @@ void kdTree::findClosestVertexToPointInternal(// inputs
 
   // Unify the left-right and down-up cases to avoid duplicating code.
   double lx0 = x0, ly0 = y0, rootX = P.x, rootY = P.y;
-  if (!root->isLeftRightSplit){ // down-up split
+  if (!node.isLeftRightSplit){ // down-up split
     swap(lx0,   ly0);
     swap(rootX, rootY);
   }
   
   if (lx0 <= rootX){
     // Search the entire left subtree first
-    if (root->left != NULL)
-      findClosestVertexToPointInternal(x0, y0, root->left,        // inputs 
+    if (node.left != -1)
+      findClosestVertexToPointInternal(x0, y0, node.left,        // inputs
                                        closestVertex, closestDist // outputs
                                        );
     // Don't go right unless there's any chance on improving what we already found
-    bool bad = (root->right == NULL || lx0 + closestDist <= rootX);
-    if (!bad) findClosestVertexToPointInternal(x0, y0, root->right,       // inputs 
+    bool bad = (node.right == -1 || lx0 + closestDist <= rootX);
+    if (!bad) findClosestVertexToPointInternal(x0, y0, node.right,       // inputs
                                                closestVertex, closestDist // outputs
                                                );
   }else{
     // Search the entire right subtree first
-    if (root->right != NULL)
-      findClosestVertexToPointInternal(x0, y0, root->right,       // inputs 
+    if (node.right != -1)
+      findClosestVertexToPointInternal(x0, y0, node.right,       // inputs
                                        closestVertex, closestDist // outputs
                                        );
     // Don't go left unless there's any chance on improving what we already found
-    bool bad = (root->left == NULL || rootX + closestDist <= lx0);
-    if (!bad) findClosestVertexToPointInternal(x0, y0, root->left,        // inputs 
+    bool bad = (node.left == -1 || rootX + closestDist <= lx0);
+    if (!bad) findClosestVertexToPointInternal(x0, y0, node.left,        // inputs
                                                closestVertex, closestDist // outputs
                                                );
     

@@ -27,6 +27,7 @@
 #include <baseUtils.h>
 #include <geomUtils.h>
 #include "dTree.h"
+#include "kdTree.h"
 
 namespace utils {
   
@@ -77,6 +78,10 @@ public:
                     );
 
   bool isXYRect();
+
+  void clipPointCloud(const dRect &clip_box,
+                  dPoly & clippedPoly, // output
+                  const std::map<int, int> *selected);
 
   void clipPoly(// inputs
                 double clip_xll, double clip_yll,
@@ -175,6 +180,7 @@ public:
   void compLayerAnno();
   void updateBoundingBox() const;
 
+  const dRect& bdBox() const;
   void bdBox(double & xll, double & yll, double & xur, double & yur) const;
   void annoBdBox(double & xll, double & yll, double & xur, double & yur) const;
 
@@ -247,6 +253,8 @@ public:
 
   void enforce45();
 
+  std::vector<int> getPolyIdsInBox(const dRect &box) const;
+
   // Pointer to a structure storing an image and its positioning
   // information in world coordinates. The image can be shown in the
   // background of the given polygon. The user is responsible
@@ -259,7 +267,8 @@ public:
 private:
   // This will create the bounding box tree and return a pointer to it
   // If three is already created it will just return the pointer
-  const boxTree< dRectWithId> * getBoundingBoxTree() const;
+  const boxTree< dRectWithId>  * getBoundingBoxTree() const;
+  const kdTree * getPointTree() const;
 
   // Clear pre-computed data if geometry changes
   void clearExtraData();
@@ -287,6 +296,8 @@ private:
   // The following items are used for performance.
   // They should be cleared if geometry changes by calling clearExtraData()
   mutable boxTree< dRectWithId> m_boundingBoxTree;
+  mutable kdTree m_pointTree;
+
   mutable std::vector<int>  m_startingIndices;
   mutable dRect m_BoundingBox;
 };
