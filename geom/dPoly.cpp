@@ -78,22 +78,22 @@ void dPoly::annoBdBox(double & xll, double & yll, double & xur, double & yur) co
 
 }
 
+void dPoly::updateBoundingBox() const{
+    if (m_totalNumVerts <= 0) return;
+
+    double  xll = *min_element( vecPtr(m_xv), vecPtr(m_xv) + m_totalNumVerts );
+    double  yll = *min_element( vecPtr(m_yv), vecPtr(m_yv) + m_totalNumVerts );
+    double  xur = *max_element( vecPtr(m_xv), vecPtr(m_xv) + m_totalNumVerts );
+    double  yur = *max_element( vecPtr(m_yv), vecPtr(m_yv) + m_totalNumVerts );
+    m_BoundingBox = dRect(xll, yll, xur, yur);
+}
 void dPoly::bdBox(double & xll, double & yll, double & xur, double & yur) const {
 
-  // The bounding box of all polygons
+    xll = m_BoundingBox.xl;
+    yll = m_BoundingBox.yl;
+    xur = m_BoundingBox.xh;
+    yur = m_BoundingBox.yh;
 
-  if (m_totalNumVerts <= 0) {
-    xll = DBL_MAX/4.0, xur = -DBL_MAX/4.0; // Use 1/4.0 to avoid overflow when ...
-    yll = DBL_MAX/4.0, yur = -DBL_MAX/4.0; // ... finding width and height
-    return;
-  }
-
-  xll = *min_element( vecPtr(m_xv), vecPtr(m_xv) + m_totalNumVerts );
-  yll = *min_element( vecPtr(m_yv), vecPtr(m_yv) + m_totalNumVerts );
-  xur = *max_element( vecPtr(m_xv), vecPtr(m_xv) + m_totalNumVerts );
-  yur = *max_element( vecPtr(m_yv), vecPtr(m_yv) + m_totalNumVerts );
-
-  return;
 };
 
 void dPoly::bdBoxes(std::vector<double> & xll, std::vector<double> & yll,
@@ -225,21 +225,21 @@ bool dPoly::isXYRect() {
   return true;
 }
 
-void dPoly::get_annoByType(std::vector<anno> & annotations, AnnoType annoType) {
+std::vector<anno> & dPoly::get_annoByType(AnnoType annoType) {
 
   if (annoType == fileAnno) {
-    get_annotations(annotations);
+    return get_annotations();
   }else if (annoType == vertAnno) {
-    get_vertIndexAnno(annotations);
+    return get_vertIndexAnno();
   }else if (annoType == polyAnno) {
-    get_polyIndexAnno(annotations);
+    return get_polyIndexAnno();
   }else if (annoType == layerAnno) {
-    get_layerAnno(annotations);
+    return get_layerAnno();
   }else{
     std::cout << "Unknown annotation type." << std::endl;
+    return get_annotations();
   }
 
-  return;
 }
 
 void dPoly::set_annoByType(const std::vector<anno> & annotations, AnnoType annoType) {
@@ -260,108 +260,129 @@ void dPoly::set_annoByType(const std::vector<anno> & annotations, AnnoType annoT
 }
 
 void dPoly::clipPoly(// inputs
-                     double clip_xll, double clip_yll,
-                     double clip_xur, double clip_yur,
-                     dPoly & clippedPoly, // output
-					 const std::map<int, int> *selected ) {
+    double clip_xll, double clip_yll,
+    double clip_xur, double clip_yur,
+    dPoly & clippedPoly, // output
+    const std::map<int, int> *selected ) {
 
   assert(this != &clippedPoly); // source and destination must be different
 
-
-  clippedPoly.reset();
-  clippedPoly.set_isPointCloud(m_isPointCloud);
-
-  const double * xv               = get_xv();
-  const double * yv               = get_yv();
-  const int    * numVerts         = get_numVerts();
-
-  const vector<char> isPolyClosed = get_isPolyClosed();
-  const vector<string> colors     = get_colors();
-  const vector<string> layers     = get_layers();
-
-  const std::vector<int>& starting_ids = getStartingIndices();
-  const auto *box_tree = getBoundingBoxTree();
-
-  vector< dRectWithId> boxes;
-  box_tree->getBoxesInRegion(clip_xll, clip_yll, clip_xur, clip_yur, boxes);
-
   dRect clip_box(clip_xll, clip_yll, clip_xur, clip_yur);
-
-  vector<double> cutXv, cutYv;
-  vector<int> cutNumVerts;
-
-  for (auto &box : boxes) {
-	  int pIter = box.id;
-	  if (selected && selected->find(pIter) == selected->end()) continue;
-
-	  int start = starting_ids[pIter];
-
-	  int  isClosed = isPolyClosed [pIter];
-	  string color  = colors       [pIter];
-	  string layer  = layers       [pIter];
-
-	  cutXv.clear(); cutYv.clear(); cutNumVerts.clear();
-
-	  if (m_isPointCloud || clip_box.contains(box)) {
-		  // To cut a point cloud to a box all is needed is to select
-		  // which points are in the box
-		  for (int vIter = 0; vIter < numVerts[pIter]; vIter++) {
-			  cutXv.push_back(xv[start + vIter]);
-			  cutYv.push_back(yv[start + vIter]);
-
-		  }
-		  cutNumVerts.push_back( cutXv.size() );
-
-	  } else if (isClosed) {
-
-
-		  cutPoly(1, numVerts + pIter, xv + start, yv + start,
-				  clip_xll, clip_yll, clip_xur, clip_yur,
-				  cutXv, cutYv, cutNumVerts // outputs
-		  );
-
-	  }else{
-
-		  cutPolyLine(numVerts[pIter], xv + start, yv + start,
-				  clip_xll, clip_yll, clip_xur, clip_yur,
-				  cutXv, cutYv, cutNumVerts // outputs
-		  );
-
-	  }
-
-
-	  int cstart = 0;
-	  for (int cIter = 0; cIter < (int)cutNumVerts.size(); cIter++) {
-
-		  if (cIter > 0) cstart += cutNumVerts[cIter - 1];
-		  int cSize = cutNumVerts[cIter];
-		  clippedPoly.appendPolygon(cSize,
-				  vecPtr(cutXv) + cstart,
-				  vecPtr(cutYv) + cstart,
-				  isClosed, color, layer
-		  );
-
-	  }
-
-  }
-
-  // Cutting inherits the annotations at the vertices of the uncut
-  // polygons which are in the cutting box.
+  const std::vector<int>& starting_ids = getStartingIndices();
   vector<anno> annotations, annoInBox;
 
-  for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
-
-    get_annoByType(annotations, (AnnoType)annoType);
-
-    annoInBox.clear();
-    for (int s = 0; s < (int)annotations.size(); s++) {
-      const anno & A = annotations[s];
-      if (clip_xll <= A.x && A.x <= clip_xur && clip_yll <= A.y && A.y <= clip_yur) {
-        annoInBox.push_back(A);
-      }
+  if (clip_box.contains(m_BoundingBox)){
+    for (int pIter = 0; pIter < m_numPolys; pIter++) {
+      if (selected && selected->find(pIter) == selected->end()) continue;
+      int start = starting_ids[pIter];
+      int  isClosed = m_isPolyClosed [pIter];
+      string color  = m_colors       [pIter];
+      string layer  = m_layers       [pIter];
+      clippedPoly.appendPolygon(m_numVerts[pIter],
+          vecPtr(m_xv) + start,
+          vecPtr(m_yv) + start,
+          isClosed, color, layer);
     }
 
-    clippedPoly.set_annoByType(annoInBox, (AnnoType)annoType);
+    for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
+      clippedPoly.set_annoByType(get_annoByType((AnnoType)annoType), (AnnoType)annoType);
+    }
+
+  } else {
+    clippedPoly.reset();
+    clippedPoly.set_isPointCloud(m_isPointCloud);
+
+    const double * xv               = get_xv();
+    const double * yv               = get_yv();
+    const int    * numVerts         = get_numVerts();
+
+    const vector<char> isPolyClosed = get_isPolyClosed();
+    const vector<string> colors     = get_colors();
+    const vector<string> layers     = get_layers();
+
+
+    const auto *box_tree = getBoundingBoxTree();
+
+    vector< dRectWithId> boxes;
+    box_tree->getBoxesInRegion(clip_xll, clip_yll, clip_xur, clip_yur, boxes);
+
+    vector<double> cutXv, cutYv;
+    vector<int> cutNumVerts;
+
+    for (auto &box : boxes) {
+      int pIter = box.id;
+      if (selected && selected->find(pIter) == selected->end()) continue;
+
+      int start = starting_ids[pIter];
+
+      int  isClosed = isPolyClosed [pIter];
+      string color  = colors       [pIter];
+      string layer  = layers       [pIter];
+
+      cutXv.clear(); cutYv.clear(); cutNumVerts.clear();
+
+      if (m_isPointCloud || clip_box.contains(box)) {
+        // To cut a point cloud to a box all is needed is to select
+        // which points are in the box
+        for (int vIter = 0; vIter < numVerts[pIter]; vIter++) {
+          cutXv.push_back(xv[start + vIter]);
+          cutYv.push_back(yv[start + vIter]);
+
+        }
+        cutNumVerts.push_back( cutXv.size() );
+
+      } else if (isClosed) {
+
+
+        cutPoly(1, numVerts + pIter, xv + start, yv + start,
+            clip_xll, clip_yll, clip_xur, clip_yur,
+            cutXv, cutYv, cutNumVerts // outputs
+        );
+
+      }else{
+
+        cutPolyLine(numVerts[pIter], xv + start, yv + start,
+            clip_xll, clip_yll, clip_xur, clip_yur,
+            cutXv, cutYv, cutNumVerts // outputs
+        );
+
+      }
+
+
+      int cstart = 0;
+      for (int cIter = 0; cIter < (int)cutNumVerts.size(); cIter++) {
+
+        if (cIter > 0) cstart += cutNumVerts[cIter - 1];
+        int cSize = cutNumVerts[cIter];
+        clippedPoly.appendPolygon(cSize,
+            vecPtr(cutXv) + cstart,
+            vecPtr(cutYv) + cstart,
+            isClosed, color, layer
+        );
+
+      }
+
+    }
+
+
+    // Cutting inherits the annotations at the vertices of the uncut
+    // polygons which are in the cutting box.
+
+    for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
+
+      const auto &annotations = get_annoByType((AnnoType)annoType);
+
+      annoInBox.clear();
+      for (int s = 0; s < (int)annotations.size(); s++) {
+        const anno & A = annotations[s];
+        if (clip_xll <= A.x && A.x <= clip_xur && clip_yll <= A.y && A.y <= clip_yur) {
+          annoInBox.push_back(A);
+        }
+      }
+
+      clippedPoly.set_annoByType(annoInBox, (AnnoType)annoType);
+
+    }
 
   }
 
@@ -379,13 +400,12 @@ void dPoly::shift(double shift_x, double shift_y) {
 
   std::vector<anno> annotations;
   for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
-    get_annoByType(annotations, (AnnoType)annoType);
+    auto &annotations = get_annoByType((AnnoType)annoType);
     for (int i = 0; i < (int)annotations.size(); i++) {
       anno & A = annotations[i]; // alias
       A.x += shift_x;
       A.y += shift_y;
     }
-    set_annoByType(annotations, (AnnoType)annoType);
   }
 
   return;
@@ -411,7 +431,7 @@ void dPoly::rotate(double angle) { // The angle is given in degrees
 
   vector<anno> annotations;
   for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
-    get_annoByType(annotations, (AnnoType)annoType);
+    auto &annotations = get_annoByType((AnnoType)annoType);
     for (int i = 0; i < (int)annotations.size(); i++) {
       anno & A = annotations[i]; // alias
       double tmpx = c*A.x - s*A.y;
@@ -419,7 +439,6 @@ void dPoly::rotate(double angle) { // The angle is given in degrees
       A.x = tmpx;
       A.y = tmpy;
     }
-    set_annoByType(annotations, (AnnoType)annoType);
   }
 
   return;
@@ -437,14 +456,12 @@ void dPoly::scale(double scale) {
   vector<anno> annotations;
   for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
 
-    get_annoByType(annotations, (AnnoType)annoType);
+    auto &annotations = get_annoByType((AnnoType)annoType);
     for (int i = 0; i < (int)annotations.size(); i++) {
       anno & A = annotations[i]; // alias
       A.x *= scale;
       A.y *= scale;
     }
-
-    set_annoByType(annotations, (AnnoType)annoType);
   }
 
   return;
@@ -517,7 +534,7 @@ void dPoly::applyTransform(double a11, double a12, double a21, double a22,
 
   vector<anno> annotations;
   for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
-    get_annoByType(annotations, (AnnoType)annoType);
+    auto &annotations = get_annoByType((AnnoType)annoType);
     for (int i = 0; i < (int)annotations.size(); i++) {
       anno & A = annotations[i]; // alias
       double x = a11*A.x + a12*A.y + sx;
@@ -525,7 +542,6 @@ void dPoly::applyTransform(double a11, double a12, double a21, double a22,
       A.x = x;
       A.y = y;
     }
-    set_annoByType(annotations, (AnnoType)annoType);
   }
 
   return;
@@ -554,7 +570,8 @@ void dPoly::appendPolygons(const dPoly & poly) {
   vector<char> isPolyClosed = poly.get_isPolyClosed();
   vector<string> colors     = poly.get_colors();
   vector<string> layers     = poly.get_layers();
-  vector<anno> annotations;  poly.get_annotations(annotations);
+
+  const vector<anno> &annotations = poly.get_annotations();
 
   int start = 0;
   for (int pIter = 0; pIter < numPolys; pIter++) {
@@ -569,16 +586,10 @@ void dPoly::appendPolygons(const dPoly & poly) {
     appendPolygon(pSize, xv + start, yv + start, isClosed, color, layer);
 
   }
+  m_annotations.insert(m_annotations.end(), annotations.begin(), annotations.end());
 
-  for (int s = 0; s < (int)annotations.size(); s++) {
-    addAnno(annotations[s]);
-  }
 
   return;
-}
-
-void dPoly::get_annotations(std::vector<anno> & annotations) const {
-  annotations = m_annotations;
 }
 
 void dPoly::set_annotations(const std::vector<anno> & A) {
@@ -589,24 +600,12 @@ void dPoly::set_vertIndexAnno(const std::vector<anno> & annotations) {
   m_vertIndexAnno = annotations;
 }
 
-void dPoly::get_vertIndexAnno(std::vector<anno> & annotations) const {
-  annotations = m_vertIndexAnno;
-}
-
 void dPoly::set_polyIndexAnno(const std::vector<anno> & annotations) {
   m_polyIndexAnno = annotations;
 }
 
-void dPoly::get_polyIndexAnno(std::vector<anno> & annotations) const {
-  annotations = m_polyIndexAnno;
-}
-
 void dPoly::set_layerAnno(const std::vector<anno> & annotations) {
   m_layerAnno = annotations;
-}
-
-void dPoly::get_layerAnno(std::vector<anno> & annotations) const {
-  annotations = m_layerAnno;
 }
 
 void dPoly::set_color(std::string color) {
@@ -1442,6 +1441,7 @@ void dPoly::clearExtraData(){
 	m_boundingBoxTree.clear();
 	m_vertIndexAnno.clear();
 	m_polyIndexAnno.clear();
+	updateBoundingBox();
 
 }
 const boxTree< dRectWithId> * dPoly::getBoundingBoxTree() const{

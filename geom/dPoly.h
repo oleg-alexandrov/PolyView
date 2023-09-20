@@ -154,20 +154,26 @@ public:
   
   void replaceOnePoly(int polyIndex, int numV, const double* x, const double* y);
   // Annotations
-  void get_annotations (std::vector<anno> & annotations) const;
-  void get_layerAnno(std::vector<anno> & annotations) const;
-  void get_vertIndexAnno(std::vector<anno> & annotations) const;
-  void get_polyIndexAnno(std::vector<anno> & annotations) const;
+  std::vector<anno>&  get_annotations()  { return m_annotations;}
+  std::vector<anno>&  get_vertIndexAnno(){ return m_vertIndexAnno;}
+  std::vector<anno>&  get_polyIndexAnno(){ return m_polyIndexAnno;}
+  std::vector<anno>&  get_layerAnno()    {return m_layerAnno;}
+
+  const std::vector<anno>&  get_annotations()  const { return m_annotations;}
+  const std::vector<anno>&  get_vertIndexAnno()const { return m_vertIndexAnno;}
+  const std::vector<anno>&  get_polyIndexAnno()const { return m_polyIndexAnno;}
+  const std::vector<anno>&  get_layerAnno()    const {return m_layerAnno;}
+
   void set_annotations(const std::vector<anno> & A);
   void set_layerAnno(const std::vector<anno> & annotations);
   void set_vertIndexAnno(const std::vector<anno> & annotations);
   void set_polyIndexAnno(const std::vector<anno> & annotations);
 
-  void addAnno(const anno & A){m_annotations.push_back(A); }
   void compVertFullIndexAnno();
   void compVertIndexAnno();
   void compPolyIndexAnno();
   void compLayerAnno();
+  void updateBoundingBox() const;
 
   void bdBox(double & xll, double & yll, double & xur, double & yur) const;
   void annoBdBox(double & xll, double & yll, double & xur, double & yur) const;
@@ -259,7 +265,7 @@ private:
   void clearExtraData();
 
   bool getColorInCntFile(const std::string & line, std::string & color);
-  void get_annoByType(std::vector<anno> & annotations, AnnoType annoType);
+  std::vector<anno> &  get_annoByType(AnnoType annoType);
   void set_annoByType(const std::vector<anno> & annotations, AnnoType annoType);
   const std::vector<int> & getStartingIndices() const;
   // If isPointCloud is true, treat each point as a set of unconnected points
@@ -282,7 +288,7 @@ private:
   // They should be cleared if geometry changes by calling clearExtraData()
   mutable boxTree< dRectWithId> m_boundingBoxTree;
   mutable std::vector<int>  m_startingIndices;
-
+  mutable dRect m_BoundingBox;
 };
 
 } // end namespace utils

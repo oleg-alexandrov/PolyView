@@ -661,16 +661,16 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   //int numVerts                  = clippedPoly.get_totalNumVerts();
 
   vector<anno> annotations;
-  annotations.clear();
+
   if (showAnno) {
     if (m_showVertOrPolyIndexAnno == 1 || m_showVertOrPolyIndexAnno == 3) {
-      clippedPoly.get_vertIndexAnno(annotations);
+        annotations = clippedPoly.get_vertIndexAnno();
     } else if (m_showVertOrPolyIndexAnno == 2) {
-      clippedPoly.get_polyIndexAnno(annotations);
+        annotations = clippedPoly.get_polyIndexAnno();
     }else if (m_showLayerAnno) {
-      clippedPoly.get_layerAnno(annotations);
+        annotations = clippedPoly.get_layerAnno();
     }else if (m_showAnnotations) {
-      clippedPoly.get_annotations(annotations);
+        annotations = clippedPoly.get_annotations();
     }
   }
   // When polys are filled, plot largest polys first
@@ -2701,10 +2701,9 @@ void polyView::addAnno() {
 
   // TODO(oalexan1): It is more efficient to have a function like
   // append_annotation() rather than copying back and forth.
-  std::vector<anno> annotations;
-  m_polyVec[m_polyVecIndex].get_annotations(annotations);
+  std::vector<anno>& annotations = m_polyVec[m_polyVecIndex].get_annotations();
   annotations.push_back(A);
-  m_polyVec[m_polyVecIndex].set_annotations(annotations);
+
 
   saveDataForUndo(false);
   refreshPixmap();
