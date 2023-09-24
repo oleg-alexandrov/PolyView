@@ -537,7 +537,13 @@ void polyView::displayData(QPainter *paint) {
       (m_displayMode == m_showPoints)                         ||
       (m_displayMode == m_showPointsEdges);
 
-    if (plotPoints) drawVertIndex++;
+    drawVertIndex = vi;
+
+    if (m_polyDiffMode && vi < 2){
+      // in polydiff mode plot points of the two polygons the same way so that
+      // the difference gets highlighted
+      drawVertIndex = 0;
+    }
 
     bool has_selected = !plotFilled && !m_selectedPolyIndices[vecIter].empty();
 
@@ -2178,25 +2184,26 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
   // Draw a vertex as a small shape (a circle, rectangle, triangle)
 
   // Use variable size shapes to distinguish better points on top of
-  // each other
-  int len = (2*drawVertIndex+2);
+  // each other, the first two are the same size
+  int len = (drawVertIndex <= 1) ? 3 : (2*drawVertIndex+2);
   len = min(len, 8); // limit how big this can get
 
   paint->setPen(QPen(color, lineWidth));
 
-  int numTypes = 5;
-  if (drawVertIndex < 0) {
+  int numTypes = 6;
+  // This is faster then %
+  while (drawVertIndex >= numTypes) drawVertIndex -= numTypes;
+  paint->setBrush(Qt::NoBrush);
 
+  if (drawVertIndex < 0) {
     // This will be reached only for the case when a polygon
     // is so small that it collapses into a point.
     len = lineWidth;
     paint->setBrush(color);
     paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
 
-  } else if (drawVertIndex%numTypes == 0) {
-
+  } else if (drawVertIndex == 0) {
     // Draw an X
-    paint->setBrush(Qt::NoBrush);
     int tl = 2*len;
     int xl = x0 - tl;
     int xr = x0 + tl;
@@ -2206,31 +2213,22 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
     paint->drawLine(xl, yl, xr, yr);
     paint->drawLine(xl, yr, xr,   yl);
 
-  }else if (drawVertIndex%numTypes == 1) {
-
+  }else if (drawVertIndex == 1) {
     // Draw an plus
-    paint->setBrush(Qt::NoBrush);
     int tl = 2*len;
     paint->drawLine(x0-tl, y0, x0+tl, y0);
     paint->drawLine(x0, y0-tl, x0,   y0+tl);
 
-
-  }else if (drawVertIndex%numTypes == 2) {
+  }else if (drawVertIndex == 2) {
     // Draw an empty square
-    paint->setBrush(Qt::NoBrush);
     paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
 
-
-  } else if (drawVertIndex%numTypes == 3) {
-
+  } else if (drawVertIndex == 3) {
     // Draw a small empty ellipse
-    paint->setBrush(Qt::NoBrush);
     paint->drawEllipse(x0 - len, y0 - len, 2*len, 2*len);
 
-
-  } else if (drawVertIndex%numTypes == 4) {
+  } else if (drawVertIndex == 4) {
     // Draw an empty triangle
-    paint->setBrush(Qt::NoBrush);
     int xl = x0 - len;
     int xr = x0 + len;
     int yl = y0 - len;
@@ -2240,19 +2238,16 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
     paint->drawLine(xl, yl, x0,   yr);
     paint->drawLine(xr, yl, x0,   yr);
 
-
   }else{
+    // Draw an empty reversed triangle
     int xl = x0 - len;
     int xr = x0 + len;
     int yl = y0 - len;
     int yr = y0 + len;
 
-    // Draw an empty reversed triangle
-    paint->setBrush(Qt::NoBrush);
     paint->drawLine(xl, yr, xr, yr);
     paint->drawLine(xl, yr, x0,   yl);
     paint->drawLine(xr, yr, x0,   yl);
-
   }
 
   return;
