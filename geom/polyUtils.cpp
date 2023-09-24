@@ -269,6 +269,7 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
 
   // The complexity of this algorithm is roughly
   // size(poly1)*log(size(poly2)).
+  //utils::Timer my_clock("findDistanceFromPoly1ToPoly2");
 
   distVec.clear();
 
@@ -280,23 +281,37 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
   if (numVerts1 == 0 || numVerts2 == 0) return; // no vertices
 
   // Put the edges of the second polygon in a tree for fast access
+  const kdTree *pt_tree = nullptr;
   edgeTree T;
-  T.putPolyEdgesInTree(poly2);
+
+  if (poly2.isPointCloud()){// If point cloud use existing point tree for performance
+    pt_tree = poly2.getPointTree() ;
+  } else {
+    T.putPolyEdgesInTree(poly2);
+  }
 
   for (int t = 0; t < numVerts1; t++) {
 
     double x = x1[t], y = y1[t];
     double closestX, closestY, closestDist;
-    seg closestEdge;
-    T.findClosestEdgeToPoint(x, y,                                        // inputs
-                             closestEdge, closestDist, closestX, closestY // outputs
-                             );
+
+    if (poly2.isPointCloud()){
+      utils::PointWithId closestVertex;
+      pt_tree->findClosestVertexToPoint(x, y, closestVertex, closestDist);
+      closestX = closestVertex.x;
+      closestY = closestVertex.y;
+    } else {
+      seg closestEdge;
+      T.findClosestEdgeToPoint(x, y,                                        // inputs
+                               closestEdge, closestDist, closestX, closestY // outputs
+      );
+    }
     distVec.push_back(segDist(x, y, closestX, closestY, closestDist));
 
   }
 
-  sort(distVec.begin(), distVec.end(), segDistGreaterThan);
 
+  sort(distVec.begin(), distVec.end(), segDistGreaterThan);
   return;
 }
 

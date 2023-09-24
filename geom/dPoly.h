@@ -139,7 +139,7 @@ public:
                                  double shift_x, double shift_y
                                  );
   void set_isPointCloud(bool isPointCloud){ m_isPointCloud = isPointCloud; }
-  bool isPointCloud() { return m_isPointCloud;}
+  bool isPointCloud() const { return m_isPointCloud;}
 
   void set_pointCloud(const std::vector<dPoint> & P, std::string color,
                       std::string layer);
@@ -270,12 +270,13 @@ public:
   // and for not having to allocate memory for an image, which can be
   // an issue if polygons are copied around, such as in an undo buffer.
   void * img;
-  
-private:
+
   // This will create the bounding box tree and return a pointer to it
   // If three is already created it will just return the pointer
   const boxTree< dRectWithId>  * getBoundingBoxTree() const;
   const kdTree * getPointTree() const;
+
+private:
 
   // Clear pre-computed data if geometry changes
   void clearExtraData();
