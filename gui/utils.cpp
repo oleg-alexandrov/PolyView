@@ -36,17 +36,33 @@
 using namespace std;
 
 void utils::printUsage(std::string progName){
-  cout << "Usage: " << progName << " "
-       << "[ -geo[metry] 1200x800 ] [-bg | -backgroundColor black ] "
-       << "[ -c | -color yellow ] "
-       << "[ -nc | -noColorOverride ] "
-       << "[ -fs | -fontSize 10 ] "
-       << "[ -lw | -lineWidth 2 ] "
-       << "[ -p | -points ] [ -cp | -closedPoly ] [ -ncp | -nonClosedPoly ] "
-       << "[ -f | -filledPoly ] [ -nf | -nonFilledPoly ] [ -cw | clockwisePoly ]"
-       << "[ -grid on | off ] [ -gridSize 10 ] [ -gridWidth 1 ] "
-       << "[ -gridColor green ] [ -panelRatio 0.2] "
-       << "file_1.xg ... file_N.xg " << endl;
+  cout <<endl;
+  cout << "USAGE: " << progName
+      <<" [app_options] [file_options] file1.xg [file_options] file2.xg"<<  endl<<endl;
+
+  cout <<"app_options:"<<endl;
+  cout <<"     -geo[metry] 1200x800 " <<endl;
+  cout <<"     -bg | -backgroundColor black "<<endl;
+  cout <<"     -grid on | off "<<endl;
+  cout <<"     -gridSize 10 "<<endl;
+  cout <<"     -gridWidth 1 "<<endl;
+  cout <<"     -gridColor green "<<endl;
+  cout <<"     -panelRatio 0.2"<<endl<<endl;
+
+  cout <<"file_options:"<<endl;
+  cout <<"     -c   | -color            yellow "<<endl;
+  cout <<"     -nc  | -noColorOverride     (use color in file) "<<endl;
+  cout <<"     -fs  | -fontSize         10 (for annotations)"<<endl;
+  cout <<"     -lw  | -lineWidth        2  (polygon drawing line thickness)"<<endl;
+  cout <<"     -p   | -points              (read as point cloud, not polygons)" <<endl;
+  cout <<"     -cp  | -closedPoly " <<endl;
+  cout <<"     -ncp | -nonClosedPoly "<<endl;
+  cout <<"     -f   | -filledPoly "<<endl;
+  cout <<"     -ha  | -hideAnno            (do not show annotations in file) "<<endl;
+  cout <<"     -nf  | -nonFilledPoly "<<endl;
+  cout <<"     -cw  | clockwisePoly        (if polygon orientation is clockwise)"<<endl;
+  cout<<endl;
+
 }
 
 void utils::extractWindowDims(// inputs
@@ -226,6 +242,12 @@ void utils::parseCmdOptions(//inputs
     if ((strcasecmp(currArg, "-nc") == 0 ||
          strcasecmp(currArg, "-nocoloroverride") == 0)){
       opt.useCmdLineColor = false;
+      continue;
+    }
+
+    if ((strcasecmp(currArg, "-ha") == 0 ||
+         strcasecmp(currArg, "-hideAnno") == 0)){
+      opt.hideAnnotation = true;
       continue;
     }
 

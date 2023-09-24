@@ -42,6 +42,7 @@ struct polyOptions{
   bool            plotAsPoints;
   bool            isPolyFilled;
   bool            clockwisePoly;
+  bool            hideAnnotation;
   closedPolyInfo  isPolyClosed;
   bool            useCmdLineColor;
   int             fontSize;
@@ -61,6 +62,7 @@ struct polyOptions{
     plotAsPoints     = false;
     isPolyFilled     = false;
     clockwisePoly    = false;
+    hideAnnotation   = false;
     isPolyClosed     = readClosedPolyInfoFromFile;
     fontSize         = 10;
     lineWidth        = 1;

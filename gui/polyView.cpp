@@ -558,6 +558,11 @@ void polyView::displayData(QPainter *paint) {
     }
 
     bool showAnno = true;
+    if (m_showVertOrPolyIndexAnno == 0 && m_showLayerAnno == 0 &&
+        m_polyOptionsVec[vecIter].hideAnnotation){
+      showAnno = false;
+    }
+
     // Plot all or un-selected ones if there are selected ones
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
             drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter],
