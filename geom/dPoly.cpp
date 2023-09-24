@@ -272,6 +272,7 @@ void  dPoly::clipPointCloud(const dRect &clip_box,
                         const std::map<int, int> *selected) {
 
   assert(m_isPointCloud);
+  //utils::Timer my_clock("dPoly::clipPointCloud");
 
   const auto *pttree = getPointTree();
   std::vector<utils::PointWithId> outPts;
@@ -306,16 +307,18 @@ void dPoly::clipPoly(// inputs
   vector<anno> annotations, annoInBox;
 
   if (clip_box.contains(bdBox())){
-    for (int pIter = 0; pIter < m_numPolys; pIter++) {
-      if (selected && selected->find(pIter) == selected->end()) continue;
-      int start = starting_ids[pIter];
-      int  isClosed = m_isPolyClosed [pIter];
-      string color  = m_colors       [pIter];
-      string layer  = m_layers       [pIter];
-      clippedPoly.appendPolygon(m_numVerts[pIter],
-                                vecPtr(m_xv) + start,
-                                vecPtr(m_yv) + start,
-                                isClosed, color, layer);
+    // If everything in clip box do not use tree search, just copy
+    if (!selected) {
+      clippedPoly= *this;
+    } else {
+      for (int pIter = 0; pIter < m_numPolys; pIter++) {
+        if (selected && selected->find(pIter) == selected->end()) continue;
+        int start = starting_ids[pIter];
+        clippedPoly.appendPolygon(m_numVerts[pIter],
+                                  vecPtr(m_xv) + start,
+                                  vecPtr(m_yv) + start,
+                                  m_isPolyClosed[pIter], m_colors[pIter], m_layers[pIter]);
+      }
     }
 
     for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
@@ -346,9 +349,9 @@ void dPoly::clipPoly(// inputs
 
       vector<double> cutXv, cutYv;
       vector<int> cutNumVerts;
-      int count = 0;
+
       for (auto &box : boxes) {
-        count++;
+
         int pIter = box.id;
         if (selected && selected->find(pIter) == selected->end()) continue;
 
@@ -405,13 +408,10 @@ void dPoly::clipPoly(// inputs
       }
     }
 
-
-
     // Cutting inherits the annotations at the vertices of the uncut
     // polygons which are in the cutting box.
 
     for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
-
 
       const auto &annotations = get_annoByType((AnnoType)annoType);
       annoInBox.clear();
@@ -421,11 +421,8 @@ void dPoly::clipPoly(// inputs
           annoInBox.push_back(A);
         }
       }
-
       clippedPoly.set_annoByType(annoInBox, (AnnoType)annoType);
-
     }
-
   }
 
   return;

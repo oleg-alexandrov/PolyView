@@ -2179,12 +2179,12 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
 
   // Use variable size shapes to distinguish better points on top of
   // each other
-  int len = 3*(drawVertIndex+1);
+  int len = (2*drawVertIndex+2);
   len = min(len, 8); // limit how big this can get
 
   paint->setPen(QPen(color, lineWidth));
 
-  int numTypes = 4;
+  int numTypes = 5;
   if (drawVertIndex < 0) {
 
     // This will be reached only for the case when a polygon
@@ -2195,40 +2195,63 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
 
   } else if (drawVertIndex%numTypes == 0) {
 
-    // Draw a small empty ellipse
+    // Draw an X
     paint->setBrush(Qt::NoBrush);
-    paint->drawEllipse(x0 - len, y0 - len, 2*len, 2*len);
+    int tl = 2*len;
+    int xl = x0 - tl;
+    int xr = x0 + tl;
+    int yl = y0 - tl;
+    int yr = y0 + tl;
+
+    paint->drawLine(xl, yl, xr, yr);
+    paint->drawLine(xl, yr, xr,   yl);
 
   }else if (drawVertIndex%numTypes == 1) {
 
+    // Draw an plus
+    paint->setBrush(Qt::NoBrush);
+    int tl = 2*len;
+    paint->drawLine(x0-tl, y0, x0+tl, y0);
+    paint->drawLine(x0, y0-tl, x0,   y0+tl);
+
+
+  }else if (drawVertIndex%numTypes == 2) {
     // Draw an empty square
     paint->setBrush(Qt::NoBrush);
     paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
 
-  }else if (drawVertIndex%numTypes == 2) {
 
-      // Draw an empty triangle
-      paint->setBrush(Qt::NoBrush);
-      int xl = x0 - len;
-      int xr = x0 + len;
-      int yl = y0 - len;
-      int yr = y0 + len;
+  } else if (drawVertIndex%numTypes == 3) {
 
-      paint->drawLine(xl, yl, xr, yl);
-      paint->drawLine(xl, yl, x0,   yr);
-      paint->drawLine(xr, yl, x0,   yr);
+    // Draw a small empty ellipse
+    paint->setBrush(Qt::NoBrush);
+    paint->drawEllipse(x0 - len, y0 - len, 2*len, 2*len);
+
+
+  } else if (drawVertIndex%numTypes == 4) {
+    // Draw an empty triangle
+    paint->setBrush(Qt::NoBrush);
+    int xl = x0 - len;
+    int xr = x0 + len;
+    int yl = y0 - len;
+    int yr = y0 + len;
+
+    paint->drawLine(xl, yl, xr, yl);
+    paint->drawLine(xl, yl, x0,   yr);
+    paint->drawLine(xr, yl, x0,   yr);
+
 
   }else{
-      int xl = x0 - len;
-      int xr = x0 + len;
-      int yl = y0 - len;
-      int yr = y0 + len;
+    int xl = x0 - len;
+    int xr = x0 + len;
+    int yl = y0 - len;
+    int yr = y0 + len;
 
-      // Draw an empty reversed triangle
-      paint->setBrush(Qt::NoBrush);
-      paint->drawLine(xl, yr, xr, yr);
-      paint->drawLine(xl, yr, x0,   yl);
-      paint->drawLine(xr, yr, x0,   yl);
+    // Draw an empty reversed triangle
+    paint->setBrush(Qt::NoBrush);
+    paint->drawLine(xl, yr, xr, yr);
+    paint->drawLine(xl, yr, x0,   yl);
+    paint->drawLine(xr, yr, x0,   yl);
 
   }
 
