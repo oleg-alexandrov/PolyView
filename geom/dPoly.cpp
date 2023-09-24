@@ -58,6 +58,7 @@ void dPoly::reset() {
   m_layers.clear();
   m_annotations.clear();
   m_layerAnno.clear();
+  m_startingIndices.clear();
   img = NULL; 
   clearExtraData();
 }
@@ -178,7 +179,7 @@ void dPoly::appendPolygon(int numVerts,
     m_xv.push_back(xv[s]);
     m_yv.push_back(yv[s]);
   }
-
+  m_startingIndices.clear();
   clearExtraData();
 
   return;
@@ -921,10 +922,7 @@ void dPoly::insertVertex(int polyIndex, int vertIndex,
   assert(0 <= polyIndex && polyIndex < m_numPolys);
   assert(0 <= vertIndex && vertIndex < m_numVerts[polyIndex] + 1);
 
-  int start = 0;
-  for (int pIter = 0; pIter < polyIndex; pIter++) {
-    start += m_numVerts[pIter];
-  }
+  int start = getStartingIndices()[polyIndex];
 
   int iv = start + vertIndex;
   m_xv.insert(m_xv.begin() + iv, x);
@@ -933,6 +931,7 @@ void dPoly::insertVertex(int polyIndex, int vertIndex,
   m_totalNumVerts++;
   m_numVerts[polyIndex]++;
 
+  m_startingIndices.clear();
   clearExtraData();
   return;
 }
@@ -942,10 +941,7 @@ void dPoly::eraseVertex(int polyIndex, int vertIndex) {
   assert(0 <= polyIndex && polyIndex < m_numPolys);
   assert(0 <= vertIndex && vertIndex < m_numVerts[polyIndex]);
 
-  int start = 0;
-  for (int pIter = 0; pIter < polyIndex; pIter++) {
-    start += m_numVerts[pIter];
-  }
+  int start = getStartingIndices()[polyIndex];
 
   int iv = start + vertIndex;
   m_xv.erase(m_xv.begin() + iv, m_xv.begin() + iv + 1);
@@ -953,7 +949,7 @@ void dPoly::eraseVertex(int polyIndex, int vertIndex) {
 
   m_totalNumVerts--;
   m_numVerts[polyIndex]--;
-
+  m_startingIndices.clear();
   clearExtraData();
   return;
 }
@@ -963,10 +959,7 @@ void dPoly::changeVertexValue(int polyIndex, int vertIndex, double x, double y) 
   assert(0 <= polyIndex && polyIndex < m_numPolys);
   assert(0 <= vertIndex && vertIndex < m_numVerts[polyIndex]);
 
-  int start = 0;
-  for (int pIter = 0; pIter < polyIndex; pIter++) {
-    start += m_numVerts[pIter];
-  }
+  int start = getStartingIndices()[polyIndex];
 
   m_xv[start + vertIndex] = x;
   m_yv[start + vertIndex] = y;
@@ -981,10 +974,7 @@ void dPoly::shiftEdge(int polyIndex, int vertIndex, double shift_x, double shift
   assert(0 <= polyIndex && polyIndex < m_numPolys);
   assert(0 <= vertIndex && vertIndex < m_numVerts[polyIndex]);
 
-  int start = 0;
-  for (int pIter = 0; pIter < polyIndex; pIter++) {
-    start += m_numVerts[pIter];
-  }
+  int start = getStartingIndices()[polyIndex];
 
   // Beginning point of the edge
   m_xv[start + vertIndex] += shift_x;
@@ -1005,10 +995,7 @@ void dPoly::shiftOnePoly(int polyIndex, double shift_x, double shift_y) {
 
   assert(0 <= polyIndex && polyIndex < m_numPolys);
 
-  int start = 0;
-  for (int pIter = 0; pIter < polyIndex; pIter++) {
-    start += m_numVerts[pIter];
-  }
+  int start = getStartingIndices()[polyIndex];
 
   for (int vIter = 0; vIter < m_numVerts[polyIndex]; vIter++) {
     m_xv[start + vIter] += shift_x;
@@ -1123,7 +1110,7 @@ void dPoly::reverse(){
     std::reverse(vecPtr(m_xv) + start, vecPtr(m_xv) + start + m_numVerts[pIter]);
     std::reverse(vecPtr(m_yv) + start, vecPtr(m_yv) + start + m_numVerts[pIter]);
   }
-  
+  clearExtraData();
   return;
 }
   
@@ -1131,14 +1118,11 @@ void dPoly::reverseOnePoly(int polyIndex){
 
   assert(0 <= polyIndex && polyIndex < m_numPolys);
 
-  int start = 0;
-  for (int pIter = 0; pIter < polyIndex; pIter++){
-    start += m_numVerts[pIter];
-  }
+  int start = getStartingIndices()[polyIndex];
 
   std::reverse(vecPtr(m_xv) + start, vecPtr(m_xv) + start + m_numVerts[polyIndex]);
   std::reverse(vecPtr(m_yv) + start, vecPtr(m_yv) + start + m_numVerts[polyIndex]);
-
+  clearExtraData();
   return;
 }
 
@@ -1223,6 +1207,7 @@ void dPoly::sortFromLargestToSmallest(bool counter_cc) {
     }
 
   }
+  m_startingIndices.clear();
   clearExtraData();
 
 }
@@ -1289,6 +1274,7 @@ void dPoly::enforce45() {
     snapPolyLineTo45DegAngles(isClosedPolyLine, numV, px, py);
 
   }
+  m_startingIndices.clear();
   clearExtraData();
   return;
 };
@@ -1411,6 +1397,7 @@ bool dPoly::readPoly(std::string filename,
     } // End processing the current polygon in the list of polygons
 
   } // End reading the file and processing all polygons
+  m_startingIndices.clear();
   clearExtraData();
   return true; // success
 
@@ -1638,6 +1625,7 @@ void dPoly::set_pointCloud(const std::vector<dPoint> & P, std::string color,
     m_xv.push_back(P[s].x);
     m_yv.push_back(P[s].y);
   }
+  m_startingIndices.clear();
   clearExtraData();
   return;
 }
@@ -1759,27 +1747,26 @@ void dPoly::markAnnosIntersectingBox(// Inputs
   }  
 }
 
-void dPoly::replaceOnePoly(int polyIndex, int numV, const double* x, const double* y) {
-
-  assert(0 <= polyIndex && polyIndex < m_numPolys);
-
-  int start = 0;
-  for (int pIter = 0; pIter < polyIndex; pIter++) start += m_numVerts[pIter];
-
-  m_xv.erase(m_xv.begin() + start, m_xv.begin() + start + m_numVerts[polyIndex]);
-  m_yv.erase(m_yv.begin() + start, m_yv.begin() + start + m_numVerts[polyIndex]);
-
-  m_xv.insert(m_xv.begin() + start, x, x + numV);
-  m_yv.insert(m_yv.begin() + start, y, y + numV);
-
-  m_numVerts[polyIndex] = numV;
-  m_totalNumVerts = m_xv.size();
-
-  m_layerAnno.clear();
-  clearExtraData();
-
-  return;
-}
+//void dPoly::replaceOnePoly(int polyIndex, int numV, const double* x, const double* y) {
+//
+//  assert(0 <= polyIndex && polyIndex < m_numPolys);
+//
+//  int start = getStartingIndices()[polyIndex];
+//
+//  m_xv.erase(m_xv.begin() + start, m_xv.begin() + start + m_numVerts[polyIndex]);
+//  m_yv.erase(m_yv.begin() + start, m_yv.begin() + start + m_numVerts[polyIndex]);
+//
+//  m_xv.insert(m_xv.begin() + start, x, x + numV);
+//  m_yv.insert(m_yv.begin() + start, y, y + numV);
+//
+//  m_numVerts[polyIndex] = numV;
+//  m_totalNumVerts = m_xv.size();
+//
+//  m_layerAnno.clear();
+//  clearExtraData();
+//  m_startingIndices.clear();
+//  return;
+//}
 
 void dPoly::eraseMarkedPolys(std::map<int, int> const& mark) {
 
@@ -1812,6 +1799,7 @@ void dPoly::eraseMarkedPolys(std::map<int, int> const& mark) {
 
   m_layerAnno.clear();
   clearExtraData();
+  m_startingIndices.clear();
   return;
 }
 
