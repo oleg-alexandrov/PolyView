@@ -3237,7 +3237,7 @@ void polyView::writeMultiplePolys(bool overwrite) {
   string allFiles = "";
   for (int polyIter = 0; polyIter < (int)m_polyVec.size(); polyIter++) {
 
-    dPoly poly = m_polyVec[polyIter];
+    dPoly &poly = m_polyVec[polyIter];
 
     string fileName = m_polyOptionsVec[polyIter].polyFileName;
     if (!overwrite) fileName = inFileToOutFile(fileName);

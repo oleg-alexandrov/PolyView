@@ -303,6 +303,7 @@ void dPoly::clipPoly(// inputs
   //utils::Timer my_clock("dPoly::clipPoly");
 
   dRect clip_box(clip_xll, clip_yll, clip_xur, clip_yur);
+
   const std::vector<int>& starting_ids = getStartingIndices();
   vector<anno> annotations, annoInBox;
 
@@ -328,6 +329,7 @@ void dPoly::clipPoly(// inputs
   } else {
     clippedPoly.reset();
     clippedPoly.set_isPointCloud(m_isPointCloud);
+
     if (m_isPointCloud ){
       // If point clouds then call the faster clipping function clipPointCloud
       clipPointCloud(clip_box, clippedPoly, selected);
@@ -363,10 +365,8 @@ void dPoly::clipPoly(// inputs
 
         cutXv.clear(); cutYv.clear(); cutNumVerts.clear();
 
-        if (m_isPointCloud || clip_box.contains(box)) {
-          //cout <<"count "<< count<<endl;
-          // To cut a point cloud to a box all is needed is to select
-          // which points are in the box
+        if (clip_box.contains(box)) {
+          // If bounding box of polygon is in clip box no need to cut polygon
           for (int vIter = 0; vIter < numVerts[pIter]; vIter++) {
             cutXv.push_back(xv[start + vIter]);
             cutYv.push_back(yv[start + vIter]);
@@ -417,7 +417,7 @@ void dPoly::clipPoly(// inputs
       annoInBox.clear();
       for (int s = 0; s < (int)annotations.size(); s++) {
         const anno & A = annotations[s];
-        if (clip_xll <= A.x && A.x <= clip_xur && clip_yll <= A.y && A.y <= clip_yur) {
+        if (clip_box.isInSide(A.x, A.y)) {
           annoInBox.push_back(A);
         }
       }
@@ -1679,12 +1679,34 @@ void dPoly::buildGrid(double xl, double yl, double xh, double yh,
   return;
 }
 
+void dPoly::markPointsInBox(// Inputs
+    double xll, double yll,
+    double xur, double yur,
+    // Outputs
+    std::map<int, int> & mark) const {
+// Mark index of points in the box, for point cloud mode
+  mark.clear();
+  const auto *pttree = getPointTree();
+  std::vector<utils::PointWithId> outPts;
+  pttree->getPointsInBox(xll, yll, xur, yur, outPts);
+
+  for (auto &pt : outPts) {
+    mark[pt.id] = 1;
+  }
+
+}
+
+
 void dPoly::markPolysIntersectingBox(// Inputs
 		double xll, double yll,
 		double xur, double yur,
 		// Outputs
 		std::map<int, int> & mark) const {
 
+	if (m_isPointCloud){
+    markPointsInBox(xll, yll, xur, yur, mark);
+    return;
+  }
 	// If bounding box of a polygon intersects the region we will check that polygon for selection
 
 	mark.clear();

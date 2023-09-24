@@ -145,6 +145,13 @@ public:
                       std::string layer);
   void buildGrid(double xl, double yl, double xh, double yh,
                  double gridSize, std::string gridColor);
+
+  void markPointsInBox(// Inputs
+      double xll, double yll,
+      double xur, double yur,
+      // Outputs
+      std::map<int, int> & mark) const;
+
   void markPolysIntersectingBox(// Inputs
                                 double xll, double yll,
                                 double xur, double yur,
