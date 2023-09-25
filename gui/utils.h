@@ -52,6 +52,7 @@ struct polyOptions{
   int             gridWidth;
   bool            readPolyFromDisk;
   double          panelRatio;
+  bool            scatter_annotations;
   std::string     bgColor;
   std::string     fgColor;
   std::string     cmdLineColor;
@@ -72,6 +73,7 @@ struct polyOptions{
     gridSize         = -1;
     readPolyFromDisk = true;
     panelRatio       = 0.2;
+    scatter_annotations = false;
     bgColor          = "black";
     fgColor          = "white";
     cmdLineColor     = "green";
@@ -97,6 +99,7 @@ namespace utils{
   };
   
   std::string getDocText();
+  void getRGBColor(double v, double vmin, double vmax, double &r, double &g, double &b);
 
   void extractWindowDims(// inputs
                          int numArgs, char ** args,

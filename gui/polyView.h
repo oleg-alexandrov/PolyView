@@ -225,6 +225,7 @@ private:
   void displayData( QPainter *paint );
   void plotDPoly(bool plotPoints, bool plotEdges,
                  bool plotFilled, bool showAnno,
+                 bool scatter_annotation,
                  int lineWidth,
                  int drawVertIndex, // 0 is a good choice here
                  // An empty grid is a good choice if not text is present
@@ -236,6 +237,9 @@ private:
 				 int lighter_darker = 0 // draw color as  0: normal, 1: darker, -1: lighter
 
 				 );
+
+  void plotAnnotationScattered(const std::vector<anno> &annotations,
+                               QPainter *paint);
 
   void plotImage(QPainter *paint, utils::dPoly const& poly);
 

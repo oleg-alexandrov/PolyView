@@ -59,11 +59,38 @@ void utils::printUsage(std::string progName){
   cout <<"     -ncp | -nonClosedPoly "<<endl;
   cout <<"     -f   | -filledPoly "<<endl;
   cout <<"     -ha  | -hideAnno            (do not show annotations in file) "<<endl;
+  cout <<"     -sa  | -scatterAnno         (plot annotation values as scattered points)"<<endl;
   cout <<"     -nf  | -nonFilledPoly "<<endl;
   cout <<"     -cw  | clockwisePoly        (if polygon orientation is clockwise)"<<endl;
   cout<<endl;
 
 }
+
+namespace {
+
+double clamp(double v)
+{
+  const double t = v < 0 ? 0 : v;
+  return t > 1.0 ? 1.0 : t;
+}
+
+}
+
+void utils::getRGBColor(double v, double vmin, double vmax, double &r, double &g, double &b){
+  if (vmax <= vmin){
+    r = 0;
+    b = 0;
+    g = 1;
+  } else {
+    v = std::max(v, vmin);
+    v = std::min(v, vmax);
+    double t = -1 + 2*(v-vmin)/(vmax-vmin);
+    r = clamp(1.5 - std::abs(2.0 * t - 1.0));
+    g = clamp(1.5 - std::abs(2.0 * t));
+    b = clamp(1.5 - std::abs(2.0 * t + 1.0));
+  }
+}
+
 
 void utils::extractWindowDims(// inputs
                               int numArgs, char ** args,
@@ -248,6 +275,12 @@ void utils::parseCmdOptions(//inputs
     if ((strcasecmp(currArg, "-ha") == 0 ||
          strcasecmp(currArg, "-hideAnno") == 0)){
       opt.hideAnnotation = true;
+      continue;
+    }
+
+    if ((strcasecmp(currArg, "-sa") == 0 ||
+         strcasecmp(currArg, "-scatterAnno") == 0)){
+      opt.scatter_annotations = true;
       continue;
     }
 

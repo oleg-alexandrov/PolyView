@@ -491,7 +491,7 @@ void polyView::displayData(QPainter *paint) {
                    m_viewXll + m_viewWidX,
                    m_viewYll + m_viewWidY,
                    m_prefs.gridSize, m_prefs.gridColor);
-    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, m_prefs.gridWidth,
+    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.gridWidth,
               drawVertIndex, textOnScreenGrid, paint, grid);
   }
 
@@ -518,6 +518,8 @@ void polyView::displayData(QPainter *paint) {
 
     // Skip the files the user does not want to see
     string fileName = m_polyOptionsVec[vecIter].polyFileName;
+    bool scatter_anno = m_polyOptionsVec[vecIter].scatter_annotations;
+
     if (m_filesToHide.find(fileName) != m_filesToHide.end()) continue;
 
     // Plot the image component
@@ -564,14 +566,14 @@ void polyView::displayData(QPainter *paint) {
     }
 
     // Plot all or un-selected ones if there are selected ones
-    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
+    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
             drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter],
             has_selected ? &un_selected : nullptr,
             lighter_darker // plot un-selected polygons darker
             );
 
     if (has_selected) {
-      plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, lineWidth,
+      plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
                 drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter], &m_selectedPolyIndices[vecIter],
                 -lighter_darker // plot selected polygons lighter
                 );
@@ -586,7 +588,7 @@ void polyView::displayData(QPainter *paint) {
   for (int h = 0; h < (int)m_highlights.size(); h++) {
     m_highlights[h].set_color(m_prefs.fgColor.c_str());
     bool showAnno = false;
-    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, m_prefs.lineWidth,
+    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth,
               drawVertIndex, textOnScreenGrid, paint, m_highlights[h]);
   }
 
@@ -617,15 +619,15 @@ void polyView::displayData(QPainter *paint) {
 // drawing region on screen is:
 // m_viewXll,  m_viewYll, m_viewXll + m_viewWidX, m_viewYll + m_viewWidY.
 void polyView::plotDPoly(bool plotPoints, bool plotEdges,
-                         bool plotFilled, bool showAnno,
+                         bool plotFilled, bool showAnno, bool scatter_annotation,
                          int lineWidth,
                          int drawVertIndex, // 0 is a good choice here
                          // An empty grid is a good choice if not text is present
                          std::vector< std::vector<int> > & textOnScreenGrid,
                          QPainter *paint,
                          dPoly &currPoly,
-						 const std::map<int, int> *selected,
-						 int lighter_darker) {
+                         const std::map<int, int> *selected,
+                         int lighter_darker) {
 
   //utils::Timer my_clock("polyView::plotDPoly");
   // Note: Having annotations at vertices can make the display
@@ -776,21 +778,67 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   }
 
   // Plot the annotations
+  if (scatter_annotation){
+    plotAnnotationScattered(clippedPoly.get_annotations(), paint);
+  }
+
   int numAnno = annotations.size();
   for (int aIter = 0; aIter < numAnno; aIter++) {
     const anno & A = annotations[aIter];
     int x0, y0;
     worldToPixelCoords(A.x, A.y, // inputs
                        x0, y0    // outputs
-                       );
-    paint->setPen(QPen(QColor("gold"), lineWidth));
+    );
+
     if (isClosestGridPtFree(textOnScreenGrid, x0, y0)) {
+      paint->setPen(QPen(QColor("gold"), lineWidth));
       paint->drawText(x0, y0, (A.label).c_str());
     }
 
   } // End placing annotations
 
+
   return;
+}
+
+void polyView::plotAnnotationScattered(const vector<anno> &annotations,
+                                       QPainter *paint){
+
+  // Plot annotations as filled colorful circles
+
+  int numAnno = annotations.size();
+  std::vector<double> vals;
+  float minval = FLT_MAX;
+  float maxval = -FLT_MAX;
+
+  for (int aIter = 0; aIter < numAnno; aIter++) {
+    const anno & A = annotations[aIter];
+    float val = 0;
+    try {
+      val = std::stof(A.label);
+    } catch (...){
+      cout <<"annotation value is not a number cannot display as scatter";
+    }
+    minval = std::min(minval, val);
+    maxval = std::max(maxval, val);
+    vals.push_back(val);
+  }
+
+  for (int aIter = 0; aIter < numAnno; aIter++) {
+    const anno & A = annotations[aIter];
+    int x0, y0;
+    worldToPixelCoords(A.x, A.y, x0, y0);
+
+    float val = vals[aIter];
+    double r, g, b;
+    getRGBColor(val, minval, maxval, r, g, b);
+    QColor color;
+    color.setRgbF(r, g, b);
+    paint->setPen(QPen(color, 1));
+    paint->setBrush(color);
+    paint->drawEllipse(x0 - 4, y0 - 4, 8, 8);
+
+  }
 }
 
 void polyView::plotImage(QPainter *paint, utils::dPoly const& poly) {
@@ -2028,7 +2076,7 @@ void polyView::drawPolyLine(const std::vector<double> & polyX,
   int drawVertIndex = 0;
   vector< vector<int> > textOnScreenGrid; textOnScreenGrid.clear();
   bool showAnno = false;
-  plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, m_prefs.lineWidth,
+  plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth,
             drawVertIndex, textOnScreenGrid, paint, polyLine);
 
   return;
