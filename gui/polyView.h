@@ -216,8 +216,16 @@ private:
   void initTextOnScreenGrid(std::vector<std::vector<int>> & Grid);
   bool isPolyZeroDim(const QPolygon & pa);
   void centerViewAtPoint(double x, double y);
-  void drawOneVertex(int x0, int y0, QColor color, int lineWidth,
-                     int drawVertIndex, QPainter * paint);
+  void drawPointShapes(const QVector<QLine> &lines,
+                       const QColor &color,
+                       int shape_type, // see polyView::getOnePointShape
+                       double lineWidth,
+                       QPainter *paint);
+  void getOnePointShape(int x0, int y0,
+                        int len, // marker edge length/size
+                        int shape_type,
+                        QVector<QLine> &lines);
+
   void updateRubberBand(QRect & R);
 
   bool hasSelectedPolygons() const;
@@ -226,7 +234,7 @@ private:
   void plotDPoly(bool plotPoints, bool plotEdges,
                  bool plotFilled, bool showAnno,
                  bool scatter_annotation,
-                 int lineWidth,
+                 double lineWidth,
                  int drawVertIndex, // 0 is a good choice here
                  // An empty grid is a good choice if not text is present
                  std::vector<std::vector<int>> & textOnScreenGrid,

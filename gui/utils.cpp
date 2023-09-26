@@ -274,13 +274,13 @@ void utils::parseCmdOptions(//inputs
 
     if ((strcasecmp(currArg, "-ha") == 0 ||
          strcasecmp(currArg, "-hideAnno") == 0)){
-      opt.hideAnnotation = true;
+      opt.hideAnnotation = !opt.hideAnnotation;
       continue;
     }
 
     if ((strcasecmp(currArg, "-sa") == 0 ||
          strcasecmp(currArg, "-scatterAnno") == 0)){
-      opt.scatter_annotations = true;
+      opt.scatter_annotations = !opt.scatter_annotations;
       continue;
     }
 

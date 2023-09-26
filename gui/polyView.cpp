@@ -511,6 +511,8 @@ void polyView::displayData(QPainter *paint) {
   // Draw un-selected polygons darker
   int lighter_darker = hasSelectedPolygons() ? 1 : 0;
 
+  drawVertIndex = -1;
+
   // Plot the images and polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
 
@@ -518,7 +520,8 @@ void polyView::displayData(QPainter *paint) {
 
     // Skip the files the user does not want to see
     string fileName = m_polyOptionsVec[vecIter].polyFileName;
-    bool scatter_anno = m_polyOptionsVec[vecIter].scatter_annotations;
+    bool scatter_anno = m_polyOptionsVec[vecIter].scatter_annotations &&
+        !m_polyOptionsVec[vecIter].hideAnnotation;
 
     if (m_filesToHide.find(fileName) != m_filesToHide.end()) continue;
 
@@ -539,7 +542,7 @@ void polyView::displayData(QPainter *paint) {
       (m_displayMode == m_showPoints)                         ||
       (m_displayMode == m_showPointsEdges);
 
-    drawVertIndex = vi;
+    if (plotPoints) drawVertIndex++;
 
     if (m_polyDiffMode && vi < 2){
       // in polydiff mode plot points of the two polygons the same way so that
@@ -620,7 +623,7 @@ void polyView::displayData(QPainter *paint) {
 // m_viewXll,  m_viewYll, m_viewXll + m_viewWidX, m_viewYll + m_viewWidY.
 void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          bool plotFilled, bool showAnno, bool scatter_annotation,
-                         int lineWidth,
+                         double lineWidth,
                          int drawVertIndex, // 0 is a good choice here
                          // An empty grid is a good choice if not text is present
                          std::vector< std::vector<int> > & textOnScreenGrid,
@@ -693,14 +696,31 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                                                      m_viewYll + m_viewWidY,
                                                      m_counter_cc);
 
-   if (clippedPoly.get_totalNumVerts() >= 50000){
-       // This is done for performance
-       // when too many polygons/points are drawn in a large area we don't need
-       // to use larger lineWidth; we cannot tell them apart anyways.
-       // When we zoom in fewer polygons are in the view and it uses
-       // user setting for lineWidth.
-       lineWidth = 1;
+   // length/size of point shapes
+   int len = (drawVertIndex <= 1) ? 3 : (2*drawVertIndex+2);
+   len = min(len, 8); // limit how big this can get
+
+   // This is done for performance
+   // when too many polygons/points are drawn in a large area we don't need
+   // to use larger lineWidth; we cannot tell them apart anyways.
+   // When we zoom in, fewer polygons are in the view and it uses
+   // user setting for lineWidth.
+   // The following settings are experimentally decided
+   if (clippedPoly.get_totalNumVerts() >= 400000){
+     lineWidth = 0.5;
+     len = 1;
+   } else if (clippedPoly.get_totalNumVerts() >= 200000){
+     lineWidth = 1.0;
+     len = 2;
+   }else if (clippedPoly.get_totalNumVerts() >= 100000){
+     lineWidth = 1.0;
    }
+
+   //my_clock.tock("CLIP");
+
+   QVector<QLine> lines;
+
+   QColor prev_color = (numPolys > 0) ? QColor(colors[0].c_str()) : QColor("") ;
 
   int start = 0;
   for (int pIter = 0; pIter < numPolys; pIter++) {
@@ -714,6 +734,13 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     }
     if (lighter_darker == -1){
         color = color.lighter(130); // 30% lighter
+    }
+
+    if (plotPoints && color != prev_color) {
+      // new color, draw previous color and clear lines
+      drawPointShapes(lines, prev_color, drawVertIndex, lineWidth, paint);
+      prev_color = color;
+      lines.clear();
     }
 
     int pSize = numVerts[pIter];
@@ -738,8 +765,9 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       // Qt's built in points are too small. Instead of drawing a point
       // draw a small shape.
       if (plotPoints) {
-        drawOneVertex(x0, y0, color, lineWidth, drawVertIndex, paint);
+        getOnePointShape(x0, y0, len, drawVertIndex, lines);
       }
+
     }
     if (isPolyClosed[pIter]){
     	worldToPixelCoords(xv[start], yv[start], // inputs
@@ -762,9 +790,11 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
       if (isPolyZeroDim(pa)) {
         // Treat the case of polygons which are made up of just one point
-        int l_drawVertIndex = -1;
-        drawOneVertex(pa[0].x(), pa[0].y(), color, lineWidth, l_drawVertIndex,
-                      paint);
+
+        len = lineWidth;
+        paint->setBrush(color);
+        paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
+
       }else {
 
         if (plotFilled) {
@@ -776,6 +806,10 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       }
     }
   }
+
+  if (plotPoints) { // draw remaining points of the last color (if any)
+    drawPointShapes(lines, prev_color, drawVertIndex, lineWidth, paint);
+   }
 
   // Plot the annotations
   if (scatter_annotation){
@@ -797,6 +831,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
   } // End placing annotations
 
+  //my_clock.tock("DRAW");
 
   return;
 }
@@ -2230,32 +2265,49 @@ void polyView::worldToPixelCoords(double wx, double wy,
   py = m_screenWidY - py;
 
 }
-
-void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
-                             int drawVertIndex, QPainter * paint) {
-
-  // Draw a vertex as a small shape (a circle, rectangle, triangle)
-
-  // Use variable size shapes to distinguish better points on top of
-  // each other, the first two are the same size
-  int len = (drawVertIndex <= 1) ? 3 : (2*drawVertIndex+2);
-  len = min(len, 8); // limit how big this can get
+void polyView::drawPointShapes(const QVector<QLine> &lines,
+                               const QColor &color,
+                               int shape_type, // see polyView::getOnePointShape
+                               double lineWidth,
+                               QPainter *paint){
 
   paint->setPen(QPen(color, lineWidth));
 
-  int numTypes = 6;
-  // This is faster then %
-  while (drawVertIndex >= numTypes) drawVertIndex -= numTypes;
-  paint->setBrush(Qt::NoBrush);
+  if (shape_type == 2){
+    QVector<QRect> rects(lines.size());
+    rects.reserve(lines.size());
+    for (const auto &line : lines) {
+      rects.push_back(QRect(line.p1().x(), line.p1().y(), line.p2().x(), line.p2().y()));
+    }
+    paint->drawRects(rects);
 
-  if (drawVertIndex < 0) {
-    // This will be reached only for the case when a polygon
-    // is so small that it collapses into a point.
-    len = lineWidth;
-    paint->setBrush(color);
-    paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
+  } else if (shape_type == 3){
+    for (const auto &line : lines) {
+      paint->drawEllipse(line.p1().x(), line.p1().y(), line.p2().x(), line.p2().y());
+    }
+  } else {
+    paint->drawLines(lines);
+  }
 
-  } else if (drawVertIndex == 0) {
+}
+void polyView::getOnePointShape(int x0, int y0,
+                                int len, // marker edge length/size
+                                int shape_type,
+                                QVector<QLine> &lines) {
+  // Return each shape as a line segment or a set of line segments.
+  // Later based on shape_type we will draw actual shape.
+  // shape_type:
+  //          0-> X
+  //          1-> +
+  //          2-> square
+  //          3-> ellipse
+  //          4-> triangle
+  //          other -> up-side-down triangle
+
+  // len: size of the shape
+  // x0,y0: center of the shape
+
+  if (shape_type == 0) {
     // Draw an X
     int tl = 2*len;
     int xl = x0 - tl;
@@ -2263,33 +2315,33 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
     int yl = y0 - tl;
     int yr = y0 + tl;
 
-    paint->drawLine(xl, yl, xr, yr);
-    paint->drawLine(xl, yr, xr,   yl);
+    lines.push_back(QLine(xl, yl, xr, yr));
+    lines.push_back(QLine(xl, yr, xr,   yl));
 
-  }else if (drawVertIndex == 1) {
+  }else if (shape_type == 1) {
     // Draw an plus
     int tl = 2*len;
-    paint->drawLine(x0-tl, y0, x0+tl, y0);
-    paint->drawLine(x0, y0-tl, x0,   y0+tl);
+    lines.push_back(QLine(x0-tl, y0, x0+tl, y0));
+    lines.push_back(QLine(x0, y0-tl, x0,   y0+tl));
 
-  }else if (drawVertIndex == 2) {
+  }else if (shape_type == 2) {
     // Draw an empty square
-    paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
+    lines.push_back(QLine(x0 - len, y0 - len, 2*len, 2*len));
 
-  } else if (drawVertIndex == 3) {
+  } else if (shape_type == 3) {
     // Draw a small empty ellipse
-    paint->drawEllipse(x0 - len, y0 - len, 2*len, 2*len);
+    lines.push_back(QLine(x0 - len, y0 - len, 2*len, 2*len));
 
-  } else if (drawVertIndex == 4) {
+  } else if (shape_type == 4) {
     // Draw an empty triangle
     int xl = x0 - len;
     int xr = x0 + len;
     int yl = y0 - len;
     int yr = y0 + len;
 
-    paint->drawLine(xl, yl, xr, yl);
-    paint->drawLine(xl, yl, x0,   yr);
-    paint->drawLine(xr, yl, x0,   yr);
+    lines.push_back(QLine(xl, yl, xr, yl));
+    lines.push_back(QLine(xl, yl, x0,   yr));
+    lines.push_back(QLine(xr, yl, x0,   yr));
 
   }else{
     // Draw an empty reversed triangle
@@ -2298,12 +2350,11 @@ void polyView::drawOneVertex(int x0, int y0, QColor color, int lineWidth,
     int yl = y0 - len;
     int yr = y0 + len;
 
-    paint->drawLine(xl, yr, xr, yr);
-    paint->drawLine(xl, yr, x0,   yl);
-    paint->drawLine(xr, yr, x0,   yl);
+    lines.push_back(QLine(xl, yr, xr, yr));
+    lines.push_back(QLine(xl, yr, x0,   yl));
+    lines.push_back(QLine(xr, yr, x0,   yl));
   }
 
-  return;
 }
 
 void polyView::drawMark(int x0, int y0, QColor color, int lineWidth,
