@@ -27,6 +27,7 @@
 #include <cmath>
 #include <set>
 #include <cassert>
+#include <cfloat>
 #include <chrono>
 
 struct dPoint{
@@ -119,8 +120,8 @@ private:
     double xl, yl, xh, yh;
 
     void setInvalid(){// set to invalid so we know that it is not set
-      xl = yl = 1;
-      xh = yh = -1;
+      xl = yl = FLT_MAX;
+      xh = yh = -FLT_MAX;
     }
     bool isInSide(double x, double y) const {
     	return (x >= xl && x <= xh && y >= yl && y <= yh);
