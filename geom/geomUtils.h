@@ -154,8 +154,8 @@ private:
 
   struct segDist: public seg{
     double dist;
-    segDist(double begx_in, double begy_in, double endx_in,
-            double endy_in, double dist_in):
+    segDist(double begx_in =0, double begy_in=0, double endx_in=0,
+            double endy_in=0, double dist_in=0):
       seg(begx_in, begy_in, endx_in, endy_in), dist(dist_in){}
   };
 

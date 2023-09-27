@@ -230,14 +230,15 @@ void boxTree<Box>::formTreeOfBoxesInternal(Box * Boxes, int numBoxes,
 
   root = getNewboxNode();
   m_nodePool[root].isLeftRightSplit = isLeftRightSplit;
+  int mid = numBoxes/2;
 
   if (isLeftRightSplit){ // Left-most boxes go in the left child
-    std::sort(Boxes, Boxes + numBoxes, leftLessThan<Box>);
+    std::nth_element(Boxes, Boxes+mid, Boxes + numBoxes, leftLessThan<Box>);
   }else{               // Bottom-most boxes go in the left child
-    std::sort(Boxes, Boxes + numBoxes, botLessThan<Box>);
+    std::nth_element(Boxes, Boxes+mid, Boxes + numBoxes, botLessThan<Box>);
   }
 
-  int mid = numBoxes/2;
+
   assert( 0 <= mid && mid < numBoxes);
 
   m_nodePool[root].Rect = Boxes[mid]; // Must happen after sorting

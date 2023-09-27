@@ -290,6 +290,8 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
     T.putPolyEdgesInTree(poly2);
   }
 
+  std::vector<segDist> distVec_temp(numVerts1);
+
   for (int t = 0; t < numVerts1; t++) {
 
     double x = x1[t], y = y1[t];
@@ -306,12 +308,15 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
                                closestEdge, closestDist, closestX, closestY // outputs
       );
     }
-    distVec.push_back(segDist(x, y, closestX, closestY, closestDist));
-
+    if (closestDist>0){
+      distVec_temp[t] = segDist(x, y, closestX, closestY, closestDist);
+    }
   }
 
+  for (auto &seg: distVec_temp){
+    if (seg.dist > 0) distVec.push_back(seg);
+  }
 
-  sort(distVec.begin(), distVec.end(), segDistGreaterThan);
   return;
 }
 

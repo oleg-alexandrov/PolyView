@@ -103,14 +103,14 @@ void kdTree::formTreeOfPointsInternal(utils::PointWithId * Pts, int numPts, bool
   root = getNewNode();
   utils::Node &node = getNode(root);
   node.isLeftRightSplit = isLeftRightSplit;
-  
+  int mid = numPts/2;
+
   if (isLeftRightSplit){ // Split points into left and right halves
-    sort(Pts, Pts + numPts, leftLessThan);
+    std::nth_element(Pts, Pts + mid, Pts + numPts, leftLessThan);
   }else{               // Split points into bottom and top halves 
-    sort(Pts, Pts + numPts, botLessThan);
+    std::nth_element(Pts, Pts + mid, Pts + numPts, botLessThan);
   }
 
-  int mid = numPts/2;
   assert( 0 <= mid && mid < numPts);
   
   node.P = Pts[mid]; // Must happen after sorting
