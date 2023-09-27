@@ -43,7 +43,7 @@ void utils::printUsage(std::string progName){
   cout <<"app_options:"<<endl;
   cout <<"     -geo[metry] 1200x800 " <<endl;
   cout <<"     -bg | -backgroundColor black "<<endl;
-  cout <<"     -grid on | off "<<endl;
+  cout <<"     -grid (on or off) "<<endl;
   cout <<"     -gridSize 10 "<<endl;
   cout <<"     -gridWidth 1 "<<endl;
   cout <<"     -gridColor green "<<endl;
@@ -61,7 +61,9 @@ void utils::printUsage(std::string progName){
   cout <<"     -ha  | -hideAnno            (do not show annotations in file) "<<endl;
   cout <<"     -sa  | -scatterAnno         (plot annotation values as scattered points)"<<endl;
   cout <<"     -nf  | -nonFilledPoly "<<endl;
-  cout <<"     -cw  | clockwisePoly        (if polygon orientation is clockwise)"<<endl;
+  cout <<"     -cw  | -clockwisePoly        (if polygon orientation is clockwise)"<<endl;
+  cout <<"     -s   | -shape          (x/+/o/s/t) define shape of points in point mode display"<<endl;
+
   cout<<endl;
 
 }
@@ -255,6 +257,28 @@ void utils::parseCmdOptions(//inputs
         && argIter < argc - 1){
       opt.useCmdLineColor = true;
       opt.cmdLineColor    = argv[argIter + 1];
+      argIter++;
+      continue;
+    }
+
+    if ((strcasecmp(currArg, "-s"    ) == 0 ||
+         strcasecmp(currArg, "-shape") == 0 )
+        && argIter < argc - 1){
+       char shape = tolower(argv[argIter + 1][0]);
+       if (shape == 'x'){
+         opt.pointShape = 0;
+       } else if (shape == '+'){
+         opt.pointShape = 1;
+       }else if (shape == 's'){
+         opt.pointShape = 2;
+       }else if (shape == 'o'){
+         opt.pointShape = 3;
+       }else if (shape == 't'){
+         opt.pointShape = 4;
+       } else {
+         cout <<"ERROR un-supported shape specified, using triangles"<<endl;
+         opt.pointShape = 5;
+       }
       argIter++;
       continue;
     }

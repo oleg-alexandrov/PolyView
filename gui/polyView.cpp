@@ -485,14 +485,14 @@ void polyView::displayData(QPainter *paint) {
     dPoly grid;
     bool plotPoints = false, plotEdges = true, plotFilled = false;
     bool showAnno = false;
-    int drawVertIndex = 0;
+    int point_shape = 0;
     textOnScreenGrid.clear(); // (this is text grid, not line grid)
     grid.buildGrid(m_viewXll,  m_viewYll,
                    m_viewXll + m_viewWidX,
                    m_viewYll + m_viewWidY,
                    m_prefs.gridSize, m_prefs.gridColor);
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.gridWidth,
-              drawVertIndex, textOnScreenGrid, paint, grid);
+              point_shape, textOnScreenGrid, paint, grid);
   }
 
 
@@ -501,7 +501,7 @@ void polyView::displayData(QPainter *paint) {
                     m_changeDisplayOrder, m_polyVecOrder); // inputs-outputs
 
   // Will draw a vertex with a shape dependent on this index
-  int drawVertIndex = -1;
+  int def_point_shape = -1;
   // Use a grid to not draw text too densely as that's slow
   assert(m_polyVec.size() == m_polyOptionsVec.size());
 
@@ -510,8 +510,6 @@ void polyView::displayData(QPainter *paint) {
 
   // Draw un-selected polygons darker
   int lighter_darker = hasSelectedPolygons() ? 1 : 0;
-
-  drawVertIndex = -1;
 
   // Plot the images and polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
@@ -542,12 +540,20 @@ void polyView::displayData(QPainter *paint) {
       (m_displayMode == m_showPoints)                         ||
       (m_displayMode == m_showPointsEdges);
 
-    if (plotPoints) drawVertIndex++;
+    int point_shape = 0;
+    if (plotPoints) {
+      if ( m_polyOptionsVec[vecIter].pointShape != -1){
+        point_shape = m_polyOptionsVec[vecIter].pointShape;
+      } else {
+        def_point_shape++;
+        point_shape = def_point_shape; // use default incremented index
+      }
+    }
 
     if (m_polyDiffMode && vi < 2){
       // in polydiff mode plot points of the two polygons the same way so that
       // the difference gets highlighted
-      drawVertIndex = 0;
+      point_shape = 0;
     }
 
     bool has_selected = !plotFilled && !m_selectedPolyIndices[vecIter].empty();
@@ -570,29 +576,29 @@ void polyView::displayData(QPainter *paint) {
 
     // Plot all or un-selected ones if there are selected ones
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
-            drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter],
-            has_selected ? &un_selected : nullptr,
-            lighter_darker // plot un-selected polygons darker
-            );
+              point_shape, textOnScreenGrid, paint, m_polyVec[vecIter],
+              has_selected ? &un_selected : nullptr,
+                  lighter_darker // plot un-selected polygons darker
+    );
 
     if (has_selected) {
       plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
-                drawVertIndex, textOnScreenGrid, paint, m_polyVec[vecIter], &m_selectedPolyIndices[vecIter],
+                point_shape, textOnScreenGrid, paint, m_polyVec[vecIter], &m_selectedPolyIndices[vecIter],
                 -lighter_darker // plot selected polygons lighter
-                );
+      );
     }
 
   } // End iterating over sets of polygons
 
   // Plot the highlights
   bool plotPoints = false, plotEdges = true, plotFilled = false;
-  drawVertIndex = 0;
+  int point_shape = 0;
   textOnScreenGrid.clear();
   for (int h = 0; h < (int)m_highlights.size(); h++) {
     m_highlights[h].set_color(m_prefs.fgColor.c_str());
     bool showAnno = false;
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth,
-              drawVertIndex, textOnScreenGrid, paint, m_highlights[h]);
+              point_shape, textOnScreenGrid, paint, m_highlights[h]);
   }
 
   // This draws the polygon being created if in that mode
@@ -624,7 +630,7 @@ void polyView::displayData(QPainter *paint) {
 void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          bool plotFilled, bool showAnno, bool scatter_annotation,
                          double lineWidth,
-                         int drawVertIndex, // 0 is a good choice here
+                         int point_shape, // 0 is a good choice here
                          // An empty grid is a good choice if not text is present
                          std::vector< std::vector<int> > & textOnScreenGrid,
                          QPainter *paint,
@@ -697,7 +703,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                                                      m_counter_cc);
 
    // length/size of point shapes
-   int len = (drawVertIndex <= 1) ? 3 : (2*drawVertIndex+2);
+   int len = (point_shape <= 1) ? 3 : (2*point_shape+2);
    len = min(len, 8); // limit how big this can get
 
    // This is done for performance
@@ -738,7 +744,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
     if (plotPoints && color != prev_color) {
       // new color, draw previous color and clear lines
-      drawPointShapes(lines, prev_color, drawVertIndex, lineWidth, paint);
+      drawPointShapes(lines, prev_color, point_shape, lineWidth, paint);
       prev_color = color;
       lines.clear();
     }
@@ -765,7 +771,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       // Qt's built in points are too small. Instead of drawing a point
       // draw a small shape.
       if (plotPoints) {
-        getOnePointShape(x0, y0, len, drawVertIndex, lines);
+        getOnePointShape(x0, y0, len, point_shape, lines);
       }
 
     }
@@ -808,7 +814,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   }
 
   if (plotPoints) { // draw remaining points of the last color (if any)
-    drawPointShapes(lines, prev_color, drawVertIndex, lineWidth, paint);
+    drawPointShapes(lines, prev_color, point_shape, lineWidth, paint);
    }
 
   // Plot the annotations
@@ -2108,11 +2114,11 @@ void polyView::drawPolyLine(const std::vector<double> & polyX,
                       );
 
   bool plotPoints = false, plotEdges = true, plotFilled = false;
-  int drawVertIndex = 0;
+  int point_shape = 0;
   vector< vector<int> > textOnScreenGrid; textOnScreenGrid.clear();
   bool showAnno = false;
   plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth,
-            drawVertIndex, textOnScreenGrid, paint, polyLine);
+            point_shape, textOnScreenGrid, paint, polyLine);
 
   return;
 }
@@ -2333,27 +2339,37 @@ void polyView::getOnePointShape(int x0, int y0,
     lines.push_back(QLine(x0 - len, y0 - len, 2*len, 2*len));
 
   } else if (shape_type == 4) {
+    // Draw an empty reversed triangle
+     int xl = x0 - len;
+     int xr = x0 + len;
+     int yl = y0 - len;
+     int yr = y0 + len;
+
+     lines.push_back(QLine(xl, yr, xr, yr));
+     lines.push_back(QLine(xl, yr, x0,   yl));
+     lines.push_back(QLine(xr, yr, x0,   yl));
+
+  }else{
     // Draw an empty triangle
+    //cout <<"drawing triangle "<< shape_type <<" "<< len<<endl;
     int xl = x0 - len;
     int xr = x0 + len;
     int yl = y0 - len;
     int yr = y0 + len;
+//    cout <<xl <<" "<<  yl<<endl;
+//    cout <<xr <<" "<<  yl<<endl;
+//    cout <<"NEXT"<<endl;
+//    cout <<xl <<" "<<  yl<<endl;
+//    cout <<x0 <<" "<<  yr<<endl;
+//    cout <<"NEXT"<<endl;
+//    cout <<xr <<" "<<  yl<<endl;
+//    cout <<x0 <<" "<<  yr<<endl;
+//    cout <<"NEXT"<<endl;
 
     lines.push_back(QLine(xl, yl, xr, yl));
     lines.push_back(QLine(xl, yl, x0,   yr));
     lines.push_back(QLine(xr, yl, x0,   yr));
-
-  }else{
-    // Draw an empty reversed triangle
-    int xl = x0 - len;
-    int xr = x0 + len;
-    int yl = y0 - len;
-    int yr = y0 + len;
-
-    lines.push_back(QLine(xl, yr, xr, yr));
-    lines.push_back(QLine(xl, yr, x0,   yl));
-    lines.push_back(QLine(xr, yr, x0,   yl));
-  }
+   }
 
 }
 
