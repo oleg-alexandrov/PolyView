@@ -158,11 +158,11 @@ void edgeTree::findClosestEdgeToPointInternal(// inputs
   // Find the distance from the input point to the edge at the root
   // node. Decide if first to visit the left or right subtree from the
   // root depending on which looks more promising.
-  
+
   assert (root != -1);
  const auto &bnode = m_boxTree.getBoxNode(root);
   
-  dRectWithId R = bnode.Rect;
+  const dRectWithId &R = bnode.Rect;
   double bx, by, ex, ey;
   boxToEdge(R,             // input
             bx, by, ex, ey // outputs

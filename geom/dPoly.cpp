@@ -294,6 +294,27 @@ void  dPoly::clipPointCloud(const dRect &clip_box,
 
 }
 
+// Cutting inherits the annotations at the vertices of the uncut
+// polygons which are in the cutting box.
+void dPoly::clipAnno(const dRect &clip_box,
+                     dPoly & clippedPoly){
+
+  vector<anno> annoInBox;
+
+  for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
+
+    const auto &annotations = get_annoByType((AnnoType)annoType);
+    annoInBox.clear();
+    for (int s = 0; s < (int)annotations.size(); s++) {
+      const anno & A = annotations[s];
+      if (clip_box.isInSide(A.x, A.y)) {
+        annoInBox.push_back(A);
+      }
+    }
+    clippedPoly.set_annoByType(annoInBox, (AnnoType)annoType);
+  }
+}
+
 void dPoly::clipPoly(// inputs
     double clip_xll, double clip_yll,
     double clip_xur, double clip_yur,
@@ -306,7 +327,6 @@ void dPoly::clipPoly(// inputs
   dRect clip_box(clip_xll, clip_yll, clip_xur, clip_yur);
 
   const std::vector<int>& starting_ids = getStartingIndices();
-  vector<anno> annotations, annoInBox;
 
   if (clip_box.contains(bdBox())){
     // If everything in clip box do not use tree search, just copy
@@ -321,10 +341,6 @@ void dPoly::clipPoly(// inputs
                                   vecPtr(m_yv) + start,
                                   m_isPolyClosed[pIter], m_colors[pIter], m_layers[pIter]);
       }
-    }
-
-    for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
-      clippedPoly.set_annoByType(get_annoByType((AnnoType)annoType), (AnnoType)annoType);
     }
 
   } else {
@@ -377,7 +393,6 @@ void dPoly::clipPoly(// inputs
 
         } else if (isClosed) {
 
-
           cutPoly(1, numVerts + pIter, xv + start, yv + start,
                   clip_xll, clip_yll, clip_xur, clip_yur,
                   cutXv, cutYv, cutNumVerts // outputs
@@ -404,28 +419,11 @@ void dPoly::clipPoly(// inputs
           );
 
         }
-
-
       }
-    }
-
-    // Cutting inherits the annotations at the vertices of the uncut
-    // polygons which are in the cutting box.
-
-    for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
-
-      const auto &annotations = get_annoByType((AnnoType)annoType);
-      annoInBox.clear();
-      for (int s = 0; s < (int)annotations.size(); s++) {
-        const anno & A = annotations[s];
-        if (clip_box.isInSide(A.x, A.y)) {
-          annoInBox.push_back(A);
-        }
-      }
-      clippedPoly.set_annoByType(annoInBox, (AnnoType)annoType);
     }
   }
 
+  clipAnno(clip_box, clippedPoly);
   return;
 }
 

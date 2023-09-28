@@ -848,24 +848,28 @@ void polyView::plotAnnotationScattered(const vector<anno> &annotations,
   // Plot annotations as filled colorful circles
 
   int numAnno = annotations.size();
-  std::vector<double> vals;
+  std::vector<double> vals(numAnno, FLT_MAX);
   float minval = FLT_MAX;
   float maxval = -FLT_MAX;
-
+  bool has_non_number_anno = false;
   for (int aIter = 0; aIter < numAnno; aIter++) {
     const anno & A = annotations[aIter];
     float val = 0;
     try {
       val = std::stof(A.label);
+      minval = std::min(minval, val);
+      maxval = std::max(maxval, val);
+      vals[aIter] = val;
     } catch (...){
-      cout <<"annotation value is not a number cannot display as scatter";
+      has_non_number_anno = true;
     }
-    minval = std::min(minval, val);
-    maxval = std::max(maxval, val);
-    vals.push_back(val);
+  }
+  if (has_non_number_anno){
+    cout <<"WARN: Some annotation values are not numbers, cannot plot them scattered"<<endl;
   }
 
   for (int aIter = 0; aIter < numAnno; aIter++) {
+    if (vals[aIter] == FLT_MAX) continue;
     const anno & A = annotations[aIter];
     int x0, y0;
     worldToPixelCoords(A.x, A.y, x0, y0);
