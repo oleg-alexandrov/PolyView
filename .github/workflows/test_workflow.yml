@@ -18,7 +18,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-       os: [ubuntu-22.04, macos-latest]
+#       os: [ubuntu-22.04, macos-latest]
+       os: ubuntu-22.04
 
     defaults:
       run:
@@ -48,14 +49,14 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
           
-    - uses: conda-incubator/setup-miniconda@v2
-      with:
-        miniconda-version: "latest"
-        activate-environment: buildenv
-        environment-file: conda_build_env.yml
-        auto-activate-base: false
-        auto-update-conda: true
-        python-version: ${{ matrix.python-version }}
+    # - uses: conda-incubator/setup-miniconda@v2
+    #   with:
+    #     miniconda-version: "latest"
+    #     activate-environment: buildenv
+    #     environment-file: conda_build_env.yml
+    #     auto-activate-base: false
+    #     auto-update-conda: true
+    #     python-version: ${{ matrix.python-version }}
 
     - name: Install Packages
       run: |
@@ -71,15 +72,15 @@ jobs:
         limit-access-to-actor: true
         limit-access-to-users: oleg-alexandrov
         ## If no one connects after 5 minutes, shut down the server
-        wait-timeout-minutes: 5
+        wait-timeout-minutes: 30
 
-    - name: Build Package
-      run: |
-        conda build .
+    # - name: Build Package
+    #   run: |
+    #     conda build .
  
-    - name: Test Package
-      run: |
-        echo Empty test
+    # - name: Test Package
+    #   run: |
+    #     echo Empty test
 
     - name: Upload Linux
       if: ${{ matrix.os == env.LINUX_VERSION }}

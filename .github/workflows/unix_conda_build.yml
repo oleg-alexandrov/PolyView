@@ -1,10 +1,14 @@
 name: UnixCondaBuild
 
+# Build on demand till the bugs are ironed out.
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_dispatch:
+
+# on:
+#   push:
+#     branches: [ "master" ]
+#   pull_request:
+#     branches: [ "master" ]
 
 env:
   # Note that this the Ubuntu version shows up twice below, because of
