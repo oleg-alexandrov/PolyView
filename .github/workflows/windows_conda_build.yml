@@ -1,10 +1,13 @@
 name: WindowsCondaBuild
 
+# Run this manually till it is figured out why it fails on push.
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_dispatch:
+
+#  push:
+#    branches: [ "master" ]
+#  pull_request:
+#    branches: [ "master" ]
 
 # The windows build complains about the default PATH being too long. Trying to set
 # the path here, but whatever is being tried it fails. TBD.
