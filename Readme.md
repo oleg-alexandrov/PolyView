@@ -291,19 +291,35 @@ g++, on OSX with clang, and on Windows with Visual Studio. It was
 written with portability in mind and it should be possible to build it
 on any platform and compiler.
 
-To compile PolyView, run:
+## Compiling locally
 
-    qmake polyview.pro
-    make
+To compile locally, on macOS, create a conda environment having the needed dependencies:
+
+    conda create -n polyview_dev qt=5.9.7 clang llvm-openmp
+
+This should install the dependencies in:
+
+    $HOME/miniconda3/envs/polyview_dev
+  
+Then run:
+
+    $HOME/miniconda3/envs/polyview_dev/bin/qmake                    \
+        QMAKE_CC=$HOME/miniconda3/envs/polyview_dev/bin/clang       \
+        QMAKE_CXX=$HOME/miniconda3/envs/polyview_dev/bin/clang-cpp  \
+        QMAKE_LINK=$HOME/miniconda3/envs/polyview_dev/bin/clang-cpp \
+        polyview.pro
+    make -j 10
     make install INSTALL_ROOT=install_directory
 
-Its only dependency is the Qt 5 library (e.g., Qt 5.9). Qt can be
-installed on Ubuntu with the command:
+On Linux, replace ``clang`` and ``clang-cpp`` with the gcc and g++ compilers, which
+may be called, for example, ``x86_64-conda_cos6-linux-gnu-gcc`` and ``x86_64-conda_cos6-linux-gnu-g++``.
 
-    apt-get install qmake
+## Compiling with conda build
 
-To compile this package with ``conda``, fetch the source code, go
-to the "PolyView" directory, and run:
+This will produce a packaged build, that can be uploaded to the cloud and
+later fetched with conda, as described at the beginning of this document.
+
+Fetch the source code, go to the "PolyView" directory, and run:
 
     conda create --name polyview
     conda activate polyview
