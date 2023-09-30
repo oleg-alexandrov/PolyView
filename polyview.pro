@@ -7,6 +7,7 @@ QT          += gui
 RESOURCES    = polyview.qrc
 INCLUDEPATH += geom
 INCLUDEPATH += gui
+QMAKE_CXXFLAGS += -fopenmp
 
 #TODO: See if compiling statically can reduce executable size
 #win32 {
