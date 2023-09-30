@@ -72,6 +72,8 @@ public:
                        const std::string & color, const std::string & layer
                        );
 
+  void getEdges(std::vector<seg> &allEdges) const;
+
   void setRectangle(double xl, double yl, double xh, double yh,
                     bool isPolyClosed,
                     const std::string & color, const std::string & layer

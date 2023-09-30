@@ -2587,6 +2587,7 @@ void polyView::plotDiff(int direction) {
     m_indexOfDistToPlot = (m_indexOfDistToPlot + len) % len;
   }else{
     m_indexOfDistToPlot = -1; // Nothing to plot
+    cout << " Distance: 0.0 " << endl;
   }
 
   if (m_indexOfDistToPlot < 0 || m_indexOfDistToPlot >= len) return;

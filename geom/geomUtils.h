@@ -112,6 +112,21 @@ private:
                              double & xll,  double & yll,
                              double & widx, double & widy);
 
+  struct seg{
+      double begx, begy, endx, endy;
+      seg(double begx_in = 0.0, double begy_in = 0.0,
+          double endx_in = 0.0, double endy_in = 0.0):
+        begx(begx_in), begy(begy_in), endx(endx_in), endy(endy_in){}
+    };
+
+
+  struct segDist: public seg{
+    double dist;
+    segDist(double begx_in =0, double begy_in=0, double endx_in=0,
+            double endy_in=0, double dist_in=0):
+      seg(begx_in, begy_in, endx_in, endy_in), dist(dist_in){}
+  };
+
 
   struct dRect{
     dRect(double xl_in = 0.0, double yl_in = 0.0,
@@ -133,6 +148,18 @@ private:
     bool isValid() const {
       return xl <= xh || yl <= yh;
     }
+    double area() const {
+      return (xh-xl)*(yh-yl);
+    }
+
+    bool operator==(const dRect &rec1) const {
+      return rec1.xh == xh && rec1.xl == xl && rec1.yh == yh && rec1.yl == yl;
+    }
+
+    bool intersects(const dRect &rec) const {
+      return !(xl > rec.xh || xh < rec.xl || yl > rec.yh || yh < rec.yl);
+    }
+    bool intersects(const utils::seg &edge) const;
 
   };
 
@@ -143,21 +170,6 @@ private:
                 double xh_in = 0.0, double yh_in = 0.0,
                 int id_in = 0):
       dRect(xl_in, yl_in, xh_in, yh_in), id(id_in){}
-  };
-
-  struct seg{
-    double begx, begy, endx, endy;
-    seg(double begx_in = 0.0, double begy_in = 0.0,
-        double endx_in = 0.0, double endy_in = 0.0):
-      begx(begx_in), begy(begy_in), endx(endx_in), endy(endy_in){}
-  };
-
-
-  struct segDist: public seg{
-    double dist;
-    segDist(double begx_in =0, double begy_in=0, double endx_in=0,
-            double endy_in=0, double dist_in=0):
-      seg(begx_in, begy_in, endx_in, endy_in), dist(dist_in){}
   };
 
   inline bool segDistGreaterThan(segDist s, segDist t){

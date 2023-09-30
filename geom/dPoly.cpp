@@ -204,6 +204,33 @@ void dPoly::setRectangle(double xl, double yl, double xh, double yh,
   appendRectangle(xl, yl, xh, yh, isPolyClosed, color, layer);
   return;
 }
+void dPoly::getEdges(std::vector<seg> &allEdges) const{
+
+  const double * xv       = get_xv();
+  const double * yv       = get_yv();
+  const int    * numVerts = get_numVerts();
+  int numPolys            = get_numPolys();
+  int totalNumVerts       = get_totalNumVerts();
+
+  allEdges.resize(totalNumVerts);
+
+  int start = 0;
+  for (int pIter = 0; pIter < numPolys; pIter++){
+
+    if (pIter > 0) start += numVerts[pIter - 1];
+
+    for (int vIter = 0; vIter < numVerts[pIter]; vIter++){
+
+      int vIter2 = (vIter + 1) % numVerts[pIter];
+      double bx = xv[start + vIter ], by = yv[start + vIter ];
+      double ex = xv[start + vIter2], ey = yv[start + vIter2];
+
+      allEdges[start + vIter] = seg(bx, by, ex, ey);
+
+    }
+  }
+}
+
 
 bool dPoly::isXYRect() {
 

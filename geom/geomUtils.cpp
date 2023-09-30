@@ -62,6 +62,12 @@ void utils::Timer::tock(const std::string &append){
 	m_start = std::chrono::steady_clock::now();
 }
 
+bool dRect::intersects(const utils::seg &edge) const{
+
+  return utils::edgeIntersectsBox(edge.begx, edge.begy, edge.endx, edge.endy,
+                                  xl, yl, xh, yh);
+}
+
 std::ostream& operator<<(std::ostream& os, const anno& A){
   os << A.x << ' ' << A.y << ' ' << A.label << std::endl;
   return os;
