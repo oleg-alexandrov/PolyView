@@ -1,35 +1,98 @@
-name: CI
+name: ssh
+
+# Build and test in a remote session for debugging purposes.
+
 on:
   workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'
-        required: true
-        default: 'warning'
-        type: choice
-        options:
-        - info
-        - warning
-        - debug
-      tags:
-        description: 'Test scenario tags'
-        required: false
-        type: boolean
 
-##on: [push]
+env:
+  # Note that this the Ubuntu version shows up twice below, because of
+  # limitations of the synax of this file.
+  LINUX_VERSION: ubuntu-22.04
 
 jobs:
-  build:
-    runs-on: macos-latest
+  UnixCondaBuild:
+    name: UnixCondaBuild
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+       os: [ubuntu-22.04, macos-latest]
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
     steps:
     - uses: actions/checkout@v2
-    - name: Setup upterm session
+      with:
+        submodules: true
+
+    - name: Cache conda
+      id: cache-conda
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-conda
+      with:
+        ## Cache the conda dependencies. They will be created manually in 
+        ## the next step, after logging in to the upterm session,
+        ## and the actual caching will happen when this recipe exits.
+        ## Changes to the cache cannot be saved, so it should
+        ## be wiped from the web interface if desired to recreate it.
+        path: |
+          /usr/local/miniconda/envs
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/miniconda.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+          
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: "latest"
+        activate-environment: buildenv
+        environment-file: conda_build_env.yml
+        auto-activate-base: false
+        auto-update-conda: true
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Packages
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then        
+          sudo apt-get update -qq
+          sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev
+        fi
+
+    - name: Set up an upterm session with ssh access
       uses: lhotari/action-upterm@v1
       with:
-        ## Testing ssh access to osx
-        ## limits ssh access and adds the ssh public key for the user which triggered the workflow
+        ## Limit access to specified users
         limit-access-to-actor: true
-        ## limits ssh access and adds the ssh public keys of the listed GitHub users
         limit-access-to-users: oleg-alexandrov
-        ## If no one connects after 5 minutes, shut down server.
-        wait-timeout-minutes: 5    
+        ## If no one connects after 5 minutes, shut down the server
+        wait-timeout-minutes: 5
+
+    - name: Build Package
+      run: |
+        conda build .
+ 
+    - name: Test Package
+      run: |
+        echo Empty test
+
+    - name: Upload Linux
+      if: ${{ matrix.os == env.LINUX_VERSION }}
+      uses: actions/upload-artifact@v2
+      with: 
+         name: polyview_${{ matrix.os }}_conda_build
+         path: "/usr/share/miniconda3/envs/buildenv/conda-bld/linux-64"
+
+    - name: Upload OSX
+      if: ${{ matrix.os == 'macos-latest' }}
+      uses: actions/upload-artifact@v2
+      with: 
+          name: polyview_${{ matrix.os }}_conda_build
+          path: "/Users/runner/miniconda3/envs/buildenv/conda-bld/osx-64"
+
+
