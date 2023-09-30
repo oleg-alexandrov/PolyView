@@ -295,25 +295,36 @@ on any platform and compiler.
 
 To compile locally, on macOS, create a conda environment having the needed dependencies:
 
-    conda create -n polyview_dev qt=5.9.7 clang llvm-openmp
+    conda create -n polyview_dev qt=5.9.7 compilers llvm-openmp
 
 This should install the dependencies in:
 
     $HOME/miniconda3/envs/polyview_dev
   
+Activate that environment with::
+
+    conda activate
+    
+Run::
+
+    echo $CC_FOR_BUILD
+    echo $CXX_FOR_BUILD
+
+to verify that the C and C++ compilers were set correctly.
+
 Then run:
 
     $HOME/miniconda3/envs/polyview_dev/bin/qmake                    \
-        QMAKE_CC=$HOME/miniconda3/envs/polyview_dev/bin/clang       \
-        QMAKE_CXX=$HOME/miniconda3/envs/polyview_dev/bin/clang-cpp  \
-        QMAKE_LINK=$HOME/miniconda3/envs/polyview_dev/bin/clang-cpp \
-        polyview.pro
+      QMAKE_CXXFLAGS="-I$HOME/miniconda3/envs/polyview_dev/include" \
+      QMAKE_CC=$CC_FOR_BUILD                                        \
+      QMAKE_CXX=$CXX_FOR_BUILD                                      \
+      QMAKE_LINK=$CXX_FOR_BUILD                                     \
+      polyview.pro
     make -j 10
-    make install INSTALL_ROOT=install_directory
+    make install INSTALL_ROOT=$(pwd)
 
-On Linux, replace ``clang`` and ``clang-cpp`` with the gcc and g++ compilers, which
-may be called, for example, ``x86_64-conda_cos6-linux-gnu-gcc`` and ``x86_64-conda_cos6-linux-gnu-g++``.
-
+This should create the ``polyview`` program in the ``bin`` subdirectory.
+    
 ## Compiling with conda build
 
 This will produce a packaged build, that can be uploaded to the cloud and
