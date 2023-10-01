@@ -551,12 +551,6 @@ void polyView::displayData(QPainter *paint) {
       }
     }
 
-    if (m_polyDiffMode && vi < 2){
-      // in polydiff mode plot points of the two polygons the same way so that
-      // the difference gets highlighted
-      point_shape = 0;
-    }
-
     bool has_selected = !plotFilled && !m_selectedPolyIndices[vecIter].empty();
 
     // Mark un-selected polygons and plot un-selected ones before selected ones
@@ -574,7 +568,15 @@ void polyView::displayData(QPainter *paint) {
         m_polyOptionsVec[vecIter].hideAnnotation){
       showAnno = false;
     }
+
     int point_size = m_polyOptionsVec[vecIter].pointSize;
+    if (m_polyDiffMode && vi < 2){
+      // in polydiff mode plot points of the two polygons the same way so that
+      // the difference gets highlighted
+      point_shape = 0;
+      point_size  = 3;
+    }
+
     // Plot all or un-selected ones if there are selected ones
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
               point_shape, point_size, m_polyOptionsVec[vecIter].colorScale, textOnScreenGrid, paint, m_polyVec[vecIter],
@@ -2332,7 +2334,7 @@ void polyView::getOnePointShape(int x0, int y0,
 
   if (shape_type == 0) {
     // Draw an X
-    int tl = 2*len;
+    int tl = len;
     int xl = x0 - tl;
     int xr = x0 + tl;
     int yl = y0 - tl;
@@ -2343,7 +2345,7 @@ void polyView::getOnePointShape(int x0, int y0,
 
   }else if (shape_type == 1) {
     // Draw an plus
-    int tl = 2*len;
+    int tl = len;
     lines.push_back(QLine(x0-tl, y0, x0+tl, y0));
     lines.push_back(QLine(x0, y0-tl, x0,   y0+tl));
 
