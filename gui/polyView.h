@@ -236,6 +236,7 @@ private:
                  bool scatter_annotation,
                  double lineWidth,
                  int drawVertIndex, // 0 is a good choice here
+                 const std::vector<double> &colorScale,
                  // An empty grid is a good choice if not text is present
                  std::vector<std::vector<int>> & textOnScreenGrid,
                  QPainter *paint,
@@ -247,6 +248,7 @@ private:
 				 );
 
   void plotAnnotationScattered(const std::vector<anno> &annotations,
+                               const std::vector<double> &colorScale,
                                QPainter *paint);
 
   void plotImage(QPainter *paint, utils::dPoly const& poly);

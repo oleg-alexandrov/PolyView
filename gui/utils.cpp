@@ -60,6 +60,7 @@ void utils::printUsage(std::string progName){
   cout <<"     -f   | -filledPoly "<<endl;
   cout <<"     -ha  | -hideAnno            (do not show annotations in file) "<<endl;
   cout <<"     -sa  | -scatterAnno         (plot annotation values as scattered points)"<<endl;
+  cout <<"     -cs  | -colorScale min_val max_val (fixed color scale for scattered plot)"<<endl;
   cout <<"     -nf  | -nonFilledPoly "<<endl;
   cout <<"     -cw  | -clockwisePoly        (if polygon orientation is clockwise)"<<endl;
   cout <<"     -s   | -shape          (x/+/o/s/t) define shape of points in point mode display"<<endl;
@@ -305,6 +306,22 @@ void utils::parseCmdOptions(//inputs
     if ((strcasecmp(currArg, "-sa") == 0 ||
          strcasecmp(currArg, "-scatterAnno") == 0)){
       opt.scatter_annotations = !opt.scatter_annotations;
+      continue;
+    }
+
+    if ((strcasecmp(currArg, "-cs") == 0 ||
+        strcasecmp(currArg, "-colorScale") == 0) && argIter < argc - 2){
+
+      opt.colorScale.resize(2);
+      argIter++;
+      opt.colorScale[0] = atof(argv[argIter]);
+      argIter++;
+      opt.colorScale[1] = atof(argv[argIter]);
+      if (opt.colorScale[0] >= opt.colorScale[1]){
+        cout <<"ERROR: min_val in color scale must be less than max_val"<<endl;
+        opt.colorScale.clear();
+      }
+
       continue;
     }
 

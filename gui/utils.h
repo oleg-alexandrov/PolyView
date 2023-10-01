@@ -59,6 +59,7 @@ struct polyOptions{
   std::string     cmdLineColor;
   std::string     gridColor;
   std::string     polyFileName;
+  std::vector<double> colorScale;
 
   polyOptions(){
     plotAsPoints     = false;

@@ -475,7 +475,7 @@ void polyView::displayData(QPainter *paint) {
 
   // This vector is used for sparsing out text on screen
   vector<vector<int>> textOnScreenGrid;
-
+  std::vector<double> colorScale;
   // Build the grid if the user wants to
   if (m_prefs.isGridOn && m_prefs.gridWidth > 0) {
 
@@ -492,7 +492,7 @@ void polyView::displayData(QPainter *paint) {
                    m_viewYll + m_viewWidY,
                    m_prefs.gridSize, m_prefs.gridColor);
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.gridWidth,
-              point_shape, textOnScreenGrid, paint, grid);
+              point_shape, colorScale, textOnScreenGrid, paint, grid);
   }
 
 
@@ -576,14 +576,14 @@ void polyView::displayData(QPainter *paint) {
 
     // Plot all or un-selected ones if there are selected ones
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
-              point_shape, textOnScreenGrid, paint, m_polyVec[vecIter],
+              point_shape, m_polyOptionsVec[vecIter].colorScale, textOnScreenGrid, paint, m_polyVec[vecIter],
               has_selected ? &un_selected : nullptr,
                   lighter_darker // plot un-selected polygons darker
     );
 
     if (has_selected) {
       plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
-                point_shape, textOnScreenGrid, paint, m_polyVec[vecIter], &m_selectedPolyIndices[vecIter],
+                point_shape, m_polyOptionsVec[vecIter].colorScale, textOnScreenGrid, paint, m_polyVec[vecIter], &m_selectedPolyIndices[vecIter],
                 -lighter_darker // plot selected polygons lighter
       );
     }
@@ -598,7 +598,7 @@ void polyView::displayData(QPainter *paint) {
     m_highlights[h].set_color(m_prefs.fgColor.c_str());
     bool showAnno = false;
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth,
-              point_shape, textOnScreenGrid, paint, m_highlights[h]);
+              point_shape, colorScale, textOnScreenGrid, paint, m_highlights[h]);
   }
 
   // This draws the polygon being created if in that mode
@@ -631,6 +631,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          bool plotFilled, bool showAnno, bool scatter_annotation,
                          double lineWidth,
                          int point_shape, // 0 is a good choice here
+                         const std::vector<double> &colorScale, // vector of size 2 contains min max value for color scale
                          // An empty grid is a good choice if not text is present
                          std::vector< std::vector<int> > & textOnScreenGrid,
                          QPainter *paint,
@@ -819,7 +820,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
   // Plot the annotations
   if (scatter_annotation){
-    plotAnnotationScattered(clippedPoly.get_annotations(), paint);
+    plotAnnotationScattered(clippedPoly.get_annotations(), colorScale, paint);
   }
 
   int numAnno = annotations.size();
@@ -843,6 +844,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 }
 
 void polyView::plotAnnotationScattered(const vector<anno> &annotations,
+                                       const std::vector<double> &colorScale,// min max values for color scale
                                        QPainter *paint){
 
   // Plot annotations as filled colorful circles
@@ -868,6 +870,10 @@ void polyView::plotAnnotationScattered(const vector<anno> &annotations,
     cout <<"WARN: Some annotation values are not numbers, cannot plot them scattered"<<endl;
   }
 
+  if (colorScale.size() == 2){
+    minval = colorScale[0];
+    maxval = colorScale[1];
+  }
   for (int aIter = 0; aIter < numAnno; aIter++) {
     if (vals[aIter] == FLT_MAX) continue;
     const anno & A = annotations[aIter];
@@ -2119,10 +2125,11 @@ void polyView::drawPolyLine(const std::vector<double> & polyX,
 
   bool plotPoints = false, plotEdges = true, plotFilled = false;
   int point_shape = 0;
+  std::vector<double> colorScale;
   vector< vector<int> > textOnScreenGrid; textOnScreenGrid.clear();
   bool showAnno = false;
   plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth,
-            point_shape, textOnScreenGrid, paint, polyLine);
+            point_shape, colorScale, textOnScreenGrid, paint, polyLine);
 
   return;
 }
