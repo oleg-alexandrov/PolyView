@@ -665,7 +665,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   double extraX = extra + tol*max(abs(m_viewXll), abs(m_viewXll + m_viewWidX));
   double extraY = extra + tol*max(abs(m_viewYll), abs(m_viewYll + m_viewWidY));
   dPoly clippedPoly;
-  currPoly.clipPoly(//inputs
+  currPoly.clipAll(//inputs
                     m_viewXll - extraX,
                     m_viewYll - extraY,
                     m_viewXll + m_viewWidX + extraX,
@@ -3028,7 +3028,7 @@ void polyView::cutToHlt() {
   dPoly clippedPoly;
   for (int vecIter = 0; vecIter < (int)m_polyVec.size(); vecIter++) {
 
-    m_polyVec[vecIter].clipPoly(xl, yl, xh, yh, //inputs
+    m_polyVec[vecIter].clipAll(xl, yl, xh, yh, //inputs
                                 clippedPoly     // output
                                 );
 

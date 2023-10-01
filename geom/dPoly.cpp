@@ -34,6 +34,10 @@
 #include <string>
 #include <map>
 
+#ifdef POLYVIEW_USE_OPENMP
+#include <omp.h>
+#endif
+
 // If all else fails
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -109,14 +113,17 @@ void dPoly::bdBoxes(std::vector<double> & xll, std::vector<double> & yll,
   // Bounding boxes of individual polygons
 
   xll.clear(); yll.clear(); xur.clear(); yur.clear();
+  xll.resize(m_numPolys);  xur.resize(m_numPolys);
+  yll.resize(m_numPolys);  yur.resize(m_numPolys);
+  const std::vector<int> &start_ids = getStartingIndices();
 
-  int start = 0;
+#ifdef POLYVIEW_USE_OPENMP
+    #pragma omp parallel for
+#endif
   for (int pIter = 0; pIter < m_numPolys; pIter++) {
 
-    if (pIter > 0) start += m_numVerts[pIter - 1];
-
     int numV = m_numVerts[pIter];
-
+    int start = start_ids[pIter];
     double x0, y0, x1, y1;
     if (numV <= 0) {
       x0 = DBL_MAX/4.0, x1 = -DBL_MAX/4.0; // Use 1/4.0 to avoid overflow when ...
@@ -127,9 +134,8 @@ void dPoly::bdBoxes(std::vector<double> & xll, std::vector<double> & yll,
       x0 = *min_element( px, px + numV ); x1 = *max_element( px, px + numV );
       y0 = *min_element( py, py + numV ); y1 = *max_element( py, py + numV );
     }
-    xll.push_back(x0); xur.push_back(x1);
-    yll.push_back(y0); yur.push_back(y1);
-
+    xll[pIter] = x0; xur[pIter] = x1;
+    yll[pIter] = y0; yur[pIter] = y1;
   }
 
   return;
@@ -342,7 +348,92 @@ void dPoly::clipAnno(const dRect &clip_box,
   }
 }
 
-void dPoly::clipPoly(// inputs
+void dPoly::copyAnno(const dRect &clip_box,
+                     dPoly & clippedPoly){
+
+  for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
+    clippedPoly.set_annoByType(get_annoByType((AnnoType)annoType), (AnnoType)annoType);
+  }
+}
+
+void dPoly::clipPolygons(const dRect &clip_box,
+                         dPoly & clippedPoly, // output
+                         const std::map<int, int> *selected){
+
+  const double * xv               = get_xv();
+  const double * yv               = get_yv();
+  const int    * numVerts         = get_numVerts();
+
+  const vector<char> isPolyClosed = get_isPolyClosed();
+  const vector<string> colors     = get_colors();
+  const vector<string> layers     = get_layers();
+
+  const std::vector<int>& starting_ids = getStartingIndices();
+  const auto *box_tree = getBoundingBoxTree();
+
+  clippedPoly.reset();
+  clippedPoly.set_isPointCloud(m_isPointCloud);
+
+  vector< dRectWithId> boxes;
+  box_tree->getBoxesInRegion(clip_box.xl, clip_box.yl, clip_box.xh, clip_box.yh, boxes);
+
+  vector<double> cutXv, cutYv;
+  vector<int> cutNumVerts;
+
+  for (auto &box : boxes) {
+
+    int pIter = box.id;
+    if (selected && selected->find(pIter) == selected->end()) continue;
+
+    int start = starting_ids[pIter];
+
+    int  isClosed = isPolyClosed [pIter];
+    string color  = colors       [pIter];
+    string layer  = layers       [pIter];
+
+    cutXv.clear(); cutYv.clear(); cutNumVerts.clear();
+
+    if (clip_box.contains(box)) {
+      // If bounding box of polygon is in clip box no need to cut polygon
+      for (int vIter = 0; vIter < numVerts[pIter]; vIter++) {
+        cutXv.push_back(xv[start + vIter]);
+        cutYv.push_back(yv[start + vIter]);
+
+      }
+      cutNumVerts.push_back( cutXv.size() );
+
+    } else if (isClosed) {
+
+      cutPoly(1, numVerts + pIter, xv + start, yv + start,
+              clip_box.xl, clip_box.yl, clip_box.xh, clip_box.yh,
+              cutXv, cutYv, cutNumVerts // outputs
+      );
+
+    }else{
+
+      cutPolyLine(numVerts[pIter], xv + start, yv + start,
+                  clip_box.xl, clip_box.yl, clip_box.xh, clip_box.yh,
+                  cutXv, cutYv, cutNumVerts // outputs
+      );
+
+    }
+
+    int cstart = 0;
+    for (int cIter = 0; cIter < (int)cutNumVerts.size(); cIter++) {
+
+      if (cIter > 0) cstart += cutNumVerts[cIter - 1];
+      int cSize = cutNumVerts[cIter];
+      clippedPoly.appendPolygon(cSize,
+                                vecPtr(cutXv) + cstart,
+                                vecPtr(cutYv) + cstart,
+                                isClosed, color, layer
+      );
+
+    }
+  }
+}
+
+void dPoly::clipAll(// inputs
     double clip_xll, double clip_yll,
     double clip_xur, double clip_yur,
     dPoly & clippedPoly, // output
@@ -369,89 +460,20 @@ void dPoly::clipPoly(// inputs
                                   m_isPolyClosed[pIter], m_colors[pIter], m_layers[pIter]);
       }
     }
+    copyAnno(clip_box, clippedPoly);
 
   } else {
-    clippedPoly.reset();
-    clippedPoly.set_isPointCloud(m_isPointCloud);
 
     if (m_isPointCloud ){
       // If point clouds then call the faster clipping function clipPointCloud
       clipPointCloud(clip_box, clippedPoly, selected);
     } else {
 
-      const double * xv               = get_xv();
-      const double * yv               = get_yv();
-      const int    * numVerts         = get_numVerts();
-
-      const vector<char> isPolyClosed = get_isPolyClosed();
-      const vector<string> colors     = get_colors();
-      const vector<string> layers     = get_layers();
-
-
-      const auto *box_tree = getBoundingBoxTree();
-
-      vector< dRectWithId> boxes;
-      box_tree->getBoxesInRegion(clip_xll, clip_yll, clip_xur, clip_yur, boxes);
-
-      vector<double> cutXv, cutYv;
-      vector<int> cutNumVerts;
-
-      for (auto &box : boxes) {
-
-        int pIter = box.id;
-        if (selected && selected->find(pIter) == selected->end()) continue;
-
-        int start = starting_ids[pIter];
-
-        int  isClosed = isPolyClosed [pIter];
-        string color  = colors       [pIter];
-        string layer  = layers       [pIter];
-
-        cutXv.clear(); cutYv.clear(); cutNumVerts.clear();
-
-        if (clip_box.contains(box)) {
-          // If bounding box of polygon is in clip box no need to cut polygon
-          for (int vIter = 0; vIter < numVerts[pIter]; vIter++) {
-            cutXv.push_back(xv[start + vIter]);
-            cutYv.push_back(yv[start + vIter]);
-
-          }
-          cutNumVerts.push_back( cutXv.size() );
-
-        } else if (isClosed) {
-
-          cutPoly(1, numVerts + pIter, xv + start, yv + start,
-                  clip_xll, clip_yll, clip_xur, clip_yur,
-                  cutXv, cutYv, cutNumVerts // outputs
-          );
-
-        }else{
-
-          cutPolyLine(numVerts[pIter], xv + start, yv + start,
-                      clip_xll, clip_yll, clip_xur, clip_yur,
-                      cutXv, cutYv, cutNumVerts // outputs
-          );
-
-        }
-
-        int cstart = 0;
-        for (int cIter = 0; cIter < (int)cutNumVerts.size(); cIter++) {
-
-          if (cIter > 0) cstart += cutNumVerts[cIter - 1];
-          int cSize = cutNumVerts[cIter];
-          clippedPoly.appendPolygon(cSize,
-                                    vecPtr(cutXv) + cstart,
-                                    vecPtr(cutYv) + cstart,
-                                    isClosed, color, layer
-          );
-
-        }
-      }
+      clipPolygons(clip_box, clippedPoly, selected);
     }
+    clipAnno(clip_box, clippedPoly);
   }
 
-  clipAnno(clip_box, clippedPoly);
-  return;
 }
 
 void dPoly::shift(double shift_x, double shift_y) {
@@ -696,7 +718,7 @@ void dPoly::set_isPolyClosed(bool isPolyClosed) {
 void dPoly::compVertFullIndexAnno() {
 
   m_vertIndexAnno.clear();
-
+  m_vertIndexAnno.reserve(m_totalNumVerts);
   const double * xv = get_xv();
   const double * yv = get_yv();
 
@@ -723,7 +745,7 @@ void dPoly::compVertFullIndexAnno() {
 void dPoly::compVertIndexAnno() {
 
   m_vertIndexAnno.clear();
-
+  m_vertIndexAnno.reserve(m_totalNumVerts);
   const double * xv = get_xv();
   const double * yv = get_yv();
   
@@ -750,7 +772,7 @@ void dPoly::compVertIndexAnno() {
 void dPoly::compPolyIndexAnno() {
 
   m_polyIndexAnno.clear();
-
+  m_polyIndexAnno.reserve(m_numPolys);
   const double * xv = get_xv();
   const double * yv = get_yv();
   
@@ -1711,49 +1733,52 @@ void dPoly::markPointsInBox(// Inputs
 
 
 void dPoly::markPolysIntersectingBox(// Inputs
-		double xll, double yll,
-		double xur, double yur,
-		// Outputs
-		std::map<int, int> & mark) const {
+    double xll, double yll,
+    double xur, double yur,
+    // Outputs
+    std::map<int, int> & mark) const {
 
-	if (m_isPointCloud){
+  if (m_isPointCloud){
     markPointsInBox(xll, yll, xur, yur, mark);
     return;
   }
-	// If bounding box of a polygon intersects the region we will check that polygon for selection
+  // If bounding box of a polygon intersects the region we will check that polygon for selection
+  //utils::Timer my_clock("dPoly::clipPointCloud");
+  mark.clear();
+  const std::vector<int>& starting_ids = getStartingIndices();
+  const auto *box_tree = getBoundingBoxTree();
 
-	mark.clear();
-	const std::vector<int>& starting_ids = getStartingIndices();
-	const auto *box_tree = getBoundingBoxTree();
+  dRect clip_box(xll, yll, xur, yur);
 
-	vector< dRectWithId> boxes;
-	box_tree->getBoxesInRegion(xll, yll, xur, yur, boxes);
+  //utils::Timer my_clock("markPolysIntersectingBox");
+  vector< dRectWithId> boxes;
+  box_tree->getBoxesInRegion(xll, yll, xur, yur, boxes);
 
-	dPoly onePoly, clippedPoly;
-	for (auto &box : boxes) {
-		int polyIndex = box.id;
+  dPoly onePoly, clippedPoly;
+  for (auto &box : boxes) {
+    int polyIndex = box.id;
 
-		if (m_numVerts[polyIndex] == 1){
-		    mark[polyIndex] = 1;
+    if (m_numVerts[polyIndex] == 1 || clip_box.contains(box)){
+      mark[polyIndex] = 1;
 
-		} else {
-		    int beg_inex = starting_ids[polyIndex];
-			extractOnePoly(polyIndex, // input
-					onePoly,
-					beg_inex);  // output
+    } else {
+      int beg_inex = starting_ids[polyIndex];
+      extractOnePoly(polyIndex, // input
+                     onePoly,
+                     beg_inex);  // output
 
-			// A polygon intersects a rectangle if cut to the rectangle
-			// it returns a non-empty polygon
-			onePoly.clipPoly(xll, yll, xur, yur, // inputs
-					clippedPoly);       // outputs
-			if (clippedPoly.get_totalNumVerts() != 0){
-				mark[polyIndex] = 1;
-			}
-		}
+      // A polygon intersects a rectangle if cut to the rectangle
+      // it returns a non-empty polygon
+      onePoly.clipAll(xll, yll, xur, yur, // inputs
+                       clippedPoly);       // outputs
+      if (clippedPoly.get_totalNumVerts() != 0){
+        mark[polyIndex] = 1;
+      }
+    }
 
-	}
+  }
 
-	return;
+  return;
 }
 
 void dPoly::markAnnosIntersectingBox(// Inputs

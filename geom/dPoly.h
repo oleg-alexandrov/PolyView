@@ -82,16 +82,22 @@ public:
   bool isXYRect();
 
   void clipPointCloud(const dRect &clip_box,
-                  dPoly & clippedPoly, // output
-                  const std::map<int, int> *selected);
+                      dPoly & clippedPoly, // output
+                      const std::map<int, int> *selected);
 
-  void clipPoly(double clip_xll, double clip_yll,
+  void clipPolygons(const dRect &clip_box,
+                    dPoly & clippedPoly, // output
+                    const std::map<int, int> *selected);
+
+  void clipAll(double clip_xll, double clip_yll,
                 double clip_xur, double clip_yur,
                 dPoly & clippedPoly, // output
                 const std::map<int, int> *selected = nullptr // optional input, if provided only clip selected polygons
   );
 
   void clipAnno(const dRect &clip_box,
+                dPoly & clippedPoly);
+  void copyAnno(const dRect &clip_box,
                 dPoly & clippedPoly);
 
   void shift(double shift_x, double shift_y);

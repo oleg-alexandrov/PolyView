@@ -142,7 +142,7 @@ private:
     	return (x >= xl && x <= xh && y >= yl && y <= yh);
     }
 
-    bool contains(const dRect &rec){
+    bool contains(const dRect &rec) const{
     	return (xl <= rec.xl && xh >= rec.xh && yl <= rec.yl && yh >= rec.yh);
     }
     bool isValid() const {
