@@ -38,6 +38,10 @@
 #include <kdTree.h>
 #include <dTree.h>
 
+#ifdef POLYVIEW_USE_OPENMP
+#include <omp.h>
+#endif
+
 // If all else fails
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -291,13 +295,17 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
   }
 
   std::vector<segDist> distVec_temp(numVerts1);
+  bool point_cloud = poly2.isPointCloud();
 
+#ifdef POLYVIEW_USE_OPENMP
+    #pragma omp parallel for
+#endif
   for (int t = 0; t < numVerts1; t++) {
 
     double x = x1[t], y = y1[t];
     double closestX, closestY, closestDist;
 
-    if (poly2.isPointCloud()){
+    if (point_cloud){
       utils::PointWithId closestVertex;
       pt_tree->findClosestVertexToPoint(x, y, closestVertex, closestDist);
       closestX = closestVertex.x;
