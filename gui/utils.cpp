@@ -63,7 +63,8 @@ void utils::printUsage(std::string progName){
   cout <<"     -cs  | -colorScale min_val max_val (fixed color scale for scattered plot)"<<endl;
   cout <<"     -nf  | -nonFilledPoly "<<endl;
   cout <<"     -cw  | -clockwisePoly        (if polygon orientation is clockwise)"<<endl;
-  cout <<"     -s   | -shape          (x/+/o/s/t) define shape of points in point mode display"<<endl;
+  cout <<"     -sh  | -shape     [x/+/o/s/t] define shape of the points in point mode display"<<endl;
+  cout <<"     -si  | -size      [3]  define size of the points in point mode display"<<endl;
 
   cout<<endl;
 
@@ -262,7 +263,7 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if ((strcasecmp(currArg, "-s"    ) == 0 ||
+    if ((strcasecmp(currArg, "-sh"    ) == 0 ||
          strcasecmp(currArg, "-shape") == 0 )
         && argIter < argc - 1){
        char shape = tolower(argv[argIter + 1][0]);
@@ -280,6 +281,14 @@ void utils::parseCmdOptions(//inputs
          cout <<"ERROR un-supported shape specified, using triangles"<<endl;
          opt.pointShape = 5;
        }
+      argIter++;
+      continue;
+    }
+
+    if ((strcasecmp(currArg, "-si"    ) == 0 ||
+        strcasecmp(currArg, "-size") == 0 )
+        && argIter < argc - 1){
+      opt.pointSize = (int)round(atof(argv[argIter + 1]));
       argIter++;
       continue;
     }

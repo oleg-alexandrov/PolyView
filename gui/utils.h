@@ -47,6 +47,7 @@ struct polyOptions{
   bool            useCmdLineColor;
   int             fontSize;
   int             pointShape;
+  int             pointSize;
   int             lineWidth;
   bool            isGridOn;
   double          gridSize;
@@ -69,6 +70,7 @@ struct polyOptions{
     isPolyClosed     = readClosedPolyInfoFromFile;
     fontSize         = 10;
     pointShape       = -1;
+    pointSize        = 0;
     lineWidth        = 1;
     useCmdLineColor  = false;
     isGridOn         = false;

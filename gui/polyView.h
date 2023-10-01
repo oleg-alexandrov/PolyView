@@ -194,6 +194,7 @@ private:
                          );
   void drawPolyLine(const std::vector<double> & polyX,
                     const std::vector<double> & polyY,
+                    int lineWidth,
                     QPainter * paint);
   void addPolyVert(int px, int py);
   void appendToPolyVec(const utils::dPoly & P);
@@ -235,17 +236,18 @@ private:
                  bool plotFilled, bool showAnno,
                  bool scatter_annotation,
                  double lineWidth,
-                 int drawVertIndex, // 0 is a good choice here
+                 int point_shape, // 0 is a good choice here
+                 int point_size,
                  const std::vector<double> &colorScale,
                  // An empty grid is a good choice if not text is present
                  std::vector<std::vector<int>> & textOnScreenGrid,
                  QPainter *paint,
                  utils::dPoly &currPoly,
-				 // optional input, if provided only clip selected polygons
-				 const std::map<int, int> *selected = nullptr,
-				 int lighter_darker = 0 // draw color as  0: normal, 1: darker, -1: lighter
+                 // optional input, if provided only clip selected polygons
+                 const std::map<int, int> *selected = nullptr,
+                 int lighter_darker = 0 // draw color as  0: normal, 1: darker, -1: lighter
 
-				 );
+                 );
 
   void plotAnnotationScattered(const std::vector<anno> &annotations,
                                const std::vector<double> &colorScale,
