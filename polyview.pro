@@ -15,6 +15,7 @@ INCLUDEPATH += gui
 
 polyview_use_openmp {
     QMAKE_CXXFLAGS += -fopenmp
+    QMAKE_LFLAGS   += -fopenmp
     QMAKE_CXXFLAGS += -DPOLYVIEW_USE_OPENMP
 }
 
