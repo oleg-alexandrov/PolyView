@@ -97,8 +97,8 @@ public:
 
   void clipAnno(const dRect &clip_box,
                 dPoly & clippedPoly);
-  void copyAnno(const dRect &clip_box,
-                dPoly & clippedPoly);
+
+  void copyAnno(dPoly & clippedPoly);
 
   void shift(double shift_x, double shift_y);
   void rotate(double angle);
@@ -200,6 +200,7 @@ public:
   const dRect& bdBox() const;
   void bdBox(double & xll, double & yll, double & xur, double & yur) const;
   void annoBdBox(double & xll, double & yll, double & xur, double & yur) const;
+  dRect annoBdBox() const;
 
   void bdBoxes(std::vector<double> & xll, std::vector<double> & yll,
                std::vector<double> & xur, std::vector<double> & yur) const;

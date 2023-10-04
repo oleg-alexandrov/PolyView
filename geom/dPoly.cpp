@@ -82,6 +82,13 @@ void dPoly::annoBdBox(double & xll, double & yll, double & xur, double & yur) co
 	}
 
 }
+dRect dPoly::annoBdBox() const{
+
+  double xll, yll, xur, yur;
+  annoBdBox(xll, yll, xur, yur);
+  return dRect(xll, yll, xur, yur);
+}
+
 
 void dPoly::updateBoundingBox() const{
   if (m_totalNumVerts <= 0) return;
@@ -348,8 +355,7 @@ void dPoly::clipAnno(const dRect &clip_box,
   }
 }
 
-void dPoly::copyAnno(const dRect &clip_box,
-                     dPoly & clippedPoly){
+void dPoly::copyAnno(dPoly & clippedPoly){
 
   for (int annoType = fileAnno; annoType < lastAnno; annoType++) {
     clippedPoly.set_annoByType(get_annoByType((AnnoType)annoType), (AnnoType)annoType);
@@ -442,6 +448,7 @@ void dPoly::clipAll(// inputs
   assert(this != &clippedPoly); // source and destination must be different
   //utils::Timer my_clock("dPoly::clipPoly");
 
+  clippedPoly.reset();
   dRect clip_box(clip_xll, clip_yll, clip_xur, clip_yur);
 
   const std::vector<int>& starting_ids = getStartingIndices();
@@ -460,7 +467,6 @@ void dPoly::clipAll(// inputs
                                   m_isPolyClosed[pIter], m_colors[pIter], m_layers[pIter]);
       }
     }
-    copyAnno(clip_box, clippedPoly);
 
   } else {
 
@@ -471,8 +477,11 @@ void dPoly::clipAll(// inputs
 
       clipPolygons(clip_box, clippedPoly, selected);
     }
-    clipAnno(clip_box, clippedPoly);
   }
+
+  // Annotation bounding box can be different than polygon bounding box so we clip instead of copy.
+  clipAnno(clip_box, clippedPoly);
+
 
 }
 
