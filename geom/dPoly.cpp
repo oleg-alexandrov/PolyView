@@ -315,21 +315,15 @@ void  dPoly::clipPointCloud(const dRect &clip_box,
   assert(m_isPointCloud);
   //utils::Timer my_clock("dPoly::clipPointCloud");
 
-  const auto *pttree = getPointTree();
-  std::vector<utils::PointWithId> outPts;
-  pttree->getPointsInBox(clip_box.xl, clip_box.yl, clip_box.xh, clip_box.yh, outPts);
-
   clippedPoly.reset();
   clippedPoly.set_isPointCloud(m_isPointCloud);
 
-  for (auto &pt : outPts) {
-    int pIter = pt.id;
-    if (selected && selected->find(pIter) == selected->end()) continue;
-    string color  = m_colors       [pIter];
-    string layer  = m_layers       [pIter];
 
-    clippedPoly.appendPolygon(1, &pt.x, &pt.y, false, color, layer);
-
+  for (int i = 0; i < (int)m_xv.size(); i++){
+    if (selected && selected->find(i) == selected->end()) continue;
+    if (clip_box.isInSide(m_xv[i], m_yv[i])){
+      clippedPoly.appendPolygon(1, &m_xv[i], &m_yv[i], false, m_colors[i], m_layers[i]);
+    }
   }
 
 }
@@ -1729,13 +1723,14 @@ void dPoly::markPointsInBox(// Inputs
     // Outputs
     std::map<int, int> & mark) const {
 // Mark index of points in the box, for point cloud mode
+  //utils::Timer my_clock("dPoly::markPointsInBox");
   mark.clear();
-  const auto *pttree = getPointTree();
-  std::vector<utils::PointWithId> outPts;
-  pttree->getPointsInBox(xll, yll, xur, yur, outPts);
 
-  for (auto &pt : outPts) {
-    mark[pt.id] = 1;
+  dRect clip_box(xll, yll, xur, yur);
+  for (int i = 0; i < (int)m_xv.size(); i++){
+    if (clip_box.isInSide(m_xv[i], m_yv[i])){
+      mark[i] = 1;
+    }
   }
 
 }
