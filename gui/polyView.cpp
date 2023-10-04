@@ -710,7 +710,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
    // length/size of point shapes
    if (point_size == 0){
-     point_size = (point_shape <= 1) ? 3 : (2*point_shape+2);
+     point_size = (point_shape <= 1) ? 4 : (2*point_shape+2);
      point_size = min(point_size, 8); // limit how big this can get
    }
    // This is done for performance
@@ -2546,14 +2546,19 @@ void polyView::toggleShowPolyDiff() {
   m_polyVec[2].set_pointCloud(vP, color1, layer1);
   m_polyVec[3].set_pointCloud(vQ, color2, layer2);
 
-  m_polyOptionsVec[2].plotAsPoints = true;
-  m_polyOptionsVec[3].plotAsPoints = true;
+  for (int i = 2; i <= 3; i++){
+    m_polyOptionsVec[i].plotAsPoints = true;
+    m_polyOptionsVec[i].readPolyFromDisk = false;
+    m_polyOptionsVec[i].lineWidth = 2;
+    m_polyOptionsVec[i].pointSize = 6;
+  }
+  m_polyOptionsVec[2].pointShape = 0;
+  m_polyOptionsVec[3].pointShape = 2;
+
 
   m_polyOptionsVec[2].polyFileName = "diff1.xg";
   m_polyOptionsVec[3].polyFileName = "diff2.xg";
 
-  m_polyOptionsVec[2].readPolyFromDisk = false;
-  m_polyOptionsVec[3].readPolyFromDisk = false;
 
   refreshPixmap();
 }
