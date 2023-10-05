@@ -28,6 +28,9 @@
 #include <algorithm>
 #include <gui/utils.h>
 
+#ifdef POLYVIEW_USE_OPENMP
+#include <omp.h>
+#endif
 // For Visual studio
 #ifdef _MSC_VER 
 #define strcasecmp _stricmp
@@ -66,6 +69,9 @@ void utils::printUsage(std::string progName){
   cout <<"     -sh  | -shape     [x/+/o/s/t] define shape of the points in point mode display"<<endl;
   cout <<"     -si  | -size      [3]  define size of the points in point mode display"<<endl;
 
+#ifdef POLYVIEW_USE_OPENMP
+  cout <<"     -nt  | -numThreads    number of threads to use for openmp loops"<<endl;
+#endif
   cout<<endl;
 
 }
@@ -333,6 +339,19 @@ void utils::parseCmdOptions(//inputs
 
       continue;
     }
+
+#ifdef POLYVIEW_USE_OPENMP
+
+    if ((strcasecmp(currArg, "-nt") == 0 || strcasecmp(currArg, "-numThreads") == 0) &&
+            argIter < argc - 1) {
+         int nt = atoi(argv[argIter + 1]);
+         if (nt > 0) {
+           omp_set_num_threads(nt);
+         }
+         argIter++;
+         continue;
+       }
+#endif
 
     // Other command line options are ignored
     if (currArg[0] == '-') continue;
