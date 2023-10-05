@@ -574,11 +574,16 @@ void polyView::displayData(QPainter *paint) {
     }
 
     int point_size = m_polyOptionsVec[vecIter].pointSize;
-    if (m_polyDiffMode && vi < 2){
-      // in polydiff mode plot points of the two polygons the same way so that
-      // the difference gets highlighted
-      point_shape = 0;
-      point_size  = 3;
+
+    if (m_polyDiffMode){
+      if ( vecIter < 2){
+        // in polydiff mode plot points of the two polygons the same way so that
+        // the difference gets highlighted
+        point_shape = 0;
+        point_size  = 3;
+      } else {
+        lighter_darker = -1;//draw diff with lighter colors
+      }
     }
 
     // Plot all or un-selected ones if there are selected ones
@@ -659,12 +664,12 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     currPoly.compPolyIndexAnno();
 
   } else if (m_showVertOrPolyIndexAnno == 3) {
-      currPoly.compVertFullIndexAnno();
+    currPoly.compVertFullIndexAnno();
 
-    } else if (m_showLayerAnno) {
+  } else if (m_showLayerAnno) {
     currPoly.compLayerAnno();
   }
-  
+
 
   // Clip the polygon a bit beyond the viewing window, as to not see
   // the edges where the cut took place. It is a bit tricky to
@@ -675,13 +680,13 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   double extraY = extra + tol*max(abs(m_viewYll), abs(m_viewYll + m_viewWidY));
   dPoly clippedPoly;
   currPoly.clipAll(//inputs
-                    m_viewXll - extraX,
-                    m_viewYll - extraY,
-                    m_viewXll + m_viewWidX + extraX,
-                    m_viewYll + m_viewWidY + extraY,
-                    // output
-                    clippedPoly,
-					selected);
+      m_viewXll - extraX,
+      m_viewYll - extraY,
+      m_viewXll + m_viewWidX + extraX,
+      m_viewYll + m_viewWidY + extraY,
+      // output
+      clippedPoly,
+      selected);
 
   //utils::Timer my_clock2("polyView::Paint");
   const double * xv               = clippedPoly.get_xv();
@@ -696,48 +701,57 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
   if (showAnno) {
     if (m_showVertOrPolyIndexAnno == 1 || m_showVertOrPolyIndexAnno == 3) {
-        annotations = clippedPoly.get_vertIndexAnno();
+      annotations = clippedPoly.get_vertIndexAnno();
     } else if (m_showVertOrPolyIndexAnno == 2) {
-        annotations = clippedPoly.get_polyIndexAnno();
+      annotations = clippedPoly.get_polyIndexAnno();
     }else if (m_showLayerAnno) {
-        annotations = clippedPoly.get_layerAnno();
+      annotations = clippedPoly.get_layerAnno();
     }else if (m_showAnnotations) {
-        annotations = clippedPoly.get_annotations();
+      annotations = clippedPoly.get_annotations();
     }
   }
   // When polys are filled, plot largest polys first
-   if (plotFilled)
-	   clippedPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
-                                                     m_viewXll + m_viewWidX,
-                                                     m_viewYll + m_viewWidY,
-                                                     m_counter_cc);
+  if (plotFilled)
+    clippedPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
+                                                       m_viewXll + m_viewWidX,
+                                                       m_viewYll + m_viewWidY,
+                                                       m_counter_cc);
 
-   // length/size of point shapes
-   if (point_size == 0){
-     point_size = (point_shape <= 1) ? 4 : (2*point_shape+2);
-     point_size = min(point_size, 8); // limit how big this can get
-   }
-   // This is done for performance
-   // when too many polygons/points are drawn in a large area we don't need
-   // to use larger lineWidth; we cannot tell them apart anyways.
-   // When we zoom in, fewer polygons are in the view and it uses
-   // user setting for lineWidth.
-   // The following settings are experimentally decided
-   if (clippedPoly.get_totalNumVerts() >= 400000){
-     lineWidth = 0.5;
-     point_size = 1;
-   } else if (clippedPoly.get_totalNumVerts() >= 200000){
-     lineWidth = 1.0;
-     point_size = 2;
-   }else if (clippedPoly.get_totalNumVerts() >= 100000){
-     lineWidth = 1.0;
-   }
+  // length/size of point shapes
+  if (point_size == 0){
+    point_size = (point_shape <= 1) ? 4 : (2*point_shape+2);
+    point_size = min(point_size, 8); // limit how big this can get
+  }
+  // This is done for performance
+  // when too many polygons/points are drawn in a large area we don't need
+  // to use larger lineWidth; we cannot tell them apart anyways.
+  // When we zoom in, fewer polygons are in the view and it uses
+  // user setting for lineWidth.
+  // The following settings are experimentally decided
+  if (clippedPoly.get_totalNumVerts() >= 400000){
+    lineWidth = 0.5;
+    point_size = 1;
+  } else if (clippedPoly.get_totalNumVerts() >= 200000){
+    lineWidth = 1.0;
+    point_size = 2;
+  }else if (clippedPoly.get_totalNumVerts() >= 100000){
+    lineWidth = 1.0;
+  }
 
-   //my_clock.tock("CLIP");
+  //my_clock.tock("CLIP");
 
-   QVector<QLine> lines;
+  auto set_lighter_darker = [lighter_darker](QColor &color)->void {
+    if (lighter_darker == 1) {
+      color = color.darker(150); // 50% darker
+    } else if (lighter_darker == -1){
+      color = color.lighter(130); // 30% lighter
+    }
+  };
 
-   QColor prev_color = (numPolys > 0) ? QColor(colors[0].c_str()) : QColor("") ;
+  QVector<QLine> lines;
+
+  QColor prev_color = (numPolys > 0) ? QColor(colors[0].c_str()) : QColor("") ;
+  set_lighter_darker(prev_color);
 
   int start = 0;
   for (int pIter = 0; pIter < numPolys; pIter++) {
@@ -745,13 +759,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     if (pIter > 0) start += numVerts[pIter - 1];
 
     QColor color = QColor(colors[pIter].c_str());
-
-    if (lighter_darker == 1) {
-        color = color.darker(150); // 50% darker
-    }
-    if (lighter_darker == -1){
-        color = color.lighter(130); // 30% lighter
-    }
+    set_lighter_darker(color);
 
     if (plotPoints && color != prev_color) {
       // new color, draw previous color and clear lines
@@ -787,9 +795,9 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
     }
     if (isPolyClosed[pIter]){
-    	worldToPixelCoords(xv[start], yv[start], // inputs
-    			x0, y0);                              // outputs
-    	pa[pSize] = QPoint(x0, y0);
+      worldToPixelCoords(xv[start], yv[start], // inputs
+                         x0, y0);                              // outputs
+      pa[pSize] = QPoint(x0, y0);
     }
 
     if (pa.size() <= 0) continue;
@@ -818,7 +826,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
         if (plotFilled) {
           paint->drawPolygon(pa);
         }else{
-        	paint->drawPolyline(pa); // don't join the last vertex to the first
+          paint->drawPolyline(pa); // don't join the last vertex to the first
         }
 
       }
@@ -827,7 +835,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
   if (plotPoints) { // draw remaining points of the last color (if any)
     drawPointShapes(lines, prev_color, point_shape, lineWidth, paint);
-   }
+  }
 
   // Plot the annotations
   if (scatter_annotation){
@@ -2303,6 +2311,7 @@ void polyView::drawPointShapes(const QVector<QLine> &lines,
                                int shape_type, // see polyView::getOnePointShape
                                double lineWidth,
                                QPainter *paint){
+  if (lines.empty()) return;
 
   paint->setPen(QPen(color, lineWidth));
   paint->setBrush(Qt::NoBrush);
