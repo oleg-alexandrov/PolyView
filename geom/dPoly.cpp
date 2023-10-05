@@ -455,7 +455,7 @@ void dPoly::clipAll(// inputs
       clippedPoly= *this;
     } else {
       for (int pIter = 0; pIter < m_numPolys; pIter++) {
-        if (selected && !(*selected)[pIter]) continue;
+        if (!(*selected)[pIter]) continue;
         int start = starting_ids[pIter];
         clippedPoly.appendPolygon(m_numVerts[pIter],
                                   vecPtr(m_xv) + start,
@@ -1735,6 +1735,9 @@ void dPoly::markPointsInBox(// Inputs
   mark.assign(m_xv.size(), 0);
 
   dRect clip_box(xll, yll, xur, yur);
+#ifdef POLYVIEW_USE_OPENMP
+    #pragma omp parallel for
+#endif
   for (int i = 0; i < (int)m_xv.size(); i++){
     if (clip_box.isInSide(m_xv[i], m_yv[i])){
       mark[i] = 1;
@@ -1767,7 +1770,9 @@ void dPoly::markPolysIntersectingBox(// Inputs
   vector< dRectWithId> boxes;
   box_tree->getBoxesInRegion(xll, yll, xur, yur, boxes);
 
-  dPoly onePoly, clippedPoly;
+#ifdef POLYVIEW_USE_OPENMP
+    #pragma omp parallel for
+#endif
   for (auto &box : boxes) {
     int polyIndex = box.id;
 
@@ -1775,6 +1780,8 @@ void dPoly::markPolysIntersectingBox(// Inputs
       mark[polyIndex] = 1;
 
     } else {
+      dPoly onePoly, clippedPoly;
+
       int beg_inex = starting_ids[polyIndex];
       extractOnePoly(polyIndex, // input
                      onePoly,
@@ -1801,6 +1808,9 @@ void dPoly::markAnnosIntersectingBox(// Inputs
                                      std::vector<int> & mark) const {
   mark.assign(m_annotations.size(), 0);
 
+#ifdef POLYVIEW_USE_OPENMP
+    #pragma omp parallel for
+#endif
   for (size_t aIter = 0; aIter < m_annotations.size(); aIter++) {
     double x = m_annotations[aIter].x;
     double y = m_annotations[aIter].y;
