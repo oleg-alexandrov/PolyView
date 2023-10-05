@@ -30,6 +30,8 @@
 #include <cfloat>
 #include <chrono>
 
+std::string getCurrentDefaultColor();
+
 struct dPoint{
   double x, y;
   dPoint(): x(0), y(0){}

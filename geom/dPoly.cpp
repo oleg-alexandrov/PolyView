@@ -1358,7 +1358,8 @@ bool dPoly::readPoly(std::string filename,
 
   anno annotation;
   string layer, line;
-  string color = "yellow"; // default color for polygons
+
+  string color = getCurrentDefaultColor(); // default color for polygons
 
   while( getline(fh, line) ) {
 

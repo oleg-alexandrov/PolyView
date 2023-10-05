@@ -43,6 +43,21 @@
 using namespace std;
 using namespace utils;
 
+static int ss_default_color_ind = 0;
+static const char * ss_xgraph_colors[] =
+  {"black", "white", "red", "blue", "green", "violet", // 0,  ..., 5
+   "orange", "yellow", "pink", "cyan", "#A2B5CD",      // 6,  ..., 10
+   "#6C7B8B", "#FF00FF", "#00CDCD", "navy", "gold"     // 11, ..., 15
+  };
+
+std::string getCurrentDefaultColor() {
+  ss_default_color_ind++;
+  if (ss_default_color_ind >= 15){
+    ss_default_color_ind -= 14; // start from 1
+  }
+  return ss_xgraph_colors[ss_default_color_ind];
+}
+
 utils::Timer::Timer(const std::string &prefix){
 	m_prefix = prefix;
 	m_start = std::chrono::steady_clock::now();
@@ -244,12 +259,6 @@ void utils::searchForColor(std::string lineStr, // input, not a reference on pur
                            std::string & color  // output
                            ){
 
-//   const char * xgraph_colors[] =
-//     {"black", "white", "red", "blue", "green", "violet",
-//      "orange", "yellow", "pink", "cyan", "lightGray",
-//      "darkGray", "fuchsia", "aqua", "navy", "gold"};
-
-
   char       * line  = (char*)lineStr.c_str();
   const char * col   = "color";
   char       * start = strstr(line, col);
@@ -273,20 +282,13 @@ void utils::searchForColor(std::string lineStr, // input, not a reference on pur
 
   color = string(pch);
 
-  const char * xgraph_colors[] =
-    {"black", "white", "red", "blue", "green", "violet", // 0,  ..., 5
-     "orange", "yellow", "pink", "cyan", "#A2B5CD",      // 6,  ..., 10
-     "#6C7B8B", "#FF00FF", "#00CDCD", "navy", "gold"     // 11, ..., 15
-    };
-
-
-  int numColors = sizeof(xgraph_colors)/sizeof(char*);
+  int numColors = sizeof(ss_xgraph_colors)/sizeof(char*);
 
   // If the color is given as a number, per xgraph's conventions
   // (e.g., red is color 2), convert that number to the color name.
   if ('0' <= pch[0] && pch[0] <= '9'){
     int colorIndex = atoi(pch)%numColors;
-    color = string( xgraph_colors[colorIndex] );
+    color = string( ss_xgraph_colors[colorIndex] );
   }
 
   return;
