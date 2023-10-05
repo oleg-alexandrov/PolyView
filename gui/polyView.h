@@ -244,7 +244,7 @@ private:
                  QPainter *paint,
                  utils::dPoly &currPoly,
                  // optional input, if provided only clip selected polygons
-                 const std::map<int, int> *selected = nullptr,
+                 const std::vector<int> *selected = nullptr,
                  int lighter_darker = 0 // draw color as  0: normal, 1: darker, -1: lighter
 
                  );
@@ -398,8 +398,9 @@ private:
   int    m_vertIndexInCurrPoly;
   double m_mousePressWorldX, m_mousePressWorldY;
   utils::dPoly m_polyBeforeShift;
-  std::map<int, std::map<int, int>> m_selectedPolyIndices;
-  std::map<int, std::map<int, int>> m_selectedAnnoIndices;
+  std::map<int, std::vector<int>> m_selectedPolyIndices;
+  std::map<int, std::vector<int>> m_selectedAnnoIndices;
+
   std::vector<utils::dPoly> m_polyVecBeforeShift;
   std::vector<utils::dPoly> m_copiedPolyVec;
   bool m_movingPolysInHlts;

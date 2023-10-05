@@ -106,64 +106,64 @@ namespace utils{
                        const std::vector<dPoly> & polyVec,
                        const std::vector<dPoly> & highlights,
                        // Outputs
-                       std::map<int, std::map<int, int>> & markedPolyIndices,
-                       std::map<int, std::map<int, int>> & markedAnnoIndices);
+                       std::map<int, std::vector<int>> & markedPolyIndices,
+                       std::map<int, std::vector<int>> & markedAnnoIndices);
 
   void shiftMarkedPolys(// Inputs
-                        std::map<int, std::map<int, int>> const& markedPolyIndices,
-                        std::map<int, std::map<int, int>> const& markedAnnoIndices,
+                        std::map<int, std::vector<int>> const& markedPolyIndices,
+                        std::map<int, std::vector<int>> const& markedAnnoIndices,
                         double shift_x, double shift_y,
                         // Inputs-outputs
                         std::vector<dPoly> & polyVec);
   void scaleMarkedPolys(// Inputs
-                        std::map<int, std::map<int, int>> const& markedPolyIndices,
-                        std::map<int, std::map<int, int>> const& markedAnnoIndices,
+                        std::map<int, std::vector<int>> const& markedPolyIndices,
+                        std::map<int, std::vector<int>> const& markedAnnoIndices,
                         double scale,
                         // Inputs-outputs
                         std::vector<dPoly> & polyVec);
   void rotateMarkedPolys(// Inputs
-                         std::map<int, std::map<int, int>> const& markedPolyIndices,
-                         std::map<int, std::map<int, int>> const& markedAnnoIndices,
+                         std::map<int, std::vector<int>> const& markedPolyIndices,
+                         std::map<int, std::vector<int>> const& markedAnnoIndices,
                          double angle,
                          // Inputs-outputs
                          std::vector<dPoly> & polyVec);
 
   void transformMarkedPolys(// Inputs
-                            std::map<int, std::map<int, int>> const& markedPolyIndices,
-                            std::map<int, std::map<int, int>> const& markedAnnoIndices,
+                            std::map<int, std::vector<int>> const& markedPolyIndices,
+                            std::map<int, std::vector<int>> const& markedAnnoIndices,
                             const utils::matrix2 & M,
                             // Inputs-outputs
                             std::vector<dPoly> & polyVec);
 
   void transformMarkedPolysAroundCtr(// Inputs
-                                     std::map<int, std::map<int, int>> const& markedPolyIndices,
-                                     std::map<int, std::map<int, int>> const& markedAnnoIndices,
+                                     std::map<int, std::vector<int>> const& markedPolyIndices,
+                                     std::map<int, std::vector<int>> const& markedAnnoIndices,
                                      const utils::matrix2 & M,
                                      // Inputs-outputs
                                      std::vector<dPoly> & polyVec);
 
   void transformMarkedPolysAroundCtr(// Inputs
-                                     std::map<int, std::map<int, int>> const& markedPolyIndices,
-                                     std::map<int, std::map<int, int>> const& markedAnnoIndices,
+                                     std::map<int, std::vector<int>> const& markedPolyIndices,
+                                     std::map<int, std::vector<int>> const& markedAnnoIndices,
                                      const utils::matrix2 & M,
                                      dPoint const & ctr,
                                      // Inputs-outputs
                                      std::vector<dPoly> & polyVec);
   void reverseMarkedPolys(// Inputs
-                          std::map<int, std::map<int, int>> const& markedPolyIndices,
+                          std::map<int, std::vector<int>> const& markedPolyIndices,
                           // Inputs-outputs
                           std::vector<dPoly> & polyVec);
   void eraseMarkedPolys(// Inputs
-                        std::map<int, std::map<int, int>> const& markedPolyIndices,
-                        std::map<int, std::map<int, int>> const& markedAnnoIndices,
+                        std::map<int, std::vector<int>> const& markedPolyIndices,
+                        std::map<int, std::vector<int>> const& markedAnnoIndices,
                         // Inputs-outputs
                         std::vector<dPoly> & polyVec);
   void extractMarkedPolys(// Inputs
                           const std::vector<dPoly> & polyVec,
-                          std::map<int, std::map<int, int>> const& markedPolyIndices,
+                          std::map<int, std::vector<int>> const& markedPolyIndices,
                           // Outputs
                           std::vector<dPoly> & extractedPolyVec);
-  int getNumElements(std::map<int, std::map<int, int>> const& index_map);
+  int getNumElements(std::map<int, std::vector<int>> const& index_map);
 
 }
 

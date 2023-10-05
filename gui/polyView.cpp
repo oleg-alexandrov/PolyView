@@ -51,6 +51,10 @@
 #include <gui/polyView.h>
 #include <gui/utils.h>
 
+#ifdef POLYVIEW_USE_OPENMP
+#include <omp.h>
+#endif
+
 using namespace std;
 using namespace utils;
 
@@ -554,13 +558,13 @@ void polyView::displayData(QPainter *paint) {
     bool has_selected = !plotFilled && !m_selectedPolyIndices[vecIter].empty();
 
     // Mark un-selected polygons and plot un-selected ones before selected ones
-    std::map<int, int> un_selected;
+    std::vector<int> un_selected;
     if (has_selected){
-    	int Np = m_polyVec[vecIter].get_numPolys();
-    	for (int i = 0; i < Np; i++) {
-    		auto it = m_selectedPolyIndices[vecIter].find(i);
-    		if (it == m_selectedPolyIndices[vecIter].end()) un_selected[i] = 1;
-    	}
+      int Np = m_polyVec[vecIter].get_numPolys();
+      un_selected.assign(Np, 0);
+      for (int i = 0; i < Np; i++) {
+        if (!(m_selectedPolyIndices[vecIter][i])) un_selected[i] = 1;
+      }
     }
 
     bool showAnno = true;
@@ -641,7 +645,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          std::vector< std::vector<int> > & textOnScreenGrid,
                          QPainter *paint,
                          dPoly &currPoly,
-                         const std::map<int, int> *selected,
+                         const std::vector<int> *selected,
                          int lighter_darker) {
 
   //utils::Timer my_clock("polyView::plotDPoly");
@@ -1280,6 +1284,7 @@ void polyView::copyPoly() {
   if (polyVecIndex < 0 || polyIndexInCurrPoly < 0) return;
 
   m_selectedPolyIndices.clear();
+  m_selectedPolyIndices[polyVecIndex].assign(m_polyVec[polyVecIndex].get_numPolys(), 0);
   m_selectedPolyIndices[polyVecIndex][polyIndexInCurrPoly] = 1;
 
   extractMarkedPolys(m_polyVec, m_selectedPolyIndices,  // Inputs
@@ -2300,9 +2305,14 @@ void polyView::drawPointShapes(const QVector<QLine> &lines,
 
   if (shape_type == 2){
     QVector<QRect> rects(lines.size());
-    rects.reserve(lines.size());
-    for (const auto &line : lines) {
-      rects.push_back(QRect(line.p1().x(), line.p1().y(), line.p2().x(), line.p2().y()));
+    rects.resize(lines.size());
+
+#ifdef POLYVIEW_USE_OPENMP
+    #pragma omp parallel for
+#endif
+    for (int i = 0; i < (int)lines.size(); i++) {
+      const auto &line = lines[i];
+      rects[i] = QRect(line.p1().x(), line.p1().y(), line.p2().x(), line.p2().y());
     }
     paint->drawRects(rects);
 

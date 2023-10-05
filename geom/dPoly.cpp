@@ -310,7 +310,7 @@ void dPoly::set_annoByType(const std::vector<anno> & annotations, AnnoType annoT
 // We use actual point tree instead of box tree for clipping
 void  dPoly::clipPointCloud(const dRect &clip_box,
                         dPoly & clippedPoly, // output
-                        const std::map<int, int> *selected) {
+                        const std::vector<int> *selected) {
 
   assert(m_isPointCloud);
   //utils::Timer my_clock("dPoly::clipPointCloud");
@@ -320,7 +320,7 @@ void  dPoly::clipPointCloud(const dRect &clip_box,
 
 
   for (int i = 0; i < (int)m_xv.size(); i++){
-    if (selected && selected->find(i) == selected->end()) continue;
+    if (selected && !(*selected)[i]) continue;
     if (clip_box.isInSide(m_xv[i], m_yv[i])){
       clippedPoly.appendPolygon(1, &m_xv[i], &m_yv[i], false, m_colors[i], m_layers[i]);
     }
@@ -358,7 +358,7 @@ void dPoly::copyAnno(dPoly & clippedPoly){
 
 void dPoly::clipPolygons(const dRect &clip_box,
                          dPoly & clippedPoly, // output
-                         const std::map<int, int> *selected){
+                         const std::vector<int> *selected){
 
   const double * xv               = get_xv();
   const double * yv               = get_yv();
@@ -383,7 +383,7 @@ void dPoly::clipPolygons(const dRect &clip_box,
   for (auto &box : boxes) {
 
     int pIter = box.id;
-    if (selected && selected->find(pIter) == selected->end()) continue;
+    if (selected && !(*selected)[pIter]) continue;
 
     int start = starting_ids[pIter];
 
@@ -437,12 +437,14 @@ void dPoly::clipAll(// inputs
     double clip_xll, double clip_yll,
     double clip_xur, double clip_yur,
     dPoly & clippedPoly, // output
-    const std::map<int, int> *selected ) {
+    const std::vector<int> *selected ) {
 
   assert(this != &clippedPoly); // source and destination must be different
   //utils::Timer my_clock("dPoly::clipPoly");
 
   clippedPoly.reset();
+  clippedPoly.set_isPointCloud(m_isPointCloud);
+
   dRect clip_box(clip_xll, clip_yll, clip_xur, clip_yur);
 
   const std::vector<int>& starting_ids = getStartingIndices();
@@ -453,7 +455,7 @@ void dPoly::clipAll(// inputs
       clippedPoly= *this;
     } else {
       for (int pIter = 0; pIter < m_numPolys; pIter++) {
-        if (selected && selected->find(pIter) == selected->end()) continue;
+        if (selected && !(*selected)[pIter]) continue;
         int start = starting_ids[pIter];
         clippedPoly.appendPolygon(m_numVerts[pIter],
                                   vecPtr(m_xv) + start,
@@ -557,12 +559,12 @@ void dPoly::scale(double scale) {
   return;
 }
 
-void dPoly::transformMarkedPolys(std::map<int, int> const& mark, const linTrans & T) {
+void dPoly::transformMarkedPolys(std::vector<int> const& mark, const linTrans & T) {
 
   int start = 0;
   for (int pIter = 0; pIter < m_numPolys; pIter++) {
     if (pIter > 0) start += m_numVerts[pIter - 1];
-    if (mark.find(pIter) == mark.end()) continue;
+    if (!mark[pIter]) continue;
 
     for (int vIter = 0; vIter < m_numVerts[pIter]; vIter++) {
       int i = start + vIter;
@@ -579,10 +581,10 @@ void dPoly::transformMarkedPolys(std::map<int, int> const& mark, const linTrans 
   return;
 }
 
-void dPoly::transformMarkedAnnos(std::map<int, int> const& mark, const linTrans & T) {
+void dPoly::transformMarkedAnnos(std::vector<int> const& mark, const linTrans & T) {
   for (size_t it = 0; it < m_annotations.size(); it++) {
 
-    if (mark.find(it) == mark.end()) continue;
+    if (!mark[it]) continue;
 
     anno & A = m_annotations[it]; // alias
     double x = T.a11*A.x + T.a12*A.y + T.sx;
@@ -592,14 +594,14 @@ void dPoly::transformMarkedAnnos(std::map<int, int> const& mark, const linTrans 
   }
 }
 
-void dPoly::transformMarkedPolysAroundPt(std::map<int, int> const& mark, const matrix2 & M,
+void dPoly::transformMarkedPolysAroundPt(std::vector<int> const& mark, const matrix2 & M,
                                          dPoint P) {
   linTrans T = transAroundPt(M, P);
   transformMarkedPolys(mark, T);
   return;
 }
 
-void dPoly::transformMarkedAnnosAroundPt(std::map<int, int> const& mark, const matrix2 & M,
+void dPoly::transformMarkedAnnosAroundPt(std::vector<int> const& mark, const matrix2 & M,
                                          dPoint P) {
   linTrans T = transAroundPt(M, P);
   transformMarkedAnnos(mark, T);
@@ -959,7 +961,8 @@ void dPoly::eraseOnePoly(int polyIndex) {
 
   assert(0 <= polyIndex && polyIndex < m_numPolys);
 
-  map<int, int> mark;
+  std::vector<int> mark;
+  mark.assign(get_numPolys(), 0);
   mark[polyIndex] = 1;
   eraseMarkedPolys(mark);
 
@@ -1068,27 +1071,31 @@ void dPoly::shiftOneAnno(int index, double shift_x, double shift_y) {
   return;
 }
 
-void dPoly::shiftMarkedPolys(std::map<int, int> const & mark, double shift_x, double shift_y) {
+void dPoly::shiftMarkedPolys(std::vector<int> const & mark, double shift_x, double shift_y) {
 
-  for (auto it = mark.begin(); it != mark.end(); it++)
-    shiftOnePoly(it->first, shift_x, shift_y);
-
-  return;
-}
-
-void dPoly::shiftMarkedAnnos(std::map<int, int> const & amark, double shift_x, double shift_y) {
-
-  for (auto it = amark.begin(); it != amark.end(); it++)
-    shiftOneAnno(it->first, shift_x, shift_y);
+  for (int i = 0; i < (int) mark.size(); i++){
+    if (!mark[i]) continue;
+    shiftOnePoly(i, shift_x, shift_y);
+  }
 
   return;
 }
 
-void dPoly::reverseMarkedPolys(std::map<int, int> const & mark) {
+void dPoly::shiftMarkedAnnos(std::vector<int> const & amark, double shift_x, double shift_y) {
 
-  for (auto it = mark.begin(); it != mark.end(); it++)
-    reverseOnePoly(it->first);
+  for (int i = 0; i < (int) amark.size(); i++){
+    if (!amark[i]) continue;
+    shiftOneAnno(i, shift_x, shift_y);
+  }
+  return;
+}
 
+void dPoly::reverseMarkedPolys(std::vector<int> const & mark) {
+
+  for (int i = 0; i < (int) mark.size(); i++){
+    if (!mark[i]) continue;
+    reverseOnePoly(i);
+  }
   return;
 }
 
@@ -1132,14 +1139,14 @@ void dPoly::extractOnePoly(int polyIndex, // input
   return;
 }
 
-void dPoly::extractMarkedPolys(std::map<int, int> const& mark, // input
+void dPoly::extractMarkedPolys(std::vector<int> const& mark, // input
                                dPoly & polys) const {          // output 
 
   const auto &start_ids = getStartingIndices();
 
   polys.reset();
   for (int pIter = 0; pIter < m_numPolys; pIter++) {
-    if (mark.find(pIter) == mark.end()) continue;
+    if (!mark[pIter]) continue;
     dPoly lPoly;
     extractOnePoly(pIter, // input
                    lPoly,  // output
@@ -1721,10 +1728,10 @@ void dPoly::markPointsInBox(// Inputs
     double xll, double yll,
     double xur, double yur,
     // Outputs
-    std::map<int, int> & mark) const {
+    std::vector<int> & mark) const {
 // Mark index of points in the box, for point cloud mode
   //utils::Timer my_clock("dPoly::markPointsInBox");
-  mark.clear();
+  mark.assign(m_xv.size(), 0);
 
   dRect clip_box(xll, yll, xur, yur);
   for (int i = 0; i < (int)m_xv.size(); i++){
@@ -1740,7 +1747,7 @@ void dPoly::markPolysIntersectingBox(// Inputs
     double xll, double yll,
     double xur, double yur,
     // Outputs
-    std::map<int, int> & mark) const {
+    std::vector<int> & mark) const {
 
   if (m_isPointCloud){
     markPointsInBox(xll, yll, xur, yur, mark);
@@ -1748,7 +1755,8 @@ void dPoly::markPolysIntersectingBox(// Inputs
   }
   // If bounding box of a polygon intersects the region we will check that polygon for selection
   //utils::Timer my_clock("dPoly::clipPointCloud");
-  mark.clear();
+  mark.assign(m_numPolys, 0);
+
   const std::vector<int>& starting_ids = getStartingIndices();
   const auto *box_tree = getBoundingBoxTree();
 
@@ -1789,8 +1797,8 @@ void dPoly::markAnnosIntersectingBox(// Inputs
                                      double xll, double yll,
                                      double xur, double yur,
                                      // Outputs
-                                     std::map<int, int> & mark) const {
-  mark.clear();
+                                     std::vector<int> & mark) const {
+  mark.assign(m_annotations.size(), 0);
 
   for (size_t aIter = 0; aIter < m_annotations.size(); aIter++) {
     double x = m_annotations[aIter].x;
@@ -1822,7 +1830,7 @@ void dPoly::markAnnosIntersectingBox(// Inputs
 //  return;
 //}
 
-void dPoly::eraseMarkedPolys(std::map<int, int> const& mark) {
+void dPoly::eraseMarkedPolys(std::vector<int> const& mark) {
 
   // Erase the polygons matching the given mark.
   // See also the function named eraseOnePoly().
@@ -1834,7 +1842,7 @@ void dPoly::eraseMarkedPolys(std::map<int, int> const& mark) {
   int start = 0;
   for (int pIter = 0; pIter < m_numPolys; pIter++) {
     if (pIter > 0) start += m_numVerts[pIter - 1];
-    if (mark.find(pIter) == mark.end()) continue;
+    if (!mark[pIter]) continue;
 
     imark[pIter] = 1;
     for (int vIter = 0; vIter < m_numVerts[pIter]; vIter++) dmark[start + vIter] = 1;
@@ -1857,11 +1865,11 @@ void dPoly::eraseMarkedPolys(std::map<int, int> const& mark) {
   return;
 }
 
-void dPoly::eraseMarkedAnnos(std::map<int, int> const& mark) {
+void dPoly::eraseMarkedAnnos(std::vector<int> const& mark) {
   vector<char> amark;
   amark.assign(m_annotations.size(), 0);
   for (size_t it = 0; it < m_annotations.size(); it++) {
-    if (mark.find(it) == mark.end()) continue;
+    if (!mark[it]) continue;
     amark[it] = 1;
   }
 
@@ -1870,14 +1878,14 @@ void dPoly::eraseMarkedAnnos(std::map<int, int> const& mark) {
 
 void dPoly::erasePolysIntersectingBox(double xll, double yll, double xur, double yur) {
 
-  map<int, int> mark;
+  std::vector<int> mark;
   markPolysIntersectingBox(xll, yll, xur, yur, // Inputs
                            mark);              // Outputs
   eraseMarkedPolys(mark);
 }
 
 void dPoly::eraseAnnosIntersectingBox(double xll, double yll, double xur, double yur) {
-  map<int, int> amark;
+  std::vector<int> amark;
   markAnnosIntersectingBox(xll, yll, xur, yur, // Inputs
                            amark);             // Outputs
   eraseMarkedAnnos(amark);
@@ -1885,8 +1893,7 @@ void dPoly::eraseAnnosIntersectingBox(double xll, double yll, double xur, double
   return;
 }
 
-void dPoly::appendAndShiftMarkedPolys(// Inputs
-                                      std::map<int, int> & mark,
+void dPoly::appendAndShiftMarkedPolys(std::vector<int> & mark,
                                       double shift_x, double shift_y) {
 
   dPoly polys;
