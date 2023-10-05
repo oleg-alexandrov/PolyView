@@ -1773,7 +1773,8 @@ void dPoly::markPolysIntersectingBox(// Inputs
 #ifdef POLYVIEW_USE_OPENMP
     #pragma omp parallel for
 #endif
-  for (auto &box : boxes) {
+  for (int i = 0; i < boxes.size(); i++) {
+    const auto &box = boxes[i];
     int polyIndex = box.id;
 
     if (m_numVerts[polyIndex] == 1 || clip_box.contains(box)){
