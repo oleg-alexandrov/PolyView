@@ -859,6 +859,7 @@ void polyView::plotAnnotationScattered(const vector<anno> &annotations,
                                        QPainter *paint){
 
   // Plot annotations as filled colorful circles
+  const QBrush &orig_brush = paint->brush();
 
   int numAnno = annotations.size();
   std::vector<double> vals(numAnno, FLT_MAX);
@@ -901,6 +902,8 @@ void polyView::plotAnnotationScattered(const vector<anno> &annotations,
     paint->drawEllipse(x0 - 4, y0 - 4, 8, 8);
 
   }
+  paint->setBrush(orig_brush);// reset brush
+
 }
 
 void polyView::plotImage(QPainter *paint, utils::dPoly const& poly) {
