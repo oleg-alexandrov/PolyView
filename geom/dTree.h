@@ -87,10 +87,14 @@ inline bool botLessThan (Box P, Box Q){
 
 template <typename Box>
 inline bool lexLessThan(Box P, Box Q){
-  if (P.xl < Q.xl) return true; if (P.xl > Q.xl) return false;
-  if (P.yl < Q.yl) return true; if (P.yl > Q.yl) return false;
-  if (P.xh < Q.xh) return true; if (P.xh > Q.xh) return false;
-  if (P.yh < Q.yh) return true; if (P.yh > Q.yh) return false;
+  if (P.xl < Q.xl) return true;
+  if (P.xl > Q.xl) return false;
+  if (P.yl < Q.yl) return true;
+  if (P.yl > Q.yl) return false;
+  if (P.xh < Q.xh) return true;
+  if (P.xh > Q.xh) return false;
+  if (P.yh < Q.yh) return true;
+  if (P.yh > Q.yh) return false;
   return false;
 }
 
