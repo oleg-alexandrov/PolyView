@@ -2302,6 +2302,7 @@ void polyView::drawPointShapes(const QVector<QLine> &lines,
                                QPainter *paint){
 
   paint->setPen(QPen(color, lineWidth));
+  paint->setBrush(Qt::NoBrush);
 
   if (shape_type == 2){
     QVector<QRect> rects(lines.size());
