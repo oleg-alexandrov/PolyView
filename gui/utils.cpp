@@ -44,34 +44,45 @@ void utils::printUsage(std::string progName){
       <<" [app_options] [file_options] file1.xg [file_options] file2.xg"<<  endl<<endl;
 
   cout <<"app_options:"<<endl;
-  cout <<"     -geo[metry] 1200x800 " <<endl;
-  cout <<"     -bg | -backgroundColor black "<<endl;
+  cout <<"     -geo | -geometry 1200x800 " <<endl;
+  cout <<"     -bg  | -backgroundColor black "<<endl;
   cout <<"     -grid (on or off) "<<endl;
   cout <<"     -gridSize 10 "<<endl;
   cout <<"     -gridWidth 1 "<<endl;
   cout <<"     -gridColor green "<<endl;
-  cout <<"     -panelRatio 0.2"<<endl<<endl;
+  cout <<"     -panelRatio 0.2  (defines the ratio of the menu size to the display size)"<<endl<<endl;
+#ifdef POLYVIEW_USE_OPENMP
+  cout <<"     -nt  | -numThreads    number of threads to use for openmp loops"<<endl;
+#endif
 
   cout <<"file_options:"<<endl;
   cout <<"     -c   | -color            yellow "<<endl;
   cout <<"     -nc  | -noColorOverride     (use color in file) "<<endl;
-  cout <<"     -fs  | -fontSize         10 (for annotations)"<<endl;
-  cout <<"     -lw  | -lineWidth        2  (polygon drawing line thickness)"<<endl;
-  cout <<"     -p   | -points              (read as point cloud, not polygons)" <<endl;
+  cout <<"     -lw  | -lineWidth        1  (thickness of the drawn lines)"<<endl;
+
+
+  cout <<endl<<"   polygon options:"<<endl;
+
   cout <<"     -cp  | -closedPoly " <<endl;
   cout <<"     -ncp | -nonClosedPoly "<<endl;
   cout <<"     -f   | -filledPoly "<<endl;
-  cout <<"     -ha  | -hideAnno            (do not show annotations in file) "<<endl;
-  cout <<"     -sa  | -scatterAnno         (plot annotation values as scattered points)"<<endl;
-  cout <<"     -cs  | -colorScale min_val max_val (fixed color scale for scattered plot)"<<endl;
   cout <<"     -nf  | -nonFilledPoly "<<endl;
-  cout <<"     -cw  | -clockwisePoly        (if polygon orientation is clockwise)"<<endl;
-  cout <<"     -sh  | -shape     [x/+/o/s/t] define shape of the points in point mode display"<<endl;
-  cout <<"     -si  | -size      [3]  define size of the points in point mode display"<<endl;
+  cout <<"     -cw  | -clockwisePoly    (if polygon orientation is clockwise)"<<endl;
 
-#ifdef POLYVIEW_USE_OPENMP
-  cout <<"     -nt  | -numThreads    number of threads to use for openmp loops"<<endl;
-#endif
+
+  cout <<endl<<"   points options:"<<endl;
+  cout <<"     -p   | -points     (read as point cloud, not polygons)" <<endl;
+  cout <<"     -sh  | -shape   o  ([x/+/o/s/t] defines shape of the points in point mode display"<<endl;
+  cout <<"     -si  | -size    3  ([1-8]  defines size of the points in point mode display"<<endl;
+
+
+  cout <<endl<<"   annotation options:"<<endl;
+  cout <<"     -fs  | -fontSize         10        (for annotations)"<<endl;
+  cout <<"     -ha  | -hideAnno                   (do not show annotations in file) "<<endl;
+  cout <<"     -sa  | -scatterAnno                (plot annotation values as scattered points)"<<endl;
+  cout <<"     -cs  | -colorScale min_val max_val (fixed color scale for scattered plot)"<<endl;
+
+
   cout<<endl;
 
 }
