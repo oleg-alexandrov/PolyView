@@ -255,7 +255,7 @@ void utils::minDistFromPtToSeg(//inputs
 
 
 
-void utils::searchForColor(std::string lineStr, // input, not a reference on purpose
+void utils::searchForColor(const std::string &lineStr, // input, not a reference on purpose
                            std::string & color  // output
                            ){
 
@@ -294,7 +294,7 @@ void utils::searchForColor(std::string lineStr, // input, not a reference on pur
   return;
 }
 
-bool utils::searchForAnnotation(std::string lineStr, anno & annotation){
+bool utils::searchForAnnotation(const std::string &lineStr, anno & annotation){
 
   // Search for annotations, which have the form:
   // anno xval yval label

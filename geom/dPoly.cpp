@@ -1368,6 +1368,10 @@ bool dPoly::readPoly(std::string filename,
     // Convert to lowercase
     transform(line.begin(), line.end(), line.begin(), ::tolower);
 
+    if (line[0] == ' ') {
+      // remove trailing space
+      line.erase(0, line.find_first_not_of(' '));
+    }
     char * linePtr = (char*)line.c_str(); // To do: Avoid this casting hack.
 
     // Replace comma with space, to be able to use comma as separator
@@ -1387,12 +1391,13 @@ bool dPoly::readPoly(std::string filename,
 
     // If the current line has a color, store it in 'color'.
     // Else keep 'color' unchanged.
-    searchForColor(line, color);
+    if (line[0] == 'c' ) searchForColor(line, color);
 
-    if (searchForAnnotation(line, annotation)) {
-      m_annotations.push_back(annotation);
+    if (line[0] == 'a'){// search only if there is a match for performance.
+      if (searchForAnnotation(line, annotation)) {
+        m_annotations.push_back(annotation);
+      }
     }
-
     // Extract the coordinates of the current vertex and the layer
     // The format we expect is: x y ; layerNo (e.g., 2.3 -1.2 ; 5:16)
     istringstream iss_xy (line);
