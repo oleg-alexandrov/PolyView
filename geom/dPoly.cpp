@@ -1429,7 +1429,7 @@ bool dPoly::readPoly(std::string filename,
             searchForLayer(line, layer);
           }
           // Don't check the logic below in this case since we know we are not at the end
-          if (!isPointCloud) continue;
+          if (!isPointCloud && !isLastLine) continue;
 
         }catch (...){}
       } catch (...){}
