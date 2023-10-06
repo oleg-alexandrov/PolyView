@@ -1375,14 +1375,15 @@ bool dPoly::readPoly(std::string filename,
     char * linePtr = (char*)line.c_str(); // To do: Avoid this casting hack.
 
     // Replace comma with space, to be able to use comma as separator
-    for (int s = 0; s < (int)strlen(linePtr); s++) {
+    int str_len = (int)strlen(linePtr);
+    for (int s = 0; s < str_len; s++) {
       if (linePtr[s] == ',') linePtr[s] = ' ';
     }
 
     // Ignore any text after the comment character, which is '#' or '!'
-    for (int s = 0; s < (int)strlen(linePtr); s++) {
+    for (int s = 0; s < str_len; s++) {
       if (linePtr[s] == '#' || linePtr[s] == '!') {
-        for (int t = s; t < (int)strlen(linePtr); t++) {
+        for (int t = s; t < str_len; t++) {
           linePtr[t] = '\0';
         }
         break;
