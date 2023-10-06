@@ -1398,31 +1398,41 @@ bool dPoly::readPoly(std::string filename,
 
     // If the current line has a color, store it in 'color'.
     // Else keep 'color' unchanged.
-    if (line[0] == 'c' ) searchForColor(line, color);
+    if (line[0] == 'c' ) {
+      searchForColor(line, color);
+      continue;
+    }
 
     if (line[0] == 'a'){// search only if there is a match for performance.
       if (searchForAnnotation(line, annotation)) {
         m_annotations.push_back(annotation);
       }
+      continue;
     }
     // Extract the coordinates of the current vertex and the layer
     // The format we expect is: x y ; layerNo (e.g., 2.3 -1.2 ; 5:16)
-    istringstream iss_xy (line);
-    double x, y;
-    if ( iss_xy >> x >> y ) {
 
-      // This line has valid coordinates, which we read in x and y.
-      m_xv.push_back(x);
-      m_yv.push_back(y);
-      end++;
+    if (line[0] != 'n'){// if "next" skip this part
+      double x, y;
+      size_t sz;
+      try {
+        x = std::stod(line, &sz);
+        try {
+          y = std::stod(line.substr(sz), &sz);
+          m_xv.push_back(x);
+          m_yv.push_back(y);
+          end++;
 
-      if (end == beg + 1) {
-        // Find the layer for the current point only if this point
-        // is the first point in the polygon
-        searchForLayer(line, layer);
-      }
-      // Don't check the logic below in this case since we know we are not at the end
-      if (!isPointCloud) continue;
+          if (end == beg + 1) {
+            // Find the layer for the current point only if this point
+            // is the first point in the polygon
+            searchForLayer(line, layer);
+          }
+          // Don't check the logic below in this case since we know we are not at the end
+          if (!isPointCloud) continue;
+
+        }catch (...){}
+      } catch (...){}
     }
 
     // If this is the last line in the file, or if we encountered a
