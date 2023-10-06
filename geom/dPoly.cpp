@@ -1414,19 +1414,18 @@ bool dPoly::readPoly(std::string filename,
         // is the first point in the polygon
         searchForLayer(line, layer);
       }
-
+      // Don't check the logic below in this case since we know we are not at the end
+      if (!isPointCloud) continue;
     }
 
     // If this is the last line in the file, or if we encountered a
     // "next" statement, or if we treat a polygon as just a set of
     // points (point cloud) then close the current polygon and start a
     // new one.
-    istringstream iss_next(line);
-    string val;
-    bool isLastVertexOfCurrPoly = ( isLastLine                               ||
-                                    ( (iss_next >> val) && (val == "next") ) ||
-                                    isPointCloud
-                                    );
+    int is_next = strncmp(line.c_str(), "next", 4);// Efficient call
+
+    bool isLastVertexOfCurrPoly = ( isLastLine || (is_next == 0) || isPointCloud);
+
     bool isCurrPolyNonEmpty = (beg < end);
     if (isLastVertexOfCurrPoly && isCurrPolyNonEmpty) {
 
