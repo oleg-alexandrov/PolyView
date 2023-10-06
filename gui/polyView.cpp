@@ -514,7 +514,7 @@ void polyView::displayData(QPainter *paint) {
   initTextOnScreenGrid(textOnScreenGrid);
 
   // Draw un-selected polygons darker
-  int lighter_darker = hasSelectedPolygons() ? 1 : 0;
+  int lighter_darker_default = hasSelectedPolygons() ? 1 : 0;
 
   // Plot the images and polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
@@ -574,7 +574,7 @@ void polyView::displayData(QPainter *paint) {
     }
 
     int point_size = m_polyOptionsVec[vecIter].pointSize;
-
+    int lighter_darker = lighter_darker_default;
     if (m_polyDiffMode){
       if ( vecIter < 2){
         // in polydiff mode plot points of the two polygons the same way so that
