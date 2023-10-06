@@ -1365,13 +1365,19 @@ bool dPoly::readPoly(std::string filename,
 
     bool isLastLine = ( fh.peek() == EOF );
 
-    // Convert to lowercase
-    transform(line.begin(), line.end(), line.begin(), ::tolower);
 
     if (line[0] == ' ') {
       // remove trailing space
       line.erase(0, line.find_first_not_of(' '));
     }
+
+    // Convert to lowercase
+    int num_chars = std::min((int)line.size(), 5);
+    for (int kk = 0; kk < num_chars; kk++){
+      // Only convert "NEXT", "COLOR", or "ANNO" to lower case, other annotations/labels should stay as is
+      line[kk] = tolower(line[kk]);
+    }
+
     char * linePtr = (char*)line.c_str(); // To do: Avoid this casting hack.
 
     // Replace comma with space, to be able to use comma as separator
