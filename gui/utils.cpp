@@ -50,9 +50,9 @@ void utils::printUsage(std::string progName){
   cout <<"     -gridSize 10 "<<endl;
   cout <<"     -gridWidth 1 "<<endl;
   cout <<"     -gridColor green "<<endl;
-  cout <<"     -panelRatio 0.2  (defines the ratio of the menu size to the display size)"<<endl<<endl;
+  cout <<"     -panelRatio 0.2  (defines the ratio of the menu size to the display size)"<<endl;
 #ifdef POLYVIEW_USE_OPENMP
-  cout <<"     -nt  | -numThreads    number of threads to use for openmp loops"<<endl;
+  cout <<"     -nt  | -numThreads    number of threads to use for openmp loops"<<endl<<endl;
 #endif
 
   cout <<"file_options:"<<endl;
