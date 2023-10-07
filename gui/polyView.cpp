@@ -815,11 +815,8 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
       if (isPolyZeroDim(pa)) {
         // Treat the case of polygons which are made up of just one point
-
-        int len = (round)(lineWidth);
-        len = std::max(len, 1);
         paint->setBrush(color);
-        paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
+        paint->drawRect(x0 - 1, y0 - 1, 2, 2);
 
       }else {
 
