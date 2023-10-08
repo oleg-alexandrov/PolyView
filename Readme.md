@@ -153,7 +153,7 @@ Grayscale images can be displayed with a built in color map (similar to matlap j
     <img src="images/colormap.jpeg"> 
 </p>
 
-## Scattered plots
+## Scatter plots
 Polyview can plot scattered data with a builtin colormap and a user-defined color scale. This mode is enabled by the command line option `-sa` or `-scatterAnno`
 Such data should be provided in annotation format, such as: "anno x1 y1 value1".  
 
