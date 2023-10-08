@@ -84,7 +84,7 @@ void utils::printUsage(std::string progName){
   cout <<"     -cs  | -colorScale min_val max_val (fixed color scale for scattered plot)"<<endl;
 
   cout <<endl<<"   image options:"<<endl;
-  cout <<"     -rgb |                              (Display grayscale image as colored with built in colored map)"<<endl;
+  cout <<"     -cm  | -colorMap                    (Display grayscale image with built in colored map)"<<endl;
   cout <<"     -cs  | -colorScale  min_val max_val (color scale for the grayscale image, default 0->black 1->white )"<<endl;
 
   cout<<endl;
@@ -339,8 +339,8 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if (strcasecmp(currArg, "-rgb") == 0){
-      opt.gray2rgb = !opt.gray2rgb;
+    if (strcasecmp(currArg, "-cm") == 0 || strcasecmp(currArg, "-colorMap") == 0){
+      opt.useColorMap = !opt.useColorMap;
       continue;
     }
 

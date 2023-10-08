@@ -530,7 +530,7 @@ void polyView::displayData(QPainter *paint) {
 
     // Plot the image component
     if (m_polyVec[vecIter].img != NULL){
-      polyView::plotImage(paint, m_polyVec[vecIter], m_polyOptionsVec[vecIter].gray2rgb,
+      polyView::plotImage(paint, m_polyVec[vecIter], m_polyOptionsVec[vecIter].useColorMap,
                           m_polyOptionsVec[vecIter].colorScale);
       continue;
     }
@@ -937,7 +937,7 @@ void grayScaleToRgb(QImage& image, const std::vector<double> &colorscale){
 }
 }
 
-void polyView::plotImage(QPainter *paint, utils::dPoly const& poly, bool gray2rgb,
+void polyView::plotImage(QPainter *paint, utils::dPoly const& poly, bool useColorMap,
                          const std::vector<double> &colorScale) {
   if (poly.img == NULL)
     return;
@@ -963,7 +963,7 @@ void polyView::plotImage(QPainter *paint, utils::dPoly const& poly, bool gray2rg
   
 
 
-  if (gray2rgb){
+  if (useColorMap){
     grayScaleToRgb(cropped, colorScale);
   }
 
