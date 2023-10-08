@@ -529,8 +529,11 @@ void polyView::displayData(QPainter *paint) {
     if (m_filesToHide.find(fileName) != m_filesToHide.end()) continue;
 
     // Plot the image component
-    if (m_polyVec[vecIter].img != NULL)
-      polyView::plotImage(paint, m_polyVec[vecIter]);
+    if (m_polyVec[vecIter].img != NULL){
+      polyView::plotImage(paint, m_polyVec[vecIter], m_polyOptionsVec[vecIter].gray2rgb,
+                          m_polyOptionsVec[vecIter].colorScale);
+      continue;
+    }
       
     int lineWidth = m_polyOptionsVec[vecIter].lineWidth;
 
@@ -911,7 +914,31 @@ void polyView::plotAnnotationScattered(const vector<anno> &annotations,
 
 }
 
-void polyView::plotImage(QPainter *paint, utils::dPoly const& poly) {
+namespace{
+void grayScaleToRgb(QImage& image, const std::vector<double> &colorscale){
+
+  double A=0, B = 1;
+  if (colorscale.size() == 2) {
+    A = colorscale[0];
+    B = colorscale[1];
+  }
+
+  for (int jj = 0; jj < image.height(); jj++) {
+    for (int ii = 0; ii < image.width(); ii++) {
+      double gray = qGray(image.pixel(ii, jj));
+      double r, g, b;
+      double t  = gray/255.0;
+      getRGBColor(t, A, B, r, g, b);
+      QColor color;
+      color.setRgbF(r, g, b);
+      image.setPixel(ii, jj, color.rgb());
+    }
+  }
+}
+}
+
+void polyView::plotImage(QPainter *paint, utils::dPoly const& poly, bool gray2rgb,
+                         const std::vector<double> &colorScale) {
   if (poly.img == NULL)
     return;
   
@@ -934,6 +961,12 @@ void polyView::plotImage(QPainter *paint, utils::dPoly const& poly) {
   polyView::imageToScreenRect(imageRect, positioned_img, // inputs
                               screenRect); // output
   
+
+
+  if (gray2rgb){
+    grayScaleToRgb(cropped, colorScale);
+  }
+
   paint->drawImage(screenRect, cropped);
 
   return;
@@ -3308,6 +3341,7 @@ void polyView::openPoly() {
 
   return;
 }
+
 
 bool polyView::readPolyOrImage(// inputs
                                std::string const& filename,

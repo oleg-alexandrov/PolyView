@@ -55,6 +55,7 @@ struct polyOptions{
   bool            readPolyFromDisk;
   double          panelRatio;
   bool            scatter_annotations;
+  bool            gray2rgb;
   std::string     bgColor;
   std::string     fgColor;
   std::string     cmdLineColor;
@@ -79,6 +80,7 @@ struct polyOptions{
     readPolyFromDisk = true;
     panelRatio       = 0.2;
     scatter_annotations = false;
+    gray2rgb        = false;
     bgColor          = "black";
     fgColor          = "white";
     cmdLineColor     = "green";

@@ -253,7 +253,8 @@ private:
                                const std::vector<double> &colorScale,
                                QPainter *paint);
 
-  void plotImage(QPainter *paint, utils::dPoly const& poly);
+  void plotImage(QPainter *paint, utils::dPoly const& poly,
+                 bool gray2rgb, const std::vector<double> &colorScale);
 
   void resetTransformSettings();
   void pixelToWorldCoords(int px, int py,

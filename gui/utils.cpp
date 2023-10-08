@@ -40,7 +40,7 @@ using namespace std;
 
 void utils::printUsage(std::string progName){
   cout <<endl;
-  cout << "USAGE: " << progName
+  cout << "USAGE: " <<endl<< progName
       <<" [app_options] [file_options] file1.xg [file_options] file2.xg"<<  endl<<endl;
 
   cout <<"app_options:"<<endl;
@@ -50,10 +50,11 @@ void utils::printUsage(std::string progName){
   cout <<"     -gridSize 10 "<<endl;
   cout <<"     -gridWidth 1 "<<endl;
   cout <<"     -gridColor green "<<endl;
-  cout <<"     -panelRatio 0.2  (defines the ratio of the menu size to the display size)"<<endl;
+  cout <<"     -panelRatio 0.2  ([0-1] defines the ratio of the menu size to the display size)"<<endl;
 #ifdef POLYVIEW_USE_OPENMP
-  cout <<"     -nt  | -numThreads    number of threads to use for openmp loops"<<endl<<endl;
+  cout <<"     -nt  | -numThreads    number of threads to use for openmp loops"<<endl;
 #endif
+  cout <<endl;
 
   cout <<"file_options:"<<endl;
   cout <<"     -c   | -color            yellow "<<endl;
@@ -70,9 +71,9 @@ void utils::printUsage(std::string progName){
   cout <<"     -cw  | -clockwisePoly    (if polygon orientation is clockwise)"<<endl;
 
 
-  cout <<endl<<"   points options:"<<endl;
+  cout <<endl<<"   point options:"<<endl;
   cout <<"     -p   | -points     (read as point cloud, not polygons)" <<endl;
-  cout <<"     -sh  | -shape   o  ([x/+/o/s/t] defines shape of the points in point mode display"<<endl;
+  cout <<"     -sh  | -shape   o  ([x, +, o, s, t] defines shape of the points in point mode display"<<endl;
   cout <<"     -si  | -size    3  ([1-8]  defines size of the points in point mode display"<<endl;
 
 
@@ -82,6 +83,9 @@ void utils::printUsage(std::string progName){
   cout <<"     -sa  | -scatterAnno                (plot annotation values as scattered points)"<<endl;
   cout <<"     -cs  | -colorScale min_val max_val (fixed color scale for scattered plot)"<<endl;
 
+  cout <<endl<<"   image options:"<<endl;
+  cout <<"     -rgb |                              (Display grayscale image as colored with built in colored map)"<<endl;
+  cout <<"     -cs  | -colorScale  min_val max_val (color scale for the grayscale image, default 0->black 1->white )"<<endl;
 
   cout<<endl;
 
@@ -335,6 +339,11 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
+    if (strcasecmp(currArg, "-rgb") == 0){
+      opt.gray2rgb = !opt.gray2rgb;
+      continue;
+    }
+
     if ((strcasecmp(currArg, "-cs") == 0 ||
         strcasecmp(currArg, "-colorScale") == 0) && argIter < argc - 2){
 
@@ -454,6 +463,7 @@ std::string utils::replaceAll(std::string result,
   }
   return result;
 }
+
 
 bool utils::readImagePosition(std::string const& filename, std::vector<double> & pos) {
 
