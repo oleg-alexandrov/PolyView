@@ -113,7 +113,7 @@ void edgeTree::findClosestEdgeToPoint(// inputs
                                       // The location on the closest
                                       // edge where closestDist is achieved
                                       double & closestX, double & closestY
-                                      ){
+                                      ) const{
 
   // Fast searching for the closest edge to a given point. We assume
   // that the tree of edges is formed by now. The idea is the
@@ -153,7 +153,7 @@ void edgeTree::findClosestEdgeToPointInternal(// inputs
                                               // outputs
                                               utils::seg & closestEdge,
                                               double     & closestDist
-                                              ){
+                                              ) const{
 
   // Find the distance from the input point to the edge at the root
   // node. Decide if first to visit the left or right subtree from the

@@ -145,9 +145,31 @@ polygons. For example, if desired to place an image so that its
 lower-left corner is at coordinates (10, 20), and each pixel is 3
 units long and wide in polygon coordinates, then this file must have
 the entries: 10 20 3 3.
-
 This allows each image to be placed and scaled independently.
 
+## Grayscale images
+Grayscale images can be displayed with a built in color map (similar to matlap jet) with the command line option `-cm`. By default black is mapped to 0 and white is mapped to 1. The user can defined a color scale with the option `-cs 0 0.5`.
+<p align="center" width="100%">
+    <img src="images/colormap.jpeg"> 
+</p>
+
+## Scattered Plots
+Polyview can plot scattered data with a built in colormap and a user defined color scale. This mode is enabled by the command line option `-sa` or `-scatterAnno`
+The data should be provided in annotation format, each line of text file should contain "anno x1 y1 value1".  
+
+   Example: data.txt  
+   ```
+   anno 10.5 10.5 0.2  
+   anno 10.5 20.4 0.5  
+   anno 20.2 20.4 0.8  
+   ```
+By default a dynamic color scale is used. The color scale is adjusted to the maximum and minimum value inside the current view. User can set a fixed color scale by the command line option `-cs 0 0.5' before the file name. 
+
+### polyview -sa -ha -cs 0 1 data.txt
+<p align="center" width="40%">
+    <img src="images/scattered_plot.jpeg"> 
+</p>   
+   
 ## Functionality
 
 ### Mouse buttons
@@ -263,26 +285,46 @@ on the command line. Example:
 
     polyview poly.xg image.png 
 
-Various command line options can modify how the polygons are displayed.
+Various command line options can modify how the polygons, points, and images are displayed.
 
-* -h | -help	Show the available command line options
-* -geo[metry] `width`x`height`	The window size in pixels (for example, 800x800)
-* -bg | -backgroundColor `color`	Color of the background (the default is black)
-* -c | -color `color`	All polygons after this option will show up in the given color (the default is to use the colors specified in the polygon files). 
-* -nc | -noColorOverride All polygons after this option will show up in the colors specified in the file. 
-* -fs | -fontSize `integer`	The text font size in pixels
-* -lw | -lineWidth `integer`	All polygons after this option will show up with given line width
-* -p | -points	All polygons after this option will show up as vertices rather than edges (a subsequent -p option undoes this behavior)
-* -cp | -closedPoly	All polygons after this option will show up as closed (the last vertex is connected to the first one)
-* -ncp | -nonClosedPoly	Interpret the polygons after this option as polygonal lines (the last vertex is not connected to the first one)
-* -f | -filledPoly	All polygons after this option will show up as filled
-* -nf | -nonFilledPoly	All polygons after this option will show up as not filled
-* -cw | -clockwisePoly	Polygons oriented clockwise are assumed to have positive area
-* -grid on | off	Turn on/off the grid display
-* -gridSize `integer`	Grid size
-* -gridWidth `integer`	Grid width in pixels
-* -gridColor `color`	Grid color
-* -panelRatio `double`  Ratio of width of the left panel showing the file names to window width. If set to zero, it will hide that panel (default = 0.2).
+* application options:
+  *  `-h | -help`	Show the available command line options
+  *  `-geo | -geometry` widthXheight  The window size in pixels (for example, 800x800)
+  *  `-bg  | -backgroundColor` color    Color of the background (the default is black)
+  *  `-grid`      (on or off)     Turn on/off the grid display
+  *  `-gridSize`  integer  Grid size in units of geometry
+  *  `-gridWidth` integer  Grid width in pixels
+  *  `-gridColor`            Grid color
+  *  `-panelRatio`  double  Ratio of width of the left panel showing the file names to window width. If set to zero, it will hide that panel (default = 0.2).
+
+
+* file options:
+  *  `-c   | -color`  color       All polygons after this option will show up in the given color (the default is to use the colors specified in the polygon files). 
+  *  `-nc  | -noColorOverride`      All polygons after this option will show up in the colors specified in the file. 
+  *  `-lw  | -lineWidth`  integer All polygons after this option will show up with given line width (default is 1)
+
+*  polygon options:
+     *  `-cp  | -closedPoly` 	 All polygons after this option will show up as closed (the last vertex is connected to the first one)
+     *  `-ncp | -nonClosedPoly`  Interpret the polygons after this option as polygonal lines (the last vertex is not connected to the first one)
+     *  `-f   | -filledPoly`     All polygons after this option will show up as filled
+     *  `-nf  | -nonFilledPoly`  All polygons after this option will show up as not filled
+     *  `-cw  | -clockwisePoly`  Polygons oriented clockwise are assumed to have positive area
+
+ *  point options:
+     *  `-p   | -points`     All polygons after this option will show up as vertices rather than edges (a subsequent -p option undoes this behavior)
+     *  `-sh  | -shape`   o  ([x, +, o, s, t] defines shape of the points in point mode display)
+     *  `-si  | -size`    3  ([1-8]  defines size of the points in point mode display)
+
+ *  annotation options:
+     *  `-fs  | -fontSize`     integer	   The text font size in pixels 
+     *  `-ha  | -hideAnno`                   (do not show annotations in file) 
+     *  `-sa  | -scatterAnno`                (plot annotation values as scattered points)
+     *  `-cs  | -colorScale` min_val max_val (fixed color scale for scattered plot)
+
+ *  image options:
+     *  `-cm  | -colorMap`                    (Display grayscale image with built in colored map)
+     *  `-cs  | -colorScale`  min_val max_val (color scale for the grayscale image, default 0->black 1->white )
+
 
 # Compiling
 
@@ -324,6 +366,17 @@ Then run:
     make install INSTALL_ROOT=$(pwd)
 
 This should create the ``polyview`` program in the ``bin`` subdirectory.
+
+## Compiling with OpenMP
+Polyview can be compiled with openMP for run time performance, on supported platforms.
+Provide this option to qmake build:
+```
+qmake CONFIG+=polyview_use_openmp
+```
+For cmake add the following to CMakeLists.txt
+```
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -DPOLYVIEW_USE_OPENMP")
+```
     
 ## Compiling with conda build
 

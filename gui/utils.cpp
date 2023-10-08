@@ -28,6 +28,9 @@
 #include <algorithm>
 #include <gui/utils.h>
 
+#ifdef POLYVIEW_USE_OPENMP
+#include <omp.h>
+#endif
 // For Visual studio
 #ifdef _MSC_VER 
 #define strcasecmp _stricmp
@@ -37,32 +40,52 @@ using namespace std;
 
 void utils::printUsage(std::string progName){
   cout <<endl;
-  cout << "USAGE: " << progName
+  cout << "USAGE: " <<endl<< progName
       <<" [app_options] [file_options] file1.xg [file_options] file2.xg"<<  endl<<endl;
 
   cout <<"app_options:"<<endl;
-  cout <<"     -geo[metry] 1200x800 " <<endl;
-  cout <<"     -bg | -backgroundColor black "<<endl;
+  cout <<"     -geo | -geometry 1200x800 " <<endl;
+  cout <<"     -bg  | -backgroundColor black "<<endl;
   cout <<"     -grid (on or off) "<<endl;
   cout <<"     -gridSize 10 "<<endl;
   cout <<"     -gridWidth 1 "<<endl;
   cout <<"     -gridColor green "<<endl;
-  cout <<"     -panelRatio 0.2"<<endl<<endl;
+  cout <<"     -panelRatio 0.2  ([0-1] defines the ratio of the menu size to the display size)"<<endl;
+#ifdef POLYVIEW_USE_OPENMP
+  cout <<"     -nt  | -numThreads    number of threads to use for openmp loops"<<endl;
+#endif
+  cout <<endl;
 
   cout <<"file_options:"<<endl;
   cout <<"     -c   | -color            yellow "<<endl;
   cout <<"     -nc  | -noColorOverride     (use color in file) "<<endl;
-  cout <<"     -fs  | -fontSize         10 (for annotations)"<<endl;
-  cout <<"     -lw  | -lineWidth        2  (polygon drawing line thickness)"<<endl;
-  cout <<"     -p   | -points              (read as point cloud, not polygons)" <<endl;
+  cout <<"     -lw  | -lineWidth        1  (thickness of the drawn lines)"<<endl;
+
+
+  cout <<endl<<"   polygon options:"<<endl;
+
   cout <<"     -cp  | -closedPoly " <<endl;
   cout <<"     -ncp | -nonClosedPoly "<<endl;
   cout <<"     -f   | -filledPoly "<<endl;
-  cout <<"     -ha  | -hideAnno            (do not show annotations in file) "<<endl;
-  cout <<"     -sa  | -scatterAnno         (plot annotation values as scattered points)"<<endl;
   cout <<"     -nf  | -nonFilledPoly "<<endl;
-  cout <<"     -cw  | -clockwisePoly        (if polygon orientation is clockwise)"<<endl;
-  cout <<"     -s   | -shape          (x/+/o/s/t) define shape of points in point mode display"<<endl;
+  cout <<"     -cw  | -clockwisePoly    (if polygon orientation is clockwise)"<<endl;
+
+
+  cout <<endl<<"   point options:"<<endl;
+  cout <<"     -p   | -points     (read as point cloud, not polygons)" <<endl;
+  cout <<"     -sh  | -shape   o  ([x, +, o, s, t] defines shape of the points in point mode display"<<endl;
+  cout <<"     -si  | -size    3  ([1-8]  defines size of the points in point mode display"<<endl;
+
+
+  cout <<endl<<"   annotation options:"<<endl;
+  cout <<"     -fs  | -fontSize         10        (for annotations)"<<endl;
+  cout <<"     -ha  | -hideAnno                   (do not show annotations in file) "<<endl;
+  cout <<"     -sa  | -scatterAnno                (plot annotation values as scattered points)"<<endl;
+  cout <<"     -cs  | -colorScale min_val max_val (fixed color scale for scattered plot)"<<endl;
+
+  cout <<endl<<"   image options:"<<endl;
+  cout <<"     -cm  | -colorMap                    (Display grayscale image with built in colored map)"<<endl;
+  cout <<"     -cs  | -colorScale  min_val max_val (color scale for the grayscale image, default 0->black 1->white )"<<endl;
 
   cout<<endl;
 
@@ -261,7 +284,7 @@ void utils::parseCmdOptions(//inputs
       continue;
     }
 
-    if ((strcasecmp(currArg, "-s"    ) == 0 ||
+    if ((strcasecmp(currArg, "-sh"    ) == 0 ||
          strcasecmp(currArg, "-shape") == 0 )
         && argIter < argc - 1){
        char shape = tolower(argv[argIter + 1][0]);
@@ -279,6 +302,14 @@ void utils::parseCmdOptions(//inputs
          cout <<"ERROR un-supported shape specified, using triangles"<<endl;
          opt.pointShape = 5;
        }
+      argIter++;
+      continue;
+    }
+
+    if ((strcasecmp(currArg, "-si"    ) == 0 ||
+        strcasecmp(currArg, "-size") == 0 )
+        && argIter < argc - 1){
+      opt.pointSize = (int)round(atof(argv[argIter + 1]));
       argIter++;
       continue;
     }
@@ -307,6 +338,40 @@ void utils::parseCmdOptions(//inputs
       opt.scatter_annotations = !opt.scatter_annotations;
       continue;
     }
+
+    if (strcasecmp(currArg, "-cm") == 0 || strcasecmp(currArg, "-colorMap") == 0){
+      opt.useColorMap = !opt.useColorMap;
+      continue;
+    }
+
+    if ((strcasecmp(currArg, "-cs") == 0 ||
+        strcasecmp(currArg, "-colorScale") == 0) && argIter < argc - 2){
+
+      opt.colorScale.resize(2);
+      argIter++;
+      opt.colorScale[0] = atof(argv[argIter]);
+      argIter++;
+      opt.colorScale[1] = atof(argv[argIter]);
+      if (opt.colorScale[0] >= opt.colorScale[1]){
+        cout <<"ERROR: min_val in color scale must be less than max_val"<<endl;
+        opt.colorScale.clear();
+      }
+
+      continue;
+    }
+
+#ifdef POLYVIEW_USE_OPENMP
+
+    if ((strcasecmp(currArg, "-nt") == 0 || strcasecmp(currArg, "-numThreads") == 0) &&
+            argIter < argc - 1) {
+         int nt = atoi(argv[argIter + 1]);
+         if (nt > 0) {
+           omp_set_num_threads(nt);
+         }
+         argIter++;
+         continue;
+       }
+#endif
 
     // Other command line options are ignored
     if (currArg[0] == '-') continue;
@@ -398,6 +463,7 @@ std::string utils::replaceAll(std::string result,
   }
   return result;
 }
+
 
 bool utils::readImagePosition(std::string const& filename, std::vector<double> & pos) {
 

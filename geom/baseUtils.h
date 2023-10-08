@@ -27,7 +27,7 @@
 #include <sstream>
 
 namespace utils{
-  
+
   template<class T>
   const T * vecPtr(const std::vector<T>& X){
     if (X.size() == 0) return NULL;

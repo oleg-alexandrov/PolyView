@@ -47,6 +47,7 @@ struct polyOptions{
   bool            useCmdLineColor;
   int             fontSize;
   int             pointShape;
+  int             pointSize;
   int             lineWidth;
   bool            isGridOn;
   double          gridSize;
@@ -54,11 +55,13 @@ struct polyOptions{
   bool            readPolyFromDisk;
   double          panelRatio;
   bool            scatter_annotations;
+  bool            useColorMap;
   std::string     bgColor;
   std::string     fgColor;
   std::string     cmdLineColor;
   std::string     gridColor;
   std::string     polyFileName;
+  std::vector<double> colorScale;
 
   polyOptions(){
     plotAsPoints     = false;
@@ -68,6 +71,7 @@ struct polyOptions{
     isPolyClosed     = readClosedPolyInfoFromFile;
     fontSize         = 10;
     pointShape       = -1;
+    pointSize        = 0;
     lineWidth        = 1;
     useCmdLineColor  = false;
     isGridOn         = false;
@@ -76,6 +80,7 @@ struct polyOptions{
     readPolyFromDisk = true;
     panelRatio       = 0.2;
     scatter_annotations = false;
+    useColorMap        = false;
     bgColor          = "black";
     fgColor          = "white";
     cmdLineColor     = "green";

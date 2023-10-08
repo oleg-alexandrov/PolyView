@@ -87,10 +87,14 @@ inline bool botLessThan (Box P, Box Q){
 
 template <typename Box>
 inline bool lexLessThan(Box P, Box Q){
-  if (P.xl < Q.xl) return true; if (P.xl > Q.xl) return false;
-  if (P.yl < Q.yl) return true; if (P.yl > Q.yl) return false;
-  if (P.xh < Q.xh) return true; if (P.xh > Q.xh) return false;
-  if (P.yh < Q.yh) return true; if (P.yh > Q.yh) return false;
+  if (P.xl < Q.xl) return true;
+  if (P.xl > Q.xl) return false;
+  if (P.yl < Q.yl) return true;
+  if (P.yl > Q.yl) return false;
+  if (P.xh < Q.xh) return true;
+  if (P.xh > Q.xh) return false;
+  if (P.yh < Q.yh) return true;
+  if (P.yh > Q.yh) return false;
   return false;
 }
 
@@ -132,7 +136,7 @@ public:
   std::vector<int> getIndicesInRegion(const utils::dRect &box) const;
 
 
-  int getTreeRoot(){
+  int getTreeRoot() const{
     return m_root;
   }
   void clear();
@@ -361,7 +365,7 @@ public:
                               // The location on the closest
                               // edge where closestDist is achieved
                               double & closestX, double & closestY
-                              );
+                              ) const;
 
 private:
 
@@ -383,7 +387,7 @@ private:
                         const utils::dRectWithId & R,
                         // outputs
                         double & bx, double & by, double & ex, double & ey
-                        ){
+                        ) const{
     // Recover the edge based on the bounding box and id. The inverse of edgeToBox.
     bx = R.xl; by = R.yl; ex = R.xh; ey = R.yh;
     int id = R.id;
@@ -396,7 +400,7 @@ private:
                                       int root,
                                       // outputs
                                       utils::seg & closestEdge,
-                                      double     & closestDist);
+                                      double     & closestDist) const;
   // Internal data structures
   boxTree<utils::dRectWithId>      m_boxTree;
   std::vector<utils::dRectWithId>  m_allEdges;

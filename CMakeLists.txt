@@ -21,7 +21,11 @@ include_directories(${Qt5Widgets_INCLUDES})
 add_definitions(${Qt5Widgets_DEFINITIONS})
 # Executables fail to build with Qt 5 in the default configuration
 # without -fPIE. We add that here.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS})
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fPIC " ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS})
+
+# Compile with OPENMP
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp -O2 -DPOLYVIEW_USE_OPENMP" ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS})
 
 find_package(OpenGL REQUIRED)
 

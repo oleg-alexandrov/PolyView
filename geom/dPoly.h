@@ -72,6 +72,8 @@ public:
                        const std::string & color, const std::string & layer
                        );
 
+  void getEdges(std::vector<seg> &allEdges) const;
+
   void setRectangle(double xl, double yl, double xh, double yh,
                     bool isPolyClosed,
                     const std::string & color, const std::string & layer
@@ -80,27 +82,33 @@ public:
   bool isXYRect();
 
   void clipPointCloud(const dRect &clip_box,
-                  dPoly & clippedPoly, // output
-                  const std::map<int, int> *selected);
+                      dPoly & clippedPoly, // output
+                      const std::vector<int> *selected);
 
-  void clipPoly(double clip_xll, double clip_yll,
+  void clipPolygons(const dRect &clip_box,
+                    dPoly & clippedPoly, // output
+                    const std::vector<int> *selected);
+
+  void clipAll(double clip_xll, double clip_yll,
                 double clip_xur, double clip_yur,
                 dPoly & clippedPoly, // output
-                const std::map<int, int> *selected = nullptr // optional input, if provided only clip selected polygons
+                const std::vector<int> *selected = nullptr // optional input, if provided only clip selected polygons
   );
 
   void clipAnno(const dRect &clip_box,
                 dPoly & clippedPoly);
 
+  void copyAnno(dPoly & clippedPoly);
+
   void shift(double shift_x, double shift_y);
   void rotate(double angle);
   void scale(double scale);
-  void transformMarkedPolys(std::map<int, int> const& mark, const linTrans & T);
-  void transformMarkedAnnos(std::map<int, int> const& mark, const linTrans & T);
+  void transformMarkedPolys(std::vector<int> const& mark, const linTrans & T);
+  void transformMarkedAnnos(std::vector<int> const& mark, const linTrans & T);
 
-  void transformMarkedPolysAroundPt(std::map<int, int> const& mark,
+  void transformMarkedPolysAroundPt(std::vector<int> const& mark,
                                     const matrix2 & M, dPoint P);
-  void transformMarkedAnnosAroundPt(std::map<int, int> const& mark,
+  void transformMarkedAnnosAroundPt(std::vector<int> const& mark,
                                     const matrix2 & M, dPoint P);
 
   void applyTransform(double a11, double a12, double a21, double a22,
@@ -131,13 +139,13 @@ public:
 
   void set_isPolyClosed(bool isPolyClosed);
 
-  void eraseMarkedPolys(std::map<int, int> const& mark);
-  void eraseMarkedAnnos(std::map<int, int> const& mark);
+  void eraseMarkedPolys(std::vector<int> const& mark);
+  void eraseMarkedAnnos(std::vector<int> const& mark);
 
   void erasePolysIntersectingBox(double xll, double yll, double xur, double yur);
   void eraseAnnosIntersectingBox(double xll, double yll, double xur, double yur);
   void appendAndShiftMarkedPolys(// Inputs
-                                 std::map<int, int> & mark,
+                                 std::vector<int> & mark,
                                  double shift_x, double shift_y
                                  );
   void set_isPointCloud(bool isPointCloud){ m_isPointCloud = isPointCloud; }
@@ -152,19 +160,19 @@ public:
       double xll, double yll,
       double xur, double yur,
       // Outputs
-      std::map<int, int> & mark) const;
+      std::vector<int> & mark) const;
 
   void markPolysIntersectingBox(// Inputs
                                 double xll, double yll,
                                 double xur, double yur,
                                 // Outputs
-                                std::map<int, int> & mark) const;
+                                std::vector<int> & mark) const;
 
   void markAnnosIntersectingBox(// Inputs
                                 double xll, double yll,
                                 double xur, double yur,
                                 // Outputs
-                                std::map<int, int> & mark) const;
+                                std::vector<int> & mark) const;
   
   //void replaceOnePoly(int polyIndex, int numV, const double* x, const double* y);
   // Annotations
@@ -192,6 +200,7 @@ public:
   const dRect& bdBox() const;
   void bdBox(double & xll, double & yll, double & xur, double & yur) const;
   void annoBdBox(double & xll, double & yll, double & xur, double & yur) const;
+  dRect annoBdBox() const;
 
   void bdBoxes(std::vector<double> & xll, std::vector<double> & yll,
                std::vector<double> & xur, std::vector<double> & yur) const;
@@ -237,16 +246,16 @@ public:
   void shiftEdge(int polyIndex, int vertIndex, double shift_x, double shift_y);
   void shiftOnePoly(int polyIndex, double shift_x, double shift_y);
   void shiftOneAnno(int index, double shift_x, double shift_y);
-  void shiftMarkedPolys(std::map<int, int> const & mark, double shift_x, double shift_y);
-  void shiftMarkedAnnos(std::map<int, int> const & amark, double shift_x, double shift_y);
+  void shiftMarkedPolys(std::vector<int> const & mark, double shift_x, double shift_y);
+  void shiftMarkedAnnos(std::vector<int> const & amark, double shift_x, double shift_y);
 
-  void reverseMarkedPolys(std::map<int, int> const & mark);
+  void reverseMarkedPolys(std::vector<int> const & mark);
 
   void extractOnePoly(int polyIndex,       // input
                       dPoly & poly,  // output
 					  int start_index = -1) const; // if start index provided do not re-compute
                       
-  void extractMarkedPolys(std::map<int, int> const& mark, // input
+  void extractMarkedPolys(std::vector<int> const& mark, // input
                           dPoly & polys) const;           // output
   
   // Reverse orientation of all polygons

@@ -30,6 +30,8 @@
 #include <cfloat>
 #include <chrono>
 
+std::string getCurrentDefaultColor();
+
 struct dPoint{
   double x, y;
   dPoint(): x(0), y(0){}
@@ -101,16 +103,31 @@ private:
 
   double signedPolyArea(int numV, const double* xv, const double* yv, bool counter_cw);
 
-  void searchForColor(std::string lineStr,  // input, not a reference on purpose
+  void searchForColor(const std::string &lineStr,  // input, not a reference on purpose
                       std::string & color); // output
 
-  bool searchForAnnotation(std::string lineStr, anno & annotation);
+  bool searchForAnnotation(const std::string &lineStr, anno & annotation);
 
   void expandBoxToGivenRatio(// inputs
                              double aspectRatio,
                              // inputs/outputs
                              double & xll,  double & yll,
                              double & widx, double & widy);
+
+  struct seg{
+      double begx, begy, endx, endy;
+      seg(double begx_in = 0.0, double begy_in = 0.0,
+          double endx_in = 0.0, double endy_in = 0.0):
+        begx(begx_in), begy(begy_in), endx(endx_in), endy(endy_in){}
+    };
+
+
+  struct segDist: public seg{
+    double dist;
+    segDist(double begx_in =0, double begy_in=0, double endx_in=0,
+            double endy_in=0, double dist_in=0):
+      seg(begx_in, begy_in, endx_in, endy_in), dist(dist_in){}
+  };
 
 
   struct dRect{
@@ -127,12 +144,24 @@ private:
     	return (x >= xl && x <= xh && y >= yl && y <= yh);
     }
 
-    bool contains(const dRect &rec){
+    bool contains(const dRect &rec) const{
     	return (xl <= rec.xl && xh >= rec.xh && yl <= rec.yl && yh >= rec.yh);
     }
     bool isValid() const {
       return xl <= xh || yl <= yh;
     }
+    double area() const {
+      return (xh-xl)*(yh-yl);
+    }
+
+    bool operator==(const dRect &rec1) const {
+      return rec1.xh == xh && rec1.xl == xl && rec1.yh == yh && rec1.yl == yl;
+    }
+
+    bool intersects(const dRect &rec) const {
+      return !(xl > rec.xh || xh < rec.xl || yl > rec.yh || yh < rec.yl);
+    }
+    bool intersects(const utils::seg &edge) const;
 
   };
 
@@ -143,21 +172,6 @@ private:
                 double xh_in = 0.0, double yh_in = 0.0,
                 int id_in = 0):
       dRect(xl_in, yl_in, xh_in, yh_in), id(id_in){}
-  };
-
-  struct seg{
-    double begx, begy, endx, endy;
-    seg(double begx_in = 0.0, double begy_in = 0.0,
-        double endx_in = 0.0, double endy_in = 0.0):
-      begx(begx_in), begy(begy_in), endx(endx_in), endy(endy_in){}
-  };
-
-
-  struct segDist: public seg{
-    double dist;
-    segDist(double begx_in =0, double begy_in=0, double endx_in=0,
-            double endy_in=0, double dist_in=0):
-      seg(begx_in, begy_in, endx_in, endy_in), dist(dist_in){}
   };
 
   inline bool segDistGreaterThan(segDist s, segDist t){

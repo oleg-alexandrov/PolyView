@@ -36,6 +36,7 @@
 #include <cfloat>    // defines DBL_MAX
 #include <cmath>
 #include <cstdlib>
+#include <vector>
 #include <iomanip>   // required for use of setw()
 #include <iostream>
 #include <algorithm>
@@ -49,6 +50,10 @@
 
 #include <gui/polyView.h>
 #include <gui/utils.h>
+
+#ifdef POLYVIEW_USE_OPENMP
+#include <omp.h>
+#endif
 
 using namespace std;
 using namespace utils;
@@ -475,7 +480,7 @@ void polyView::displayData(QPainter *paint) {
 
   // This vector is used for sparsing out text on screen
   vector<vector<int>> textOnScreenGrid;
-
+  std::vector<double> colorScale;
   // Build the grid if the user wants to
   if (m_prefs.isGridOn && m_prefs.gridWidth > 0) {
 
@@ -492,7 +497,7 @@ void polyView::displayData(QPainter *paint) {
                    m_viewYll + m_viewWidY,
                    m_prefs.gridSize, m_prefs.gridColor);
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.gridWidth,
-              point_shape, textOnScreenGrid, paint, grid);
+              point_shape, 1, colorScale, textOnScreenGrid, paint, grid);
   }
 
 
@@ -509,7 +514,7 @@ void polyView::displayData(QPainter *paint) {
   initTextOnScreenGrid(textOnScreenGrid);
 
   // Draw un-selected polygons darker
-  int lighter_darker = hasSelectedPolygons() ? 1 : 0;
+  int lighter_darker_default = hasSelectedPolygons() ? 1 : 0;
 
   // Plot the images and polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
@@ -524,8 +529,11 @@ void polyView::displayData(QPainter *paint) {
     if (m_filesToHide.find(fileName) != m_filesToHide.end()) continue;
 
     // Plot the image component
-    if (m_polyVec[vecIter].img != NULL)
-      polyView::plotImage(paint, m_polyVec[vecIter]);
+    if (m_polyVec[vecIter].img != NULL){
+      polyView::plotImage(paint, m_polyVec[vecIter], m_polyOptionsVec[vecIter].useColorMap,
+                          m_polyOptionsVec[vecIter].colorScale);
+      continue;
+    }
       
     int lineWidth = m_polyOptionsVec[vecIter].lineWidth;
 
@@ -550,22 +558,16 @@ void polyView::displayData(QPainter *paint) {
       }
     }
 
-    if (m_polyDiffMode && vi < 2){
-      // in polydiff mode plot points of the two polygons the same way so that
-      // the difference gets highlighted
-      point_shape = 0;
-    }
-
     bool has_selected = !plotFilled && !m_selectedPolyIndices[vecIter].empty();
 
     // Mark un-selected polygons and plot un-selected ones before selected ones
-    std::map<int, int> un_selected;
+    std::vector<int> un_selected;
     if (has_selected){
-    	int Np = m_polyVec[vecIter].get_numPolys();
-    	for (int i = 0; i < Np; i++) {
-    		auto it = m_selectedPolyIndices[vecIter].find(i);
-    		if (it == m_selectedPolyIndices[vecIter].end()) un_selected[i] = 1;
-    	}
+      int Np = m_polyVec[vecIter].get_numPolys();
+      un_selected.assign(Np, 0);
+      for (int i = 0; i < Np; i++) {
+        if (!(m_selectedPolyIndices[vecIter][i])) un_selected[i] = 1;
+      }
     }
 
     bool showAnno = true;
@@ -574,16 +576,30 @@ void polyView::displayData(QPainter *paint) {
       showAnno = false;
     }
 
+    int point_size = m_polyOptionsVec[vecIter].pointSize;
+    int lighter_darker = lighter_darker_default;
+    if (m_polyDiffMode){
+      if ( vecIter < 2){
+        // in polydiff mode plot points of the two polygons the same way so that
+        // the difference gets highlighted
+        point_shape = 0;
+        point_size  = 3;
+      } else {
+        lighter_darker = -1;//draw diff with lighter colors
+      }
+    }
+
     // Plot all or un-selected ones if there are selected ones
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
-              point_shape, textOnScreenGrid, paint, m_polyVec[vecIter],
+              point_shape, point_size, m_polyOptionsVec[vecIter].colorScale, textOnScreenGrid, paint, m_polyVec[vecIter],
               has_selected ? &un_selected : nullptr,
                   lighter_darker // plot un-selected polygons darker
     );
 
     if (has_selected) {
       plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
-                point_shape, textOnScreenGrid, paint, m_polyVec[vecIter], &m_selectedPolyIndices[vecIter],
+                point_shape, point_size, m_polyOptionsVec[vecIter].colorScale, textOnScreenGrid, paint,
+                m_polyVec[vecIter], &m_selectedPolyIndices[vecIter],
                 -lighter_darker // plot selected polygons lighter
       );
     }
@@ -598,7 +614,7 @@ void polyView::displayData(QPainter *paint) {
     m_highlights[h].set_color(m_prefs.fgColor.c_str());
     bool showAnno = false;
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth,
-              point_shape, textOnScreenGrid, paint, m_highlights[h]);
+              point_shape, 1, colorScale, textOnScreenGrid, paint, m_highlights[h]);
   }
 
   // This draws the polygon being created if in that mode
@@ -631,11 +647,13 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          bool plotFilled, bool showAnno, bool scatter_annotation,
                          double lineWidth,
                          int point_shape, // 0 is a good choice here
+                         int point_size, // 1 is a good choice here
+                         const std::vector<double> &colorScale, // vector of size 2 contains min max value for color scale
                          // An empty grid is a good choice if not text is present
                          std::vector< std::vector<int> > & textOnScreenGrid,
                          QPainter *paint,
                          dPoly &currPoly,
-                         const std::map<int, int> *selected,
+                         const std::vector<int> *selected,
                          int lighter_darker) {
 
   //utils::Timer my_clock("polyView::plotDPoly");
@@ -649,12 +667,12 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     currPoly.compPolyIndexAnno();
 
   } else if (m_showVertOrPolyIndexAnno == 3) {
-      currPoly.compVertFullIndexAnno();
+    currPoly.compVertFullIndexAnno();
 
-    } else if (m_showLayerAnno) {
+  } else if (m_showLayerAnno) {
     currPoly.compLayerAnno();
   }
-  
+
 
   // Clip the polygon a bit beyond the viewing window, as to not see
   // the edges where the cut took place. It is a bit tricky to
@@ -664,14 +682,14 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   double extraX = extra + tol*max(abs(m_viewXll), abs(m_viewXll + m_viewWidX));
   double extraY = extra + tol*max(abs(m_viewYll), abs(m_viewYll + m_viewWidY));
   dPoly clippedPoly;
-  currPoly.clipPoly(//inputs
-                    m_viewXll - extraX,
-                    m_viewYll - extraY,
-                    m_viewXll + m_viewWidX + extraX,
-                    m_viewYll + m_viewWidY + extraY,
-                    // output
-                    clippedPoly,
-					selected);
+  currPoly.clipAll(//inputs
+      m_viewXll - extraX,
+      m_viewYll - extraY,
+      m_viewXll + m_viewWidX + extraX,
+      m_viewYll + m_viewWidY + extraY,
+      // output
+      clippedPoly,
+      selected);
 
   //utils::Timer my_clock2("polyView::Paint");
   const double * xv               = clippedPoly.get_xv();
@@ -686,47 +704,57 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
   if (showAnno) {
     if (m_showVertOrPolyIndexAnno == 1 || m_showVertOrPolyIndexAnno == 3) {
-        annotations = clippedPoly.get_vertIndexAnno();
+      annotations = clippedPoly.get_vertIndexAnno();
     } else if (m_showVertOrPolyIndexAnno == 2) {
-        annotations = clippedPoly.get_polyIndexAnno();
+      annotations = clippedPoly.get_polyIndexAnno();
     }else if (m_showLayerAnno) {
-        annotations = clippedPoly.get_layerAnno();
+      annotations = clippedPoly.get_layerAnno();
     }else if (m_showAnnotations) {
-        annotations = clippedPoly.get_annotations();
+      annotations = clippedPoly.get_annotations();
     }
   }
   // When polys are filled, plot largest polys first
-   if (plotFilled)
-	   clippedPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
-                                                     m_viewXll + m_viewWidX,
-                                                     m_viewYll + m_viewWidY,
-                                                     m_counter_cc);
+  if (plotFilled)
+    clippedPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
+                                                       m_viewXll + m_viewWidX,
+                                                       m_viewYll + m_viewWidY,
+                                                       m_counter_cc);
 
-   // length/size of point shapes
-   int len = (point_shape <= 1) ? 3 : (2*point_shape+2);
-   len = min(len, 8); // limit how big this can get
+  // length/size of point shapes
+  if (point_size == 0){
+    point_size = (point_shape <= 1) ? 4 : (2*point_shape+2);
+    point_size = min(point_size, 8); // limit how big this can get
+  }
+  // This is done for performance
+  // when too many polygons/points are drawn in a large area we don't need
+  // to use larger lineWidth; we cannot tell them apart anyways.
+  // When we zoom in, fewer polygons are in the view and it uses
+  // user setting for lineWidth.
+  // The following settings are experimentally decided
+  if (clippedPoly.get_totalNumVerts() >= 400000){
+    lineWidth = 0.5;
+    point_size = 1;
+  } else if (clippedPoly.get_totalNumVerts() >= 200000){
+    lineWidth = 1.0;
+    point_size = 2;
+  }else if (clippedPoly.get_totalNumVerts() >= 100000){
+    lineWidth = 1.0;
+  }
 
-   // This is done for performance
-   // when too many polygons/points are drawn in a large area we don't need
-   // to use larger lineWidth; we cannot tell them apart anyways.
-   // When we zoom in, fewer polygons are in the view and it uses
-   // user setting for lineWidth.
-   // The following settings are experimentally decided
-   if (clippedPoly.get_totalNumVerts() >= 400000){
-     lineWidth = 0.5;
-     len = 1;
-   } else if (clippedPoly.get_totalNumVerts() >= 200000){
-     lineWidth = 1.0;
-     len = 2;
-   }else if (clippedPoly.get_totalNumVerts() >= 100000){
-     lineWidth = 1.0;
-   }
+  //my_clock.tock("CLIP");
 
-   //my_clock.tock("CLIP");
+  auto set_lighter_darker = [lighter_darker](QColor &color)->void {
+    if (lighter_darker == 1) {
+      color = color.darker(150); // 50% darker
+    } else if (lighter_darker == -1){
+      color = color.lighter(130); // 30% lighter
+    }
+  };
 
-   QVector<QLine> lines;
+  QVector<QLine> lines;
 
-   QColor prev_color = (numPolys > 0) ? QColor(colors[0].c_str()) : QColor("") ;
+  QColor prev_color = (numPolys > 0) ? QColor(colors[0].c_str()) : QColor("") ;
+  set_lighter_darker(prev_color);
 
   int start = 0;
   for (int pIter = 0; pIter < numPolys; pIter++) {
@@ -734,13 +762,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     if (pIter > 0) start += numVerts[pIter - 1];
 
     QColor color = QColor(colors[pIter].c_str());
-
-    if (lighter_darker == 1) {
-        color = color.darker(150); // 50% darker
-    }
-    if (lighter_darker == -1){
-        color = color.lighter(130); // 30% lighter
-    }
+    set_lighter_darker(color);
 
     if (plotPoints && color != prev_color) {
       // new color, draw previous color and clear lines
@@ -771,14 +793,14 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       // Qt's built in points are too small. Instead of drawing a point
       // draw a small shape.
       if (plotPoints) {
-        getOnePointShape(x0, y0, len, point_shape, lines);
+        getOnePointShape(x0, y0, point_size, point_shape, lines);
       }
 
     }
     if (isPolyClosed[pIter]){
-    	worldToPixelCoords(xv[start], yv[start], // inputs
-    			x0, y0);                              // outputs
-    	pa[pSize] = QPoint(x0, y0);
+      worldToPixelCoords(xv[start], yv[start], // inputs
+                         x0, y0);                              // outputs
+      pa[pSize] = QPoint(x0, y0);
     }
 
     if (pa.size() <= 0) continue;
@@ -796,17 +818,15 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
       if (isPolyZeroDim(pa)) {
         // Treat the case of polygons which are made up of just one point
-
-        len = lineWidth;
         paint->setBrush(color);
-        paint->drawRect(x0 - len, y0 - len, 2*len, 2*len);
+        paint->drawRect(x0 - 1, y0 - 1, 2, 2);
 
       }else {
 
         if (plotFilled) {
           paint->drawPolygon(pa);
         }else{
-        	paint->drawPolyline(pa); // don't join the last vertex to the first
+          paint->drawPolyline(pa); // don't join the last vertex to the first
         }
 
       }
@@ -815,11 +835,11 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
   if (plotPoints) { // draw remaining points of the last color (if any)
     drawPointShapes(lines, prev_color, point_shape, lineWidth, paint);
-   }
+  }
 
   // Plot the annotations
   if (scatter_annotation){
-    plotAnnotationScattered(clippedPoly.get_annotations(), paint);
+    plotAnnotationScattered(clippedPoly.get_annotations(), colorScale, paint);
   }
 
   int numAnno = annotations.size();
@@ -843,9 +863,11 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 }
 
 void polyView::plotAnnotationScattered(const vector<anno> &annotations,
+                                       const std::vector<double> &colorScale,// min max values for color scale
                                        QPainter *paint){
 
   // Plot annotations as filled colorful circles
+  const QBrush &orig_brush = paint->brush();
 
   int numAnno = annotations.size();
   std::vector<double> vals(numAnno, FLT_MAX);
@@ -868,6 +890,10 @@ void polyView::plotAnnotationScattered(const vector<anno> &annotations,
     cout <<"WARN: Some annotation values are not numbers, cannot plot them scattered"<<endl;
   }
 
+  if (colorScale.size() == 2){
+    minval = colorScale[0];
+    maxval = colorScale[1];
+  }
   for (int aIter = 0; aIter < numAnno; aIter++) {
     if (vals[aIter] == FLT_MAX) continue;
     const anno & A = annotations[aIter];
@@ -884,9 +910,38 @@ void polyView::plotAnnotationScattered(const vector<anno> &annotations,
     paint->drawEllipse(x0 - 4, y0 - 4, 8, 8);
 
   }
+  paint->setBrush(orig_brush);// reset brush
+
 }
 
-void polyView::plotImage(QPainter *paint, utils::dPoly const& poly) {
+namespace{
+void grayScaleToRgb(QImage& image, const std::vector<double> &colorscale){
+
+  double A=0, B = 1;
+  if (colorscale.size() == 2) {
+    A = colorscale[0];
+    B = colorscale[1];
+  }
+  if (image.isGrayscale()){
+    image = image.convertToFormat(QImage::Format_RGB32);
+  }
+
+  for (int jj = 0; jj < image.height(); jj++) {
+    for (int ii = 0; ii < image.width(); ii++) {
+      double gray = qGray(image.pixel(ii, jj));
+      double r, g, b;
+      double t  = gray/255.0;
+      getRGBColor(t, A, B, r, g, b);
+      QColor color;
+      color.setRgbF(r, g, b);
+      image.setPixel(ii, jj, color.rgb());
+    }
+  }
+}
+}
+
+void polyView::plotImage(QPainter *paint, utils::dPoly const& poly, bool useColorMap,
+                         const std::vector<double> &colorScale) {
   if (poly.img == NULL)
     return;
   
@@ -909,6 +964,12 @@ void polyView::plotImage(QPainter *paint, utils::dPoly const& poly) {
   polyView::imageToScreenRect(imageRect, positioned_img, // inputs
                               screenRect); // output
   
+
+
+  if (useColorMap){
+    grayScaleToRgb(cropped, colorScale);
+  }
+
   paint->drawImage(screenRect, cropped);
 
   return;
@@ -1267,6 +1328,7 @@ void polyView::copyPoly() {
   if (polyVecIndex < 0 || polyIndexInCurrPoly < 0) return;
 
   m_selectedPolyIndices.clear();
+  m_selectedPolyIndices[polyVecIndex].assign(m_polyVec[polyVecIndex].get_numPolys(), 0);
   m_selectedPolyIndices[polyVecIndex][polyIndexInCurrPoly] = 1;
 
   extractMarkedPolys(m_polyVec, m_selectedPolyIndices,  // Inputs
@@ -1647,7 +1709,7 @@ void polyView::drawPolyBeingPlotted(const std::vector<double> & polyX,
   // Draw the current polygon being plotted
   paint->setPen(QPen(QColor((m_prefs.fgColor).c_str()), m_prefs.lineWidth));
   paint->setBrush(Qt::NoBrush);
-  drawPolyLine(polyX, polyY, paint);
+  drawPolyLine(polyX, polyY, m_prefs.lineWidth, paint);
 
   // Draw a small rectangle at the start of the polygon to make it easier
   // to tell where to close the polygon.
@@ -2107,6 +2169,7 @@ void polyView::appendToPolyVec(const dPoly & P) {
 
 void polyView::drawPolyLine(const std::vector<double> & polyX,
                             const std::vector<double> & polyY,
+                            int lineWidth,
                             QPainter * paint) {
 
   dPoly  polyLine;
@@ -2119,10 +2182,11 @@ void polyView::drawPolyLine(const std::vector<double> & polyX,
 
   bool plotPoints = false, plotEdges = true, plotFilled = false;
   int point_shape = 0;
+  std::vector<double> colorScale;
   vector< vector<int> > textOnScreenGrid; textOnScreenGrid.clear();
   bool showAnno = false;
-  plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth,
-            point_shape, textOnScreenGrid, paint, polyLine);
+  plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, lineWidth,
+            point_shape, 1, colorScale, textOnScreenGrid, paint, polyLine);
 
   return;
 }
@@ -2280,14 +2344,21 @@ void polyView::drawPointShapes(const QVector<QLine> &lines,
                                int shape_type, // see polyView::getOnePointShape
                                double lineWidth,
                                QPainter *paint){
+  if (lines.empty()) return;
 
   paint->setPen(QPen(color, lineWidth));
+  paint->setBrush(Qt::NoBrush);
 
   if (shape_type == 2){
     QVector<QRect> rects(lines.size());
-    rects.reserve(lines.size());
-    for (const auto &line : lines) {
-      rects.push_back(QRect(line.p1().x(), line.p1().y(), line.p2().x(), line.p2().y()));
+    rects.resize(lines.size());
+
+#ifdef POLYVIEW_USE_OPENMP
+    #pragma omp parallel for
+#endif
+    for (int i = 0; i < (int)lines.size(); i++) {
+      const auto &line = lines[i];
+      rects[i] = QRect(line.p1().x(), line.p1().y(), line.p2().x(), line.p2().y());
     }
     paint->drawRects(rects);
 
@@ -2319,7 +2390,7 @@ void polyView::getOnePointShape(int x0, int y0,
 
   if (shape_type == 0) {
     // Draw an X
-    int tl = 2*len;
+    int tl = len;
     int xl = x0 - tl;
     int xr = x0 + tl;
     int yl = y0 - tl;
@@ -2330,7 +2401,7 @@ void polyView::getOnePointShape(int x0, int y0,
 
   }else if (shape_type == 1) {
     // Draw an plus
-    int tl = 2*len;
+    int tl = len;
     lines.push_back(QLine(x0-tl, y0, x0+tl, y0));
     lines.push_back(QLine(x0, y0-tl, x0,   y0+tl));
 
@@ -2531,14 +2602,19 @@ void polyView::toggleShowPolyDiff() {
   m_polyVec[2].set_pointCloud(vP, color1, layer1);
   m_polyVec[3].set_pointCloud(vQ, color2, layer2);
 
-  m_polyOptionsVec[2].plotAsPoints = true;
-  m_polyOptionsVec[3].plotAsPoints = true;
+  for (int i = 2; i <= 3; i++){
+    m_polyOptionsVec[i].plotAsPoints = true;
+    m_polyOptionsVec[i].readPolyFromDisk = false;
+    m_polyOptionsVec[i].lineWidth = 2;
+    m_polyOptionsVec[i].pointSize = 6;
+  }
+  m_polyOptionsVec[2].pointShape = 0;
+  m_polyOptionsVec[3].pointShape = 2;
+
 
   m_polyOptionsVec[2].polyFileName = "diff1.xg";
   m_polyOptionsVec[3].polyFileName = "diff2.xg";
 
-  m_polyOptionsVec[2].readPolyFromDisk = false;
-  m_polyOptionsVec[3].readPolyFromDisk = false;
 
   refreshPixmap();
 }
@@ -2587,6 +2663,7 @@ void polyView::plotDiff(int direction) {
     m_indexOfDistToPlot = (m_indexOfDistToPlot + len) % len;
   }else{
     m_indexOfDistToPlot = -1; // Nothing to plot
+    cout << " Distance: 0.0 " << endl;
   }
 
   if (m_indexOfDistToPlot < 0 || m_indexOfDistToPlot >= len) return;
@@ -2634,7 +2711,7 @@ void polyView::plotDistBwPolyClips(QPainter *paint) {
   // polyView::plotDiff() for more info.
 
   if (!m_polyDiffMode) return;
-  drawPolyLine(m_segX, m_segY, paint);
+  drawPolyLine(m_segX, m_segY, 2, paint);
   return;
 }
 
@@ -3020,7 +3097,7 @@ void polyView::cutToHlt() {
   dPoly clippedPoly;
   for (int vecIter = 0; vecIter < (int)m_polyVec.size(); vecIter++) {
 
-    m_polyVec[vecIter].clipPoly(xl, yl, xh, yh, //inputs
+    m_polyVec[vecIter].clipAll(xl, yl, xh, yh, //inputs
                                 clippedPoly     // output
                                 );
 
@@ -3267,6 +3344,7 @@ void polyView::openPoly() {
 
   return;
 }
+
 
 bool polyView::readPolyOrImage(// inputs
                                std::string const& filename,
