@@ -922,6 +922,9 @@ void grayScaleToRgb(QImage& image, const std::vector<double> &colorscale){
     A = colorscale[0];
     B = colorscale[1];
   }
+  if (image.isGrayscale()){
+    image = image.convertToFormat(QImage::Format_RGB32);
+  }
 
   for (int jj = 0; jj < image.height(); jj++) {
     for (int ii = 0; ii < image.width(); ii++) {
