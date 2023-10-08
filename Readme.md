@@ -349,11 +349,11 @@ This should install the dependencies in:
 
     $HOME/miniconda3/envs/polyview_dev
   
-Activate that environment with::
+Activate that environment with:
 
     conda activate
     
-Run::
+Run:
 
     echo $CC_FOR_BUILD
     echo $CXX_FOR_BUILD
