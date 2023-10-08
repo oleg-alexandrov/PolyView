@@ -14,7 +14,7 @@ edges, and text labels. It can also cut polygons to a box.
 
 This program can overlay images and polygons, if each image has a
 plain-text metadata file describing how to place the image relative to
-the polygons.
+the polygons. It can plot scatter points and colorize grayscale images.
 
 These features are explained in detail further down this document.
 
