@@ -148,14 +148,14 @@ the entries: 10 20 3 3.
 This allows each image to be placed and scaled independently.
 
 ## Grayscale images
-Grayscale images can be displayed with a built in color map (similar to matlap jet) with the command line option `-cm`. By default black is mapped to 0 and white is mapped to 1. The user can defined a color scale with the option `-cs 0 0.5`.
+Grayscale images can be displayed with a built in color map (similar to matlap jet) with the command line option `-cm`. By default, black is mapped to 0 and white is mapped to 1. The user can define a color scale with the option `-cs 0 0.5`.
 <p align="center" width="100%">
     <img src="images/colormap.jpeg"> 
 </p>
 
-## Scattered Plots
-Polyview can plot scattered data with a built in colormap and a user defined color scale. This mode is enabled by the command line option `-sa` or `-scatterAnno`
-The data should be provided in annotation format, each line of text file should contain "anno x1 y1 value1".  
+## Scattered plots
+Polyview can plot scattered data with a builtin colormap and a user-defined color scale. This mode is enabled by the command line option `-sa` or `-scatterAnno`
+Such data should be provided in annotation format, such as: "anno x1 y1 value1".  
 
    Example: data.txt  
    ```
@@ -163,7 +163,7 @@ The data should be provided in annotation format, each line of text file should 
    anno 10.5 20.4 0.5  
    anno 20.2 20.4 0.8  
    ```
-By default a dynamic color scale is used. The color scale is adjusted to the maximum and minimum value inside the current view. User can set a fixed color scale by the command line option `-cs 0 0.5' before the file name. 
+By default, a dynamic color scale is used. The color scale is adjusted to the maximum and minimum value inside the current view. A fixed color scale can be set with the command line option `-cs 0 0.5' before the file name. 
 
 ### polyview -sa -ha -cs 0 1 data.txt
 <p align="center" width="40%">
@@ -373,11 +373,7 @@ Provide this option to qmake build:
 ```
 qmake CONFIG+=polyview_use_openmp
 ```
-For cmake add the following to CMakeLists.txt
-```
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -DPOLYVIEW_USE_OPENMP")
-```
-    
+
 ## Compiling with conda build
 
 This will produce a packaged build, that can be uploaded to the cloud and
