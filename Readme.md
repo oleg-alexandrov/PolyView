@@ -165,9 +165,15 @@ Such data should be provided in annotation format, such as: "anno x1 y1 value1".
    ```
 By default, a dynamic color scale is used. The color scale is adjusted to the maximum and minimum value inside the current view. A fixed color scale can be set with the command line option `-cs 0 0.5' before the file name. 
 
-### polyview -sa -ha -cs 0 1 data.txt
+Example invocation:
+
+```
+polyview -sa -ha -cs 0 1 data.txt
+```
+This will produce the following plot:
+
 <p align="center" width="40%">
-    <img src="images/scattered_plot.jpeg"> 
+    <img src="images/scattered_plot.jpeg"  width="600"> 
 </p>   
    
 ## Functionality
