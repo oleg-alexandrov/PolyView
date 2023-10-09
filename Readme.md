@@ -148,7 +148,7 @@ the entries: 10 20 3 3.
 This allows each image to be placed and scaled independently.
 
 ## Grayscale images
-Grayscale images can be displayed with a built in color map (similar to matlap jet) with the command line option `-cm`. By default, black is mapped to 0 and white is mapped to 1. The user can define a color scale with the option `-cs 0 0.5`.
+Grayscale images can be displayed with a built in color map (similar to Matlab's ``jet``) with the command line option `-cm`. By default, black is mapped to 0 and white is mapped to 1. The user can define a color scale with the option `-cs 0 0.5`.
 <p align="center" width="100%">
     <img src="images/colormap.jpeg"> 
 </p>
