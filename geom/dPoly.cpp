@@ -1400,14 +1400,14 @@ bool dPoly::readPoly(std::string filename,
     // Else keep 'color' unchanged.
     if (line[0] == 'c' ) {
       searchForColor(line, color);
-      continue;
+      if (!isLastLine) continue;
     }
 
     if (line[0] == 'a'){// search only if there is a match for performance.
       if (searchForAnnotation(line, annotation)) {
         m_annotations.push_back(annotation);
       }
-      continue;
+      if (!isLastLine) continue;
     }
     // Extract the coordinates of the current vertex and the layer
     // The format we expect is: x y ; layerNo (e.g., 2.3 -1.2 ; 5:16)
