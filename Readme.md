@@ -341,9 +341,10 @@ on any platform and compiler.
 
 ## Compiling locally
 
-To compile locally, on macOS, create a conda environment having the needed dependencies:
+To compile locally, on Linux and macOS, create a conda environment having the
+needed dependencies:
 
-    conda create -n polyview_dev qt=5.9.7 compilers llvm-openmp
+    conda create -n polyview_dev qt=5.9.7
 
 This should install the dependencies in:
 
@@ -351,34 +352,36 @@ This should install the dependencies in:
   
 Activate that environment with:
 
-    conda activate
+    conda activate polyview_dev
     
-Run:
+On MacOS, run:
 
-    echo $CC_FOR_BUILD
-    echo $CXX_FOR_BUILD
-
-to verify that the C and C++ compilers were set correctly.
-
-Then run:
-
-    $HOME/miniconda3/envs/polyview_dev/bin/qmake                    \
-      QMAKE_CXXFLAGS="-I$HOME/miniconda3/envs/polyview_dev/include" \
-      QMAKE_CC=$CC_FOR_BUILD                                        \
-      QMAKE_CXX=$CXX_FOR_BUILD                                      \
-      QMAKE_LINK=$CXX_FOR_BUILD                                     \
+    base=$HOME/miniconda3/envs/polyview_dev
+    ${base}/bin/qmake \
       polyview.pro
     make -j 10
     make install INSTALL_ROOT=$(pwd)
 
-This should create the ``polyview`` program in the ``bin`` subdirectory.
+While on Linux, adjust this as follows:
 
+    base=$HOME/miniconda3/envs/polyview_dev
+    ${base}/bin/qmake \
+      QMAKE_CXXFLAGS="-I${base}/include/qt -I${base}/include -I/usr/include" \
+      QMAKE_LFLAGS="-L/lib64 -Wl,-rpath-link -Wl,${base}/lib -Wl,-rpath-link -Wl,/lib64" \
+      polyview.pro
+    make -j 10
+    make install INSTALL_ROOT=$(pwd)
+
+The extra options above are to help the compiler find its dependencies.
+
+This should create the ``polyview`` program in the ``bin`` subdirectory.
+ 
 ## Compiling with OpenMP
+
 Polyview can be compiled with openMP for run time performance, on supported platforms.
 Provide this option to qmake build:
-```
-qmake CONFIG+=polyview_use_openmp
-```
+
+    qmake CONFIG+=polyview_use_openmp
 
 ## Compiling with conda build
 
