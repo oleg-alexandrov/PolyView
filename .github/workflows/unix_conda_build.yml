@@ -1,14 +1,15 @@
 name: UnixCondaBuild
 
-# Build on demand till the bugs are ironed out.
-on:
-  workflow_dispatch:
+# Build on demand. This is useful when ironing out bugs.
+#on:
+#  workflow_dispatch:
 
-# on:
-#   push:
-#     branches: [ "master" ]
-#   pull_request:
-#     branches: [ "master" ]
+# Build on push
+on:
+   push:
+     branches: [ "master" ]
+   pull_request:
+     branches: [ "master" ]
 
 env:
   # Note that this the Ubuntu version shows up twice below, because of
