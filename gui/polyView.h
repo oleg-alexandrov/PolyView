@@ -116,6 +116,7 @@ public slots:
   void toggleMoveEdges();
   void toggleAlignMode();
   void addAnno();
+  void markAcute();
   void deleteAnno();
   void insertVertex();
   void deleteVertex();
@@ -360,6 +361,7 @@ private:
   QAction* m_saveMark;
   QAction* m_addAnno;
   QAction* m_deleteAnno;
+  QAction* m_markAcute;
   QAction* m_alignModeAction;
 
   QAction* m_align_rotate90;

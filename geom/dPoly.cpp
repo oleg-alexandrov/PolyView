@@ -33,6 +33,7 @@
 #include <cstring>
 #include <string>
 #include <map>
+#include <complex>
 
 #ifdef POLYVIEW_USE_OPENMP
 #include <omp.h>
@@ -479,6 +480,37 @@ void dPoly::clipAll(// inputs
   clipAnno(clip_box, clippedPoly);
 
 
+}
+
+std::vector<dPoint> dPoly::getAcuteAngleLocs() const{
+
+  const auto &start_ids = getStartingIndices();
+
+  std::vector<dPoint> res;
+
+  for (int pIter = 0; pIter < m_numPolys; pIter++) {
+    int start = start_ids[pIter];
+    int end   = start_ids[pIter+1];
+    if ((end - start) < 3) continue;
+    for (int ic = start; ic < end; ic++){
+      int ip = (ic == start) ? end-1 : ic-1;
+      int in = (ic == end-1) ? start : ic+1;
+      std::complex<double> Pp(m_xv[ip], m_yv[ip]);
+      std::complex<double> Pc(m_xv[ic], m_yv[ic]);
+      std::complex<double> Pn(m_xv[in], m_yv[in]);
+      auto dv1 = Pp - Pc;
+      auto dv2 = Pn - Pc;
+      double len1 = abs(dv1);
+      double len2 = abs(dv2);
+      if (len1 > 0) dv1 /= len1;
+      if (len2 > 0) dv2 /= len2;
+      double innerp = dv1.real()*dv2.real() + dv1.imag()*dv2.imag();
+      if (innerp > 1e-7){ // acute angle
+        res.push_back(dPoint(m_xv[ic], m_yv[ic]));
+      }
+    }
+  }
+  return res;
 }
 
 void dPoly::shift(double shift_x, double shift_y) {

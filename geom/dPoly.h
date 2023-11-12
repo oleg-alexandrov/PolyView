@@ -100,6 +100,8 @@ public:
 
   void copyAnno(dPoly & clippedPoly);
 
+  std::vector<dPoint> getAcuteAngleLocs() const;
+
   void shift(double shift_x, double shift_y);
   void rotate(double angle);
   void scale(double scale);

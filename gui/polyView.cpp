@@ -233,6 +233,10 @@ polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
   m_deleteAnno = m_ContextMenu->addAction("Delete annotation");
   connect(m_deleteAnno, SIGNAL(triggered()), this, SLOT(deleteAnno()));
 
+  // Mark acute angles
+  m_markAcute = m_ContextMenu->addAction("Mark acute angles");
+  connect(m_markAcute, SIGNAL(triggered()), this, SLOT(markAcute()));
+
   // Align polygons
   m_alignModeAction = m_ContextMenu->addAction("Align mode");
   connect(m_alignModeAction, SIGNAL(triggered()), this, SLOT(toggleAlignMode()));
@@ -629,13 +633,15 @@ void polyView::displayData(QPainter *paint) {
   // This draws the polygon being created if in that mode
   drawPolyBeingPlotted(m_currPolyX, m_currPolyY, paint);
 
-  // Draw the mark if there
+  // Draw the marks if there
   if (m_markX.size() > 0) {
-    int x0, y0;
-    worldToPixelCoords(m_markX[0], m_markY[0], // inputs
-                       x0, y0 );                // outputs
-    drawMark(x0, y0, QColor(m_prefs.fgColor.c_str()),
-             m_prefs.lineWidth, paint);
+    for (unsigned i = 0; i < m_markX.size(); i++){
+      int x0, y0;
+      worldToPixelCoords(m_markX[i], m_markY[i], // inputs
+                         x0, y0 );                // outputs
+      drawMark(x0, y0, QColor(m_prefs.fgColor.c_str()),
+               m_prefs.lineWidth, paint);
+    }
   }
 
   // If in diff mode
@@ -2945,6 +2951,21 @@ void polyView::addAnno() {
   saveDataForUndo(false);
   refreshPixmap();
   return;
+}
+
+void polyView::markAcute() {
+  m_markX.clear();
+  m_markY.clear();
+
+  for (auto &pol : m_polyVec){
+    auto acute = pol.getAcuteAngleLocs();
+    for (auto pt : acute){
+      m_markX.push_back(pt.x);
+      m_markY.push_back(pt.y);
+    }
+  }
+  refreshPixmap();
+
 }
 
 void polyView::deleteAnno() {
