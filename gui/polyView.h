@@ -236,6 +236,7 @@ private:
                  bool plotFilled, bool showAnno,
                  bool scatter_annotation,
                  double lineWidth,
+                 double transparency,
                  int point_shape, // 0 is a good choice here
                  int point_size,
                  const std::vector<double> &colorScale,

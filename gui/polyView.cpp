@@ -496,7 +496,7 @@ void polyView::displayData(QPainter *paint) {
                    m_viewXll + m_viewWidX,
                    m_viewYll + m_viewWidY,
                    m_prefs.gridSize, m_prefs.gridColor);
-    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.gridWidth,
+    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.gridWidth, 1.0,
               point_shape, 1, colorScale, textOnScreenGrid, paint, grid);
   }
 
@@ -516,6 +516,7 @@ void polyView::displayData(QPainter *paint) {
   // Draw un-selected polygons darker
   int lighter_darker_default = hasSelectedPolygons() ? 1 : 0;
 
+  double transparency = 1.0;
   // Plot the images and polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
 
@@ -588,16 +589,19 @@ void polyView::displayData(QPainter *paint) {
         lighter_darker = -1;//draw diff with lighter colors
       }
     }
-
+    if (plotFilled){
+      // plot filled polygons with increasing level of transparency
+      if (transparency > 0.2) transparency -= 0.2;
+    }
     // Plot all or un-selected ones if there are selected ones
-    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
+    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth, transparency,
               point_shape, point_size, m_polyOptionsVec[vecIter].colorScale, textOnScreenGrid, paint, m_polyVec[vecIter],
               has_selected ? &un_selected : nullptr,
                   lighter_darker // plot un-selected polygons darker
     );
 
     if (has_selected) {
-      plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth,
+      plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth, transparency,
                 point_shape, point_size, m_polyOptionsVec[vecIter].colorScale, textOnScreenGrid, paint,
                 m_polyVec[vecIter], &m_selectedPolyIndices[vecIter],
                 -lighter_darker // plot selected polygons lighter
@@ -613,7 +617,7 @@ void polyView::displayData(QPainter *paint) {
   for (int h = 0; h < (int)m_highlights.size(); h++) {
     m_highlights[h].set_color(m_prefs.fgColor.c_str());
     bool showAnno = false;
-    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth,
+    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth, 1.0,
               point_shape, 1, colorScale, textOnScreenGrid, paint, m_highlights[h]);
   }
 
@@ -646,6 +650,7 @@ void polyView::displayData(QPainter *paint) {
 void polyView::plotDPoly(bool plotPoints, bool plotEdges,
                          bool plotFilled, bool showAnno, bool scatter_annotation,
                          double lineWidth,
+                         double transparency,
                          int point_shape, // 0 is a good choice here
                          int point_size, // 1 is a good choice here
                          const std::vector<double> &colorScale, // vector of size 2 contains min max value for color scale
@@ -774,9 +779,9 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     int pSize = numVerts[pIter];
     if (pSize == 0) continue;
     // Determine the orientation of polygons
-    double signedArea = 0.0;
+    bool isHole = false;
     if (plotFilled && isPolyClosed[pIter]) {
-      signedArea = signedPolyArea(pSize, xv + start, yv + start, m_counter_cc);
+      isHole = (signedPolyArea(pSize, xv + start, yv + start, m_counter_cc) < 0);
     }
 
     // Scale the polygon to screen (pixel) coordinates
@@ -808,13 +813,21 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     if (plotEdges) {
 
       if (plotFilled && isPolyClosed[pIter]) {
-        if (signedArea >= 0.0) paint->setBrush(color);
-        else                   paint->setBrush(QColor(m_prefs.bgColor.c_str()));
-        paint->setPen(color);
+
+        if (isHole){
+          auto color2 = QColor(m_prefs.bgColor.c_str());
+          color2.setAlphaF(transparency);
+          paint->setBrush(color2);
+        } else {
+          color.setAlphaF(transparency);
+          paint->setBrush(color);
+        }
+
       }else {
         paint->setBrush(Qt::NoBrush);
-        paint->setPen(QPen(color, lineWidth));
       }
+      color.setAlphaF(1.0);
+      paint->setPen(QPen(color, lineWidth));
 
       if (isPolyZeroDim(pa)) {
         // Treat the case of polygons which are made up of just one point
@@ -825,9 +838,9 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
         if (plotFilled) {
           paint->drawPolygon(pa);
-        }else{
-          paint->drawPolyline(pa); // don't join the last vertex to the first
         }
+        paint->setBrush(Qt::NoBrush);
+        paint->drawPolyline(pa); // don't join the last vertex to the first
 
       }
     }
@@ -2185,7 +2198,7 @@ void polyView::drawPolyLine(const std::vector<double> & polyX,
   std::vector<double> colorScale;
   vector< vector<int> > textOnScreenGrid; textOnScreenGrid.clear();
   bool showAnno = false;
-  plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, lineWidth,
+  plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, lineWidth, 1.0,
             point_shape, 1, colorScale, textOnScreenGrid, paint, polyLine);
 
   return;
