@@ -56,6 +56,7 @@ struct polyOptions{
   double          panelRatio;
   bool            scatter_annotations;
   bool            useColorMap;
+  double          transparency;
   std::string     bgColor;
   std::string     fgColor;
   std::string     cmdLineColor;
@@ -81,6 +82,7 @@ struct polyOptions{
     panelRatio       = 0.2;
     scatter_annotations = false;
     useColorMap        = false;
+    transparency      = 0;
     bgColor          = "black";
     fgColor          = "white";
     cmdLineColor     = "green";

@@ -31,7 +31,7 @@
 
 class polyView;
 class QCloseEvent;
-class cmdLineOptions;
+struct cmdLineOptions;
 class QTextEdit;
 class chooseFilesDlg;
 

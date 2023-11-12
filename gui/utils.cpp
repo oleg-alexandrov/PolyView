@@ -69,7 +69,7 @@ void utils::printUsage(std::string progName){
   cout <<"     -f   | -filledPoly "<<endl;
   cout <<"     -nf  | -nonFilledPoly "<<endl;
   cout <<"     -cw  | -clockwisePoly    (if polygon orientation is clockwise)"<<endl;
-
+  cout <<"     -tr  | -transparency [0-1] (transparency for filled polygons)"<<endl;
 
   cout <<endl<<"   point options:"<<endl;
   cout <<"     -p   | -points     (read as point cloud, not polygons)" <<endl;
@@ -310,6 +310,14 @@ void utils::parseCmdOptions(//inputs
         strcasecmp(currArg, "-size") == 0 )
         && argIter < argc - 1){
       opt.pointSize = (int)round(atof(argv[argIter + 1]));
+      argIter++;
+      continue;
+    }
+
+    if ((strcasecmp(currArg, "-tr"    ) == 0 ||
+        strcasecmp(currArg, "-transparency") == 0 )
+        && argIter < argc - 1){
+      opt.transparency = atof(argv[argIter + 1]);
       argIter++;
       continue;
     }

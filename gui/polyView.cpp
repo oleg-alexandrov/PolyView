@@ -516,7 +516,8 @@ void polyView::displayData(QPainter *paint) {
   // Draw un-selected polygons darker
   int lighter_darker_default = hasSelectedPolygons() ? 1 : 0;
 
-  double transparency = 1.0;
+  double default_transparency = 1.0;
+
   // Plot the images and polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
 
@@ -589,10 +590,14 @@ void polyView::displayData(QPainter *paint) {
         lighter_darker = -1;//draw diff with lighter colors
       }
     }
+
     if (plotFilled){
       // plot filled polygons with increasing level of transparency
-      if (transparency > 0.2) transparency -= 0.2;
+      if (default_transparency > 0.2) default_transparency -= 0.2;
     }
+    double transparency = m_polyOptionsVec[vecIter].transparency;
+    if ( transparency == 0.0) transparency = default_transparency;
+
     // Plot all or un-selected ones if there are selected ones
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, scatter_anno, lineWidth, transparency,
               point_shape, point_size, m_polyOptionsVec[vecIter].colorScale, textOnScreenGrid, paint, m_polyVec[vecIter],
