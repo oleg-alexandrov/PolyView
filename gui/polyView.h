@@ -233,6 +233,8 @@ private:
   bool hasSelectedPolygons() const;
 
   void displayData( QPainter *paint );
+  void drawMarks(QPainter *paint);
+
   void plotDPoly(bool plotPoints, bool plotEdges,
                  bool plotFilled, bool showAnno,
                  bool scatter_annotation,

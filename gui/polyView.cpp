@@ -633,25 +633,30 @@ void polyView::displayData(QPainter *paint) {
   // This draws the polygon being created if in that mode
   drawPolyBeingPlotted(m_currPolyX, m_currPolyY, paint);
 
-  // Draw the marks if there
-  if (m_markX.size() > 0) {
-    for (unsigned i = 0; i < m_markX.size(); i++){
-      int x0, y0;
-      worldToPixelCoords(m_markX[i], m_markY[i], // inputs
-                         x0, y0 );                // outputs
-      drawMark(x0, y0, QColor(m_prefs.fgColor.c_str()),
-               m_prefs.lineWidth, paint);
-    }
-  }
-
   // If in diff mode
   plotDistBwPolyClips(paint);
+
+  // Draw the marks if there
+  drawMarks(paint);
 
   // Wipe this temporary data now that the display changed
   m_snappedPoints.clear();
   m_nonSnappedPoints.clear();
 
   return;
+}
+
+void polyView::drawMarks(QPainter *paint){
+  // Draw the marks if there
+   if (m_markX.size() > 0) {
+     for (unsigned i = 0; i < m_markX.size(); i++){
+       int x0, y0;
+       worldToPixelCoords(m_markX[i], m_markY[i], // inputs
+                          x0, y0 );                // outputs
+       drawMark(x0, y0, QColor(m_prefs.fgColor.c_str()),
+                m_prefs.lineWidth, paint);
+     }
+   }
 }
 
 // Plot a given dPoly with given options.
@@ -2475,8 +2480,9 @@ void polyView::getOnePointShape(int x0, int y0,
 void polyView::drawMark(int x0, int y0, QColor color, int lineWidth,
                         QPainter * paint) {
 
-  int len = 6;
+  int len = 8;
 
+  lineWidth = std::max(lineWidth, 2);
   paint->setBrush(Qt::NoBrush);
   paint->setPen(QPen(color, lineWidth));
 
@@ -2954,6 +2960,7 @@ void polyView::addAnno() {
 }
 
 void polyView::markAcute() {
+  bool need_to_refresh =  m_markX.size() > 0;
   m_markX.clear();
   m_markY.clear();
 
@@ -2964,7 +2971,20 @@ void polyView::markAcute() {
       m_markY.push_back(pt.y);
     }
   }
-  refreshPixmap();
+
+  if (m_markX.empty()){
+    cout <<"No acute angles"<<endl;
+    return;
+  }
+
+  if (need_to_refresh){
+    refreshPixmap();
+  } else {
+    QPainter paint(&m_pixmap);
+
+    drawMarks(&paint);
+    update();
+  }
 
 }
 
@@ -3091,10 +3111,20 @@ void polyView::saveMark() {
 }
 
 void polyView::plotMark(double x, double y) {
+  bool need_to_refresh = m_markX.size() > 0;
   cout << "mark " << x << ' ' << y << endl;
   m_markX.resize(1); m_markX[0] = x;
   m_markY.resize(1); m_markY[0] = y;
-  refreshPixmap();
+
+  if (need_to_refresh){
+    refreshPixmap();
+  } else {
+    QPainter paint(&m_pixmap);
+
+    drawMarks(&paint);
+    update();
+  }
+
   return;
 }
 
