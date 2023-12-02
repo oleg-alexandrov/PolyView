@@ -50,6 +50,10 @@ static const char * ss_xgraph_colors[] =
    "#6C7B8B", "#FF00FF", "#00CDCD", "navy", "gold"     // 11, ..., 15
   };
 
+void setCurrentDefaultColor(int color){
+  ss_default_color_ind = color;
+}
+
 std::string getCurrentDefaultColor() {
   ss_default_color_ind++;
   if (ss_default_color_ind >= 15){

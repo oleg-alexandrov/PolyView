@@ -3304,6 +3304,7 @@ void polyView::redo() {
 
 
 void polyView::reloadPolys() {
+  setCurrentDefaultColor(0);// reset default color so that reloaded polygons have the same color as before
   readAllPolys();
   refreshPixmap();
 }

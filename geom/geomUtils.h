@@ -31,6 +31,7 @@
 #include <chrono>
 
 std::string getCurrentDefaultColor();
+void setCurrentDefaultColor(int color);
 
 struct dPoint{
   double x, y;
