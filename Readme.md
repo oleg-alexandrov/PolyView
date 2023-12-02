@@ -282,7 +282,8 @@ provides a basic level of scripting and reproducibility.
 * Reverse the orientation of the polygon closest to the mouse cursor
 * Insert annotation (text label)
 * Delete annotation (text label)
-* Enter align mode (a mode in which, given two polygon files, the second polygon file is kept fixed, while the first one can be interactively translated using Shift-Mouse and rotated/flipped from the right-click menu until it aligns to the second one).
+* Mark acute angles ( Mark polygon vertices where inner or outer angle is less than 90 degrees)
+* Align mode (a mode in which, given two polygon files, the second polygon file is kept fixed, while the first one can be interactively translated using Shift-Mouse and rotated/flipped from the right-click menu until it aligns to the second one).
 
 # Command line options
 
@@ -315,7 +316,7 @@ Various command line options can modify how the polygons, points, and images are
      *  `-f   | -filledPoly`     All polygons after this option will show up as filled
      *  `-nf  | -nonFilledPoly`  All polygons after this option will show up as not filled
      *  `-cw  | -clockwisePoly`  Polygons oriented clockwise are assumed to have positive area
-
+     *  `-tr  | -transparency` 0.5 ( [0-1] transparency level for filled polygons)
  *  point options:
      *  `-p   | -points`     All polygons after this option will show up as vertices rather than edges (a subsequent -p option undoes this behavior)
      *  `-sh  | -shape`   o  ([x, +, o, s, t] defines shape of the points in point mode display)
