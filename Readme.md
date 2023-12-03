@@ -148,14 +148,22 @@ the entries: 10 20 3 3.
 This allows each image to be placed and scaled independently.
 
 ## Grayscale images
-Grayscale images can be displayed with a built in color map (similar to Matlab's ``jet``) with the command line option `-cm`. By default, black is mapped to 0 and white is mapped to 1. The user can define a color scale with the option `-cs 0 0.5`.
+
+Grayscale images can be displayed with a built-in colormap (similar to Matlab's
+``jet``) with the command line option `-cm`. By default, black is mapped to 0
+and white is mapped to 1. The user can define a color scale with the option `-cs
+0 0.5`.
+
 <p align="center" width="100%">
     <img src="images/colormap.jpeg"> 
 </p>
 
 ## Scatter plots
-Polyview can plot scattered data with a builtin colormap and a user-defined color scale. This mode is enabled by the command line option `-sa` or `-scatterAnno`
-Such data should be provided in annotation format, such as: "anno x1 y1 value1".  
+
+PolyView can plot scattered data with a builtin colormap and a user-defined
+color scale. This mode is enabled by the command line option `-sa` or
+`-scatterAnno` Such data should be provided in annotation format, such as: "anno
+x1 y1 value1".  
 
    Example: data.txt  
    ```
@@ -163,7 +171,9 @@ Such data should be provided in annotation format, such as: "anno x1 y1 value1".
    anno 10.5 20.4 0.5  
    anno 20.2 20.4 0.8  
    ```
-By default, a dynamic color scale is used. The color scale is adjusted to the maximum and minimum value inside the current view. A fixed color scale can be set with the command line option `-cs 0 0.5` before the file name. 
+By default, a dynamic color scale is used. The color scale is adjusted to the
+maximum and minimum value inside the current view. A fixed color scale can be
+set with the command line option `-cs 0 0.5` before the file name. 
 
 Example invocation:
 
@@ -249,16 +259,19 @@ provides a basic level of scripting and reproducibility.
 #### Grid menu
 
 * Show/hide the grid
-* Enforce that all polygon edges have angles multiple of 45 degrees and snap the vertices to the grid
+* Enforce that all polygon edges have angles multiple of 45 degrees and snap the
+  vertices to the grid
 * Set the grid size
 * Set the grid line width
 * Set the grid color
 
 #### Diff menu
 
-* Change the colors of polygons so that polygons from different files have different colors
+* Change the colors of polygons so that polygons from different files have
+  different colors
 * Enter diff mode (a mode in which two similar polygon files can be compared)
-* Show the next/previous difference between given two given polygon files (starting with the largest difference)
+* Show the next/previous difference between given two given polygon files
+  (starting with the largest difference)
 
 #### Options menu
 
@@ -272,7 +285,8 @@ provides a basic level of scripting and reproducibility.
 * Enforce integer vertices and edge angles multiple of 45 degrees
 * Create a polygon with arbitrary angles
 * Delete the polygon at mouse cursor
-* Enter move polygons mode (use Shift-Mouse to move a polygon; if some polygons are selected using a highlight, then all selected polygons will be moved)
+* Enter move polygons mode (use Shift-Mouse to move a polygon; if some polygons
+  are selected using a highlight, then all selected polygons will be moved)
 * Enter move vertices mode (use Shift-Mouse to move a vertex)
 * Enter move edges mode (use Shift-Mouse to move an edge)
 * Insert a vertex on the edge closest to the mouse cursor
@@ -282,56 +296,71 @@ provides a basic level of scripting and reproducibility.
 * Reverse the orientation of the polygon closest to the mouse cursor
 * Insert annotation (text label)
 * Delete annotation (text label)
-* Mark acute angles ( Mark polygon vertices where inner or outer angle is less than 90 degrees)
-* Align mode (a mode in which, given two polygon files, the second polygon file is kept fixed, while the first one can be interactively translated using Shift-Mouse and rotated/flipped from the right-click menu until it aligns to the second one).
+* Mark acute angles (mark polygon vertices where inner or outer angle is less
+  than 90 degrees)
+* Align mode (a mode in which, given two polygon files, the second polygon file
+  is kept fixed, while the first one can be interactively translated using
+  Shift-Mouse and rotated/flipped from the right-click menu until it aligns to
+  the second one).
 
-# Command line options
+## Command line options
 
 PolyView will open simultaneously all polygon and image files supplied as inputs
 on the command line. Example:
 
     polyview poly.xg image.png 
 
-Various command line options can modify how the polygons, points, and images are displayed.
+Various command line options can modify how the polygons, points, and images are
+displayed.
 
-* application options:
-  *  `-h | -help`	Show the available command line options
-  *  `-geo | -geometry` widthXheight  The window size in pixels (for example, 800x800)
-  *  `-bg  | -backgroundColor` color    Color of the background (the default is black)
-  *  `-grid`      (on or off)     Turn on/off the grid display
-  *  `-gridSize`  integer  Grid size in units of geometry
-  *  `-gridWidth` integer  Grid width in pixels
-  *  `-gridColor`            Grid color
-  *  `-panelRatio`  double  Ratio of width of the left panel showing the file names to window width. If set to zero, it will hide that panel (default = 0.2).
+### Application options
+  *  `-h | -help`	Show the available command line options.
+  *  `-geo | -geometry` (width x height) The window size in pixels (for example, 800x800).
+  *  `-bg  | -backgroundColor` (color) Color of the background (the default is black).
+  *  `-grid`      (on or off)  Turn on/off the grid display.
+  *  `-gridSize`  (integer)  Grid size in units of geometry.
+  *  `-gridWidth` (integer)  Grid width in pixels.
+  *  `-gridColor` (color) Grid color.
+  *  `-panelRatio`  (default = 0.2)  Ratio of width of the left panel showing
+     the file names to window width. If set to zero, it will hide that panel.
 
+### File options
+  *  `-c   | -color`  (color) All polygons after this option will show up in
+     the given color (the default is to use the colors specified in the polygon
+     files). 
+  *  `-nc  | -noColorOverride` All polygons after this option will show up
+     in the colors specified in the file. 
+  *  `-lw  | -lineWidth` (default = 1) All polygons after this option will show up
+     with given line width.
 
-* file options:
-  *  `-c   | -color`  color       All polygons after this option will show up in the given color (the default is to use the colors specified in the polygon files). 
-  *  `-nc  | -noColorOverride`      All polygons after this option will show up in the colors specified in the file. 
-  *  `-lw  | -lineWidth`  integer All polygons after this option will show up with given line width (default is 1)
+### Polygon options
+  *  `-cp  | -closedPoly` All polygons after this option will show up as closed (the last vertex is connected to the first one).
+  *  `-ncp | -nonClosedPoly`  Interpret the polygons after this option as polygonal lines (the last vertex is not connected to the first one).
+  *  `-f   | -filledPoly`     All polygons after this option will show up as filled.
+  *  `-nf  | -nonFilledPoly`  All polygons after this option will show up as not filled.
+  *  `-cw  | -clockwisePoly`  Polygons oriented clockwise are assumed to have
+     positive area.
+  *  `-tr  | -transparency` (default = 0.5) Options: [0-1]. Transparency level
+     for filled polygons).
+  
+### Point options
+  *  `-p   | -points` All polygons after this option will show up as
+     vertices rather than edges (a subsequent -p option undoes this behavior).
+  *  `-sh  | -shape` (default = 0) Options: x, +, o, s, t. Defines shape of the
+     points in point mode display.
+  *  `-si  | -size` (default = 3). Options: [1-8]. Defines size of the points in
+     point mode display.
 
-*  polygon options:
-     *  `-cp  | -closedPoly` 	 All polygons after this option will show up as closed (the last vertex is connected to the first one)
-     *  `-ncp | -nonClosedPoly`  Interpret the polygons after this option as polygonal lines (the last vertex is not connected to the first one)
-     *  `-f   | -filledPoly`     All polygons after this option will show up as filled
-     *  `-nf  | -nonFilledPoly`  All polygons after this option will show up as not filled
-     *  `-cw  | -clockwisePoly`  Polygons oriented clockwise are assumed to have positive area
-     *  `-tr  | -transparency` 0.5 ( [0-1] transparency level for filled polygons)
- *  point options:
-     *  `-p   | -points`     All polygons after this option will show up as vertices rather than edges (a subsequent -p option undoes this behavior)
-     *  `-sh  | -shape`   o  ([x, +, o, s, t] defines shape of the points in point mode display)
-     *  `-si  | -size`    3  ([1-8]  defines size of the points in point mode display)
+### Annotation options
+  *  `-fs  | -fontSize` (integer) The text font size in pixels.
+  *  `-ha  | -hideAnno`  Do not show annotations in file. 
+  *  `-sa  | -scatterAnno` Plot annotation values as scattered points.
+  *  `-cs  | -colorScale` (min_val max_val) Fixed color scale for scattered plot.
 
- *  annotation options:
-     *  `-fs  | -fontSize`     integer	   The text font size in pixels 
-     *  `-ha  | -hideAnno`                   (do not show annotations in file) 
-     *  `-sa  | -scatterAnno`                (plot annotation values as scattered points)
-     *  `-cs  | -colorScale` min_val max_val (fixed color scale for scattered plot)
-
- *  image options:
-     *  `-cm  | -colorMap`                    (Display grayscale image with built in colored map)
-     *  `-cs  | -colorScale`  min_val max_val (color scale for the grayscale image, default 0->black 1->white )
-
+### Image options
+  *  `-cm  | -colorMap` Display grayscale image with built in colored map.
+  *  `-cs  | -colorScale` (min_val max_val) Color scale for the grayscale image
+     Default: 0->black, 1->white.
 
 # Compiling
 
