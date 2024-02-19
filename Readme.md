@@ -228,6 +228,7 @@ provides a basic level of scripting and reproducibility.
 * Zoom and pan
 * Reset the view to contain all polygons with a small padding
 * Change the order in which the polygons are displayed
+* Sequential display of objects, used to display objects one at a time.
 * Show/hide annotations (text labels)
 * Show the polygons filled with color
 * Show the vertices only (no edges)
@@ -313,7 +314,7 @@ on the command line. Example:
 Various command line options can modify how the polygons, points, and images are
 displayed.
 
-### Application options
+#### Application options
   *  `-h | -help`	Show the available command line options.
   *  `-geo | -geometry` (width x height) The window size in pixels (for example, 800x800).
   *  `-bg  | -backgroundColor` (color) Color of the background (the default is black).
@@ -324,7 +325,7 @@ displayed.
   *  `-panelRatio`  (default = 0.2)  Ratio of width of the left panel showing
      the file names to window width. If set to zero, it will hide that panel.
 
-### File options
+#### File options
   *  `-c   | -color`  (color) All polygons after this option will show up in
      the given color (the default is to use the colors specified in the polygon
      files). 
@@ -333,7 +334,7 @@ displayed.
   *  `-lw  | -lineWidth` (default = 1) All polygons after this option will show up
      with given line width.
 
-### Polygon options
+#### Polygon options
   *  `-cp  | -closedPoly` All polygons after this option will show up as closed (the last vertex is connected to the first one).
   *  `-ncp | -nonClosedPoly`  Interpret the polygons after this option as polygonal lines (the last vertex is not connected to the first one).
   *  `-f   | -filledPoly`     All polygons after this option will show up as filled.
@@ -343,7 +344,7 @@ displayed.
   *  `-tr  | -transparency` (default = 0.5) Options: [0-1]. Transparency level
      for filled polygons).
   
-### Point options
+#### Point options
   *  `-p   | -points` All polygons after this option will show up as
      vertices rather than edges (a subsequent -p option undoes this behavior).
   *  `-sh  | -shape` (default = 0) Options: x, +, o, s, t. Defines shape of the
@@ -351,13 +352,13 @@ displayed.
   *  `-si  | -size` (default = 3). Options: [1-8]. Defines size of the points in
      point mode display.
 
-### Annotation options
+#### Annotation options
   *  `-fs  | -fontSize` (integer) The text font size in pixels.
   *  `-ha  | -hideAnno`  Do not show annotations in file. 
   *  `-sa  | -scatterAnno` Plot annotation values as scattered points.
   *  `-cs  | -colorScale` (min_val max_val) Fixed color scale for scattered plot.
 
-### Image options
+#### Image options
   *  `-cm  | -colorMap` Display grayscale image with built in colored map.
   *  `-cs  | -colorScale` (min_val max_val) Color scale for the grayscale image
      Default: 0->black, 1->white.
