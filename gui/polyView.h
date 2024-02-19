@@ -68,7 +68,7 @@ public slots:
   bool getStringVectorFromGui(std::string title,
                               std::string description,
                               std::vector<std::string> & values);
-  void playMovie();
+  void sequentialDisplay();
   void toggleAnno();
   void toggleFilled();
   void toggleShowGrid();

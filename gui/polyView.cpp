@@ -526,7 +526,7 @@ void polyView::displayData(QPainter *paint, int pol_id) {
   // Plot the images and polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
 
-    if (pol_id >= 0 && pol_id != vi) continue;
+    if (pol_id >= 0 && pol_id < vi) continue;
     int vecIter = m_polyVecOrder[vi];
 
     // Skip the files the user does not want to see
@@ -2494,12 +2494,13 @@ void polyView::drawMark(int x0, int y0, QColor color, int lineWidth,
 
 }
 
-void polyView::playMovie(){
+void polyView::sequentialDisplay(){
 
-    cout <<"in playMovie: "<< m_movie_frame_id<<endl;
     m_movie_frame_id++;
 
-    if ((int)m_polyVec.size() == m_movie_frame_id) m_movie_frame_id = -1;
+    if ((int)m_polyVec.size() == (m_movie_frame_id+1)){ // draw all
+      m_movie_frame_id = -1;
+    }
 
     m_pixmap = QPixmap(size());
     m_pixmap.fill(QColor(m_prefs.bgColor.c_str()));
