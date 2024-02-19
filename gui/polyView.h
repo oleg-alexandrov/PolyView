@@ -68,6 +68,7 @@ public slots:
   bool getStringVectorFromGui(std::string title,
                               std::string description,
                               std::vector<std::string> & values);
+  void playMovie();
   void toggleAnno();
   void toggleFilled();
   void toggleShowGrid();
@@ -232,7 +233,7 @@ private:
 
   bool hasSelectedPolygons() const;
 
-  void displayData( QPainter *paint );
+  void displayData( QPainter *paint, int i = -1 );
   void drawMarks(QPainter *paint);
 
   void plotDPoly(bool plotPoints, bool plotEdges,
@@ -331,7 +332,7 @@ private:
 
   bool m_showAnnotations;
   bool m_showFilledPolys;
-
+  int m_movie_frame_id;
   std::vector<utils::dPoly> m_highlights;
 
   int m_showEdges, m_showPoints, m_showPointsEdges, m_displayMode;

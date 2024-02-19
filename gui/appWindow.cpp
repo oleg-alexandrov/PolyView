@@ -273,6 +273,7 @@ void appWindow::createMenusAndMainWidget(){
   view->addAction("Move down",            this,   SLOT(shiftDown()),    Qt::Key_Down);
   view->addAction("Reset view",           m_poly, SLOT(resetView()),    Qt::Key_R);
   view->addAction("Change display order", m_poly, SLOT(changeOrder()),  Qt::Key_O);
+  view->addAction("Movie mode",           m_poly, SLOT([playMovie()),   Qt::Key_M);
   view->addAction("Toggle annotations",   m_poly, SLOT(toggleAnno()),   Qt::Key_A);
   view->addAction("Toggle filled",        m_poly, SLOT(toggleFilled()), Qt::Key_F);
   view->addAction("Toggle points display",

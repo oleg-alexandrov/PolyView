@@ -97,6 +97,7 @@ polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
   m_showLayerAnno      = false;
   m_showFilledPolys    = false;
   m_changeDisplayOrder = false;
+  m_movie_frame_id = -1;
 
   m_emptyRubberBand = QRect(-10, -10, 0, 0); // off-screen rubberband
   m_rubberBand      = m_emptyRubberBand;
@@ -477,7 +478,7 @@ bool polyView::hasSelectedPolygons() const{
 }
 // Plot the current data. See worldToPixelCoords() for how to convert
 // from world to screen coordinates.
-void polyView::displayData(QPainter *paint) {
+void polyView::displayData(QPainter *paint, int pol_id) {
 
   //utils::Timer my_clock("polyView::displayData");
   setupViewingWindow(); // Must happen before anything else
@@ -525,6 +526,7 @@ void polyView::displayData(QPainter *paint) {
   // Plot the images and polygons
   for (int vi  = 0; vi < (int)m_polyVec.size(); vi++) {
 
+    if (pol_id >= 0 && pol_id != vi) continue;
     int vecIter = m_polyVecOrder[vi];
 
     // Skip the files the user does not want to see
@@ -1678,19 +1680,19 @@ void polyView::refreshPixmap() {
   // directly. Later we'll display the pixmap without redrawing
   // whenever possible for reasons of speed.
 
-  m_pixmap = QPixmap(size());
-  m_pixmap.fill(QColor(m_prefs.bgColor.c_str()));
+    m_pixmap = QPixmap(size());
+    m_pixmap.fill(QColor(m_prefs.bgColor.c_str()));
 
-  QPainter paint(&m_pixmap);
-  paint.initFrom(this);
+    QPainter paint(&m_pixmap);
+    paint.initFrom(this);
 
-  QFont F;
-  F.setPointSize(m_prefs.fontSize);
-  //F.setStyleStrategy(QFont::NoAntialias);
-  paint.setFont(F);
+    QFont F;
+    F.setPointSize(m_prefs.fontSize);
+    //F.setStyleStrategy(QFont::NoAntialias);
+    paint.setFont(F);
 
-  displayData(&paint);
-  update();
+    displayData(&paint);
+    update();
 
   return;
 }
@@ -2490,6 +2492,28 @@ void polyView::drawMark(int x0, int y0, QColor color, int lineWidth,
   paint->drawLine(x0 - len, y0 - len, x0 + len, y0 + len);
   paint->drawLine(x0 - len, y0 + len, x0 + len, y0 - len);
 
+}
+
+void polyView::playMovie(){
+
+    cout <<"in playMovie: "<< m_movie_frame_id<<endl;
+    m_movie_frame_id++;
+
+    if ((int)m_polyVec.size() == m_movie_frame_id) m_movie_frame_id = -1;
+
+    m_pixmap = QPixmap(size());
+    m_pixmap.fill(QColor(m_prefs.bgColor.c_str()));
+
+    QPainter paint(&m_pixmap);
+    paint.initFrom(this);
+
+    QFont F;
+    F.setPointSize(m_prefs.fontSize);
+    //F.setStyleStrategy(QFont::NoAntialias);
+    paint.setFont(F);
+
+    displayData(&paint, m_movie_frame_id);
+    update();
 }
 
 void polyView::toggleAnno() {
