@@ -1679,7 +1679,7 @@ void polyView::refreshPixmap() {
   // Draw the data onto the pixmap instead of the screen
   // directly. Later we'll display the pixmap without redrawing
   // whenever possible for reasons of speed.
-
+    m_movie_frame_id = -1;
     m_pixmap = QPixmap(size());
     m_pixmap.fill(QColor(m_prefs.bgColor.c_str()));
 
