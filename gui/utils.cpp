@@ -506,8 +506,9 @@ bool utils::readImagePosition(std::string const& filename, std::vector<double> &
 // Convert from world coordinates to this image's pixel coordinates.
 void utils::worldToImage(double wx, double wy, utils::PositionedImage const& img, // inputs
                   double & ix, double & iy) { // outputs
-   ix = (wx - img.pos[0]) / img.pos[2];
-   iy = (wy - img.pos[1]) / img.pos[3];
+   // half grid shift for pixel center
+   ix = (wx - img.pos[0] + img.pos[2]/2) / img.pos[2];
+   iy = (wy - img.pos[1] + img.pos[3]/2) / img.pos[3];
 
    // Flip in y
    iy = img.qimg.height() - 1 - iy;
@@ -520,8 +521,9 @@ void utils::imageToWorld(double ix, double iy, utils::PositionedImage const& img
    // Flip in y
   iy = img.qimg.height() - 1 - iy;
   
-  wx = ix * img.pos[2] + img.pos[0];
-  wy = iy * img.pos[3] + img.pos[1];
+  // half grid shift for pixel center
+  wx = ix * img.pos[2] + img.pos[0] - img.pos[2]/2;
+  wy = iy * img.pos[3] + img.pos[1] - img.pos[3]/2;
 }
 
 // Find the box containing all polygons and images

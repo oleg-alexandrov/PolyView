@@ -444,10 +444,11 @@ void polyView::imageToScreenRect(// inputs
                                  utils::PositionedImage const& positioned_img,
                                  QRect & screenRect) { // output
 
-  std::vector<int> x = {imageRect.left(), imageRect.right(),
-                        imageRect.right(), imageRect.left()};
+  // Increase the right and bottom by 1 seems to work properly for Qt image display
+  std::vector<int> x = {imageRect.left(), imageRect.right()+1,
+                        imageRect.right()+1, imageRect.left()};
   std::vector<int> y = {imageRect.top(), imageRect.top(),
-                        imageRect.bottom(), imageRect.bottom()};
+                        imageRect.bottom()+1, imageRect.bottom()+1};
   
   int big = std::numeric_limits<int>::max();
   int min_ix = big, min_iy = big, max_ix = -big, max_iy = -big;
