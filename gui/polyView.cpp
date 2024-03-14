@@ -425,7 +425,7 @@ void polyView::screenToImageRect(// Inputs
   // When zooming in, this box can get tiny. Keep it at least 3 pixels on each side,
   // if possible. The extra pixels end up being rendered outside the viewing
   // window, so in effect won't be displayed, but that isn't an issue.
-  if (min_ix > 0) 
+  if (min_ix > 0)
     min_ix--;
   if (min_iy > 0)
     min_iy--;
@@ -444,11 +444,12 @@ void polyView::imageToScreenRect(// inputs
                                  utils::PositionedImage const& positioned_img,
                                  QRect & screenRect) { // output
 
-  // Increase the right and bottom by 1 seems to work properly for Qt image display
+  // Increase the right by 1 and decreasing the top by 1 seems to work properly for Qt image display
+  // Don't know why
   std::vector<int> x = {imageRect.left(), imageRect.right()+1,
                         imageRect.right()+1, imageRect.left()};
-  std::vector<int> y = {imageRect.top(), imageRect.top(),
-                        imageRect.bottom()+1, imageRect.bottom()+1};
+  std::vector<int> y = {imageRect.top()-1, imageRect.top()-1,
+                        imageRect.bottom(), imageRect.bottom()};
   
   int big = std::numeric_limits<int>::max();
   int min_ix = big, min_iy = big, max_ix = -big, max_iy = -big;
