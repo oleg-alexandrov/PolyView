@@ -53,6 +53,7 @@ namespace utils {
 
 void dPoly::reset() {
   m_isPointCloud  = false;
+  m_has_color_in_file = false;
   m_numPolys      = 0;
   m_totalNumVerts = 0;
   m_numVerts.clear();
@@ -1413,7 +1414,10 @@ bool dPoly::readPoly(std::string filename,
   anno annotation;
   string layer, line;
 
+
   string color = getCurrentDefaultColor(); // default color for polygons
+  string default_color = color;
+  m_has_color_in_file = false;
 
   while( getline(fh, line) ) {
 
@@ -1454,7 +1458,9 @@ bool dPoly::readPoly(std::string filename,
     // Else keep 'color' unchanged.
     if (line[0] == 'c' ) {
       searchForColor(line, color);
+      if (color != default_color) m_has_color_in_file = true;
       if (!isLastLine) continue;
+
     }
 
     if (line[0] == 'a'){// search only if there is a match for performance.
@@ -1554,9 +1560,11 @@ void dPoly::writePoly(std::string filename, std::string defaultColor) {
     if (m_numVerts[pIter] <= 0) continue; // skip empty polygons
     if (pIter > 0) start += m_numVerts[pIter - 1];
 
-    if (pIter < (int)m_colors.size()) color = m_colors[pIter];
-    if (color != prevColor || pIter == 0) out << "color = " << color << endl;
-    prevColor = color;
+    if (m_has_color_in_file){
+      if (pIter < (int)m_colors.size()) color = m_colors[pIter];
+      if (color != prevColor || pIter == 0) out << "color = " << color << endl;
+      prevColor = color;
+    }
 
     string layer = "";
     if (pIter < (int)m_layers.size()) layer = m_layers[pIter];

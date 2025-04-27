@@ -3134,7 +3134,7 @@ void polyView::saveMark() {
 
   cout << " Saving the mark to " << markFile << endl;
   ofstream mark(markFile.c_str());
-  mark << "color = white" << endl;
+  //mark << "color = white" << endl;
   mark << m_menuX << ' ' << m_menuY << endl;
   mark << "NEXT" << endl;
   mark.close();

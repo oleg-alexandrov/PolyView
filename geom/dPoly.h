@@ -302,7 +302,7 @@ private:
   const std::vector<int> & getStartingIndices() const;
   // If isPointCloud is true, treat each point as a set of unconnected points
   bool                     m_isPointCloud;
-
+  bool                     m_has_color_in_file;
   std::vector<double>      m_xv;
   std::vector<double>      m_yv;
   std::vector<int>         m_numVerts;
