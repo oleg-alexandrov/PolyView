@@ -102,6 +102,8 @@ public:
 
   std::vector<dPoint> getAcuteAngleLocs() const;
 
+  std::vector<dPoint> getNon45Locs() const;
+
   void shift(double shift_x, double shift_y);
   void rotate(double angle);
   void scale(double scale);

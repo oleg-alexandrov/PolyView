@@ -117,7 +117,6 @@ public slots:
   void toggleMoveEdges();
   void toggleAlignMode();
   void addAnno();
-  void markAcute();
   void deleteAnno();
   void insertVertex();
   void deleteVertex();
@@ -137,6 +136,10 @@ public slots:
   void align_flip_against_y_axis();
   void align_flip_against_x_axis();
   void performAlignmentOfClosePolys();
+
+  // Mark menu
+  void markAcute();
+  void markNon45();
 
 protected:
 
