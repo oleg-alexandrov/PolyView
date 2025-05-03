@@ -107,6 +107,7 @@ public slots:
   void setGridWidth();
   void setGridSize();
   void setGridColor();
+  void setMarkColor();
   void setBgColor();
 
   // Right-click menu
@@ -140,8 +141,13 @@ public slots:
   // Mark menu
   void markAcute();
   void markNon45();
+  void markNonManh();
+  void markDuplicatePoints();
+  void clearMarks();
+
 
 protected:
+  void updateMarks(bool need_to_refresh);
 
   void paintEvent(QPaintEvent *);
   void drawPolyBeingPlotted(const std::vector<double> & polyX,

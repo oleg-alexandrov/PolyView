@@ -483,6 +483,57 @@ void dPoly::clipAll(// inputs
 
 }
 
+std::vector<dPoint> dPoly::getDuplicates() const{
+  const auto &start_ids = getStartingIndices();
+
+    std::vector<dPoint> res;
+    std::map<std::pair<double, double>, int> point_count;
+
+    for (int pIter = 0; pIter < m_numPolys; pIter++) {
+      int start = start_ids[pIter];
+      int end   = start_ids[pIter+1];
+      if ((end - start) < 1) continue;
+      for (int ic = start; ic < end; ic++){
+        auto key = make_pair(m_xv[ic], m_yv[ic]);
+        auto it = point_count.find(key);
+        if (it == point_count.end())
+          point_count[key] = 1;
+        else
+          it->second++;
+
+      }
+    }
+
+    for (auto &it : point_count){
+      if (it.second > 1){
+        res.push_back(dPoint(it.first.first, it.first.second));
+      }
+    }
+    return res;
+}
+
+std::vector<dPoint> dPoly::getNonManhLocs() const{
+  const auto &start_ids = getStartingIndices();
+
+    std::vector<dPoint> res;
+
+    for (int pIter = 0; pIter < m_numPolys; pIter++) {
+      int start = start_ids[pIter];
+      int end   = start_ids[pIter+1];
+      if ((end - start) < 1) continue;
+      for (int ic = start; ic < end; ic++){
+        int in = (ic == end-1) ? start : ic+1;
+        double dx = m_xv[ic] - m_xv[in];
+        double dy = m_yv[ic] - m_yv[in];
+        if (dx == 0 || dy == 0) continue;
+
+        res.push_back(dPoint(m_xv[ic], m_yv[ic]));
+        res.push_back(dPoint(m_xv[in], m_yv[in]));
+      }
+    }
+    return res;
+}
+
 std::vector<dPoint> dPoly::getNon45Locs() const{
   const auto &start_ids = getStartingIndices();
 

@@ -633,8 +633,8 @@ void polyView::drawMarks(QPainter *paint){
        int x0, y0;
        worldToPixelCoords(m_markX[i], m_markY[i], // inputs
                           x0, y0 );                // outputs
-       drawMark(x0, y0, QColor(m_prefs.fgColor.c_str()),
-                m_prefs.lineWidth, paint);
+       drawMark(x0, y0, QColor(m_prefs.markColor.c_str()),
+                m_prefs.lineWidth+2, paint);
      }
    }
 }
@@ -1894,6 +1894,22 @@ void polyView::setGridColor() {
   }
   return;
 }
+void polyView::setMarkColor() {
+
+  vector<string> values;
+  if (!getStringVectorFromGui("Mark", "Enter mark color",
+                              values)) return;
+
+  string markColor = "";
+  if (values.size() > 0) markColor = values[0];
+  if (QColor(markColor.c_str()) != QColor::Invalid) {
+    m_prefs.markColor = markColor;
+    refreshPixmap();
+  }else{
+    popUp("Invalid grid color.");
+  }
+  return;
+}
 
 void polyView::setBgColor() {
 
@@ -2961,6 +2977,32 @@ void polyView::addAnno() {
   refreshPixmap();
   return;
 }
+void polyView::clearMarks(){
+  m_markX.clear();
+  m_markY.clear();
+  refreshPixmap();
+}
+
+void polyView::markDuplicatePoints(){
+  bool need_to_refresh =  m_markX.size() > 0;
+   m_markX.clear();
+   m_markY.clear();
+
+   for (auto &pol : m_polyVec){
+     auto acute = pol.getDuplicates();
+     for (auto pt : acute){
+       m_markX.push_back(pt.x);
+       m_markY.push_back(pt.y);
+     }
+   }
+
+   if (m_markX.empty()){
+      cout <<"No duplicate points"<<endl;
+    }
+
+   updateMarks(need_to_refresh);
+
+}
 
 void polyView::markNon45(){
   bool need_to_refresh =  m_markX.size() > 0;
@@ -2976,19 +3018,30 @@ void polyView::markNon45(){
    }
 
    if (m_markX.empty()){
-     cout <<"No non45 edges"<<endl;
-     return;
+     cout <<"No non-45 edges"<<endl;
    }
 
-   if (need_to_refresh){
-     refreshPixmap();
-   } else {
-     QPainter paint(&m_pixmap);
+   updateMarks(need_to_refresh);
+}
 
-     drawMarks(&paint);
-     update();
+void polyView::markNonManh(){
+  bool need_to_refresh =  m_markX.size() > 0;
+   m_markX.clear();
+   m_markY.clear();
+
+   for (auto &pol : m_polyVec){
+     auto acute = pol.getNonManhLocs();
+     for (auto pt : acute){
+       m_markX.push_back(pt.x);
+       m_markY.push_back(pt.y);
+     }
    }
 
+   if (m_markX.empty()){
+     cout <<"No non-manhattan edges"<<endl;
+   }
+
+   updateMarks(need_to_refresh);
 }
 void polyView::markAcute() {
   bool need_to_refresh =  m_markX.size() > 0;
@@ -3005,8 +3058,13 @@ void polyView::markAcute() {
 
   if (m_markX.empty()){
     cout <<"No acute angles"<<endl;
-    return;
   }
+  updateMarks(need_to_refresh);
+
+}
+
+void polyView::updateMarks(bool need_to_refresh){
+
 
   if (need_to_refresh){
     refreshPixmap();
@@ -3016,9 +3074,7 @@ void polyView::markAcute() {
     drawMarks(&paint);
     update();
   }
-
 }
-
 void polyView::deleteAnno() {
 
   int polyVecIndex, annoIndexInCurrPoly;

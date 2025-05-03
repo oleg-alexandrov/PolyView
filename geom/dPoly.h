@@ -101,8 +101,9 @@ public:
   void copyAnno(dPoly & clippedPoly);
 
   std::vector<dPoint> getAcuteAngleLocs() const;
-
+  std::vector<dPoint> getNonManhLocs() const;
   std::vector<dPoint> getNon45Locs() const;
+  std::vector<dPoint> getDuplicates() const;
 
   void shift(double shift_x, double shift_y);
   void rotate(double angle);
