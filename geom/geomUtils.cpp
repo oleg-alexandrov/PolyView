@@ -45,10 +45,10 @@ using namespace utils;
 
 static int ss_default_color_ind = 0;
 static const char * ss_xgraph_colors[] =
-  {"black", "white", "red", "blue", "green", "violet", // 0,  ..., 5
-   "orange", "yellow", "pink", "cyan", "#A2B5CD",      // 6,  ..., 10
-   "#6C7B8B", "#FF00FF", "#00CDCD", "navy", "gold"     // 11, ..., 15
-  };
+{   "black", "white", "red",  "green", "cyan", "magenta",
+    "yellow", "pink", "teal", "aquamarine", "gold",
+    "brown", "blue",  "violet", "orange", "navy"
+};
 
 void setCurrentDefaultColor(int color){
   ss_default_color_ind = color;
@@ -56,8 +56,8 @@ void setCurrentDefaultColor(int color){
 
 std::string getCurrentDefaultColor() {
   ss_default_color_ind++;
-  if (ss_default_color_ind >= 15){
-    ss_default_color_ind -= 14; // start from 1
+  if (ss_default_color_ind >= 16){
+    ss_default_color_ind -= 15; // start from 1
   }
   return ss_xgraph_colors[ss_default_color_ind];
 }
