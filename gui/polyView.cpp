@@ -159,27 +159,6 @@ polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
 
   // Actions for right-click menu
 
-  // Show poly filled
-  m_showPolysFilled = m_ContextMenu->addAction("Show polygons filled");
-  m_showPolysFilled->setCheckable(true);
-  m_showPolysFilled->setChecked(false);
-  connect(m_showPolysFilled, SIGNAL(triggered()), this, SLOT(toggleFilled()));
-
-  // Show vertex indices
-  m_showIndices = m_ContextMenu->addAction("Show vertex or poly indices");
-  m_showIndices->setCheckable(true);
-  m_showIndices->setChecked(false);
-  connect(m_showIndices, SIGNAL(triggered()), this, SLOT(toggleVertOrPolyIndexAnno()));
-  
-  // Create arbitrary poly
-  m_createArbitraryPoly = m_ContextMenu->addAction("Create polygon (left mouse click)");
-  connect(m_createArbitraryPoly, SIGNAL(triggered()), this, SLOT(createArbitraryPoly()));
-
-  // Create poly with int vertices and 45x angle
-  m_create45DegIntPoly
-    = m_ContextMenu->addAction("Create poly with int vertices and 45x deg angles");
-  connect(m_create45DegIntPoly, SIGNAL(triggered()), this, SLOT(create45DegIntPoly()));
-
   // Insert vertex
   m_insertVertex = m_ContextMenu->addAction("Insert vertex");
   connect(m_insertVertex, SIGNAL(triggered()), this, SLOT(insertVertex()));
@@ -234,9 +213,6 @@ polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
   m_deleteAnno = m_ContextMenu->addAction("Delete annotation");
   connect(m_deleteAnno, SIGNAL(triggered()), this, SLOT(deleteAnno()));
 
-  // Mark acute angles
-  m_markAcute = m_ContextMenu->addAction("Mark acute angles");
-  connect(m_markAcute, SIGNAL(triggered()), this, SLOT(markAcute()));
 
   // Align polygons
   m_alignModeAction = m_ContextMenu->addAction("Align mode");
@@ -657,8 +633,8 @@ void polyView::drawMarks(QPainter *paint){
        int x0, y0;
        worldToPixelCoords(m_markX[i], m_markY[i], // inputs
                           x0, y0 );                // outputs
-       drawMark(x0, y0, QColor(m_prefs.fgColor.c_str()),
-                m_prefs.lineWidth, paint);
+       drawMark(x0, y0, QColor(m_prefs.markColor.c_str()),
+                m_prefs.lineWidth+2, paint);
      }
    }
 }
@@ -1918,6 +1894,22 @@ void polyView::setGridColor() {
   }
   return;
 }
+void polyView::setMarkColor() {
+
+  vector<string> values;
+  if (!getStringVectorFromGui("Mark", "Enter mark color",
+                              values)) return;
+
+  string markColor = "";
+  if (values.size() > 0) markColor = values[0];
+  if (QColor(markColor.c_str()) != QColor::Invalid) {
+    m_prefs.markColor = markColor;
+    refreshPixmap();
+  }else{
+    popUp("Invalid grid color.");
+  }
+  return;
+}
 
 void polyView::setBgColor() {
 
@@ -2985,7 +2977,72 @@ void polyView::addAnno() {
   refreshPixmap();
   return;
 }
+void polyView::clearMarks(){
+  m_markX.clear();
+  m_markY.clear();
+  refreshPixmap();
+}
 
+void polyView::markDuplicatePoints(){
+  bool need_to_refresh =  m_markX.size() > 0;
+   m_markX.clear();
+   m_markY.clear();
+
+   for (auto &pol : m_polyVec){
+     auto acute = pol.getDuplicates();
+     for (auto pt : acute){
+       m_markX.push_back(pt.x);
+       m_markY.push_back(pt.y);
+     }
+   }
+
+   if (m_markX.empty()){
+      cout <<"No duplicate points"<<endl;
+    }
+
+   updateMarks(need_to_refresh);
+
+}
+
+void polyView::markNon45(){
+  bool need_to_refresh =  m_markX.size() > 0;
+   m_markX.clear();
+   m_markY.clear();
+
+   for (auto &pol : m_polyVec){
+     auto acute = pol.getNon45Locs();
+     for (auto pt : acute){
+       m_markX.push_back(pt.x);
+       m_markY.push_back(pt.y);
+     }
+   }
+
+   if (m_markX.empty()){
+     cout <<"No non-45 edges"<<endl;
+   }
+
+   updateMarks(need_to_refresh);
+}
+
+void polyView::markNonManh(){
+  bool need_to_refresh =  m_markX.size() > 0;
+   m_markX.clear();
+   m_markY.clear();
+
+   for (auto &pol : m_polyVec){
+     auto acute = pol.getNonManhLocs();
+     for (auto pt : acute){
+       m_markX.push_back(pt.x);
+       m_markY.push_back(pt.y);
+     }
+   }
+
+   if (m_markX.empty()){
+     cout <<"No non-manhattan edges"<<endl;
+   }
+
+   updateMarks(need_to_refresh);
+}
 void polyView::markAcute() {
   bool need_to_refresh =  m_markX.size() > 0;
   m_markX.clear();
@@ -3001,8 +3058,13 @@ void polyView::markAcute() {
 
   if (m_markX.empty()){
     cout <<"No acute angles"<<endl;
-    return;
   }
+  updateMarks(need_to_refresh);
+
+}
+
+void polyView::updateMarks(bool need_to_refresh){
+
 
   if (need_to_refresh){
     refreshPixmap();
@@ -3012,9 +3074,7 @@ void polyView::markAcute() {
     drawMarks(&paint);
     update();
   }
-
 }
-
 void polyView::deleteAnno() {
 
   int polyVecIndex, annoIndexInCurrPoly;
@@ -3130,7 +3190,7 @@ void polyView::saveMark() {
 
   cout << " Saving the mark to " << markFile << endl;
   ofstream mark(markFile.c_str());
-  mark << "color = white" << endl;
+  //mark << "color = white" << endl;
   mark << m_menuX << ' ' << m_menuY << endl;
   mark << "NEXT" << endl;
   mark.close();

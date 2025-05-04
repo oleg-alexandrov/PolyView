@@ -267,10 +267,6 @@ void appWindow::createMenusAndMainWidget(){
   menu->addMenu(view);
   view->addAction("Zoom out",             m_poly, SLOT(zoomOut()),      Qt::Key_Minus);
   view->addAction("Zoom in",              m_poly, SLOT(zoomIn()),       Qt::Key_Equal);
-  view->addAction("Move left",            m_poly, SLOT(shiftLeft()),    Qt::Key_Left);
-  view->addAction("Move right",           m_poly, SLOT(shiftRight()),   Qt::Key_Right);
-  view->addAction("Move up",              this,   SLOT(shiftUp()),      Qt::Key_Up);
-  view->addAction("Move down",            this,   SLOT(shiftDown()),    Qt::Key_Down);
   view->addAction("Reset view",           m_poly, SLOT(resetView()),    Qt::Key_R);
   view->addAction("Change display order", m_poly, SLOT(changeOrder()),  Qt::Key_O);
   view->addAction("Sequential display (next)",   m_poly, SLOT(sequentialDisplay()), Qt::Key_S);
@@ -346,6 +342,15 @@ void appWindow::createMenusAndMainWidget(){
   diff->addAction("Toggle show poly diff", m_poly, SLOT(toggleShowPolyDiff()), Qt::Key_D);
   diff->addAction("Show next diff", m_poly, SLOT(plotNextDiff()), Qt::Key_K);
   diff->addAction("Show prev diff", m_poly, SLOT(plotPrevDiff()), Qt::Key_J);
+
+  QMenu* mark = new QMenu("Mark", menu );
+  menu->addMenu( mark);
+  mark-> addAction("Mark acute angles", m_poly, SLOT(markAcute()));
+  mark-> addAction("Mark non-Manhattan edges", m_poly, SLOT(markNonManh()));
+  mark-> addAction("Mark non-45 edges", m_poly, SLOT(markNon45()));
+  mark-> addAction("Mark duplicate points", m_poly, SLOT(markDuplicatePoints()));
+  mark-> addAction("Clear marks", m_poly, SLOT(clearMarks()));
+  mark-> addAction("Set mark color", m_poly, SLOT(setMarkColor()));
 
   QMenu* options = new QMenu("Options", menu);
   menu->addMenu( options);

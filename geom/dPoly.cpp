@@ -53,6 +53,7 @@ namespace utils {
 
 void dPoly::reset() {
   m_isPointCloud  = false;
+  m_has_color_in_file = false;
   m_numPolys      = 0;
   m_totalNumVerts = 0;
   m_numVerts.clear();
@@ -480,6 +481,79 @@ void dPoly::clipAll(// inputs
   clipAnno(clip_box, clippedPoly);
 
 
+}
+
+std::vector<dPoint> dPoly::getDuplicates() const{
+  const auto &start_ids = getStartingIndices();
+
+    std::vector<dPoint> res;
+    std::map<std::pair<double, double>, int> point_count;
+
+    for (int pIter = 0; pIter < m_numPolys; pIter++) {
+      int start = start_ids[pIter];
+      int end   = start_ids[pIter+1];
+      if ((end - start) < 1) continue;
+      for (int ic = start; ic < end; ic++){
+        auto key = make_pair(m_xv[ic], m_yv[ic]);
+        auto it = point_count.find(key);
+        if (it == point_count.end())
+          point_count[key] = 1;
+        else
+          it->second++;
+
+      }
+    }
+
+    for (auto &it : point_count){
+      if (it.second > 1){
+        res.push_back(dPoint(it.first.first, it.first.second));
+      }
+    }
+    return res;
+}
+
+std::vector<dPoint> dPoly::getNonManhLocs() const{
+  const auto &start_ids = getStartingIndices();
+
+    std::vector<dPoint> res;
+
+    for (int pIter = 0; pIter < m_numPolys; pIter++) {
+      int start = start_ids[pIter];
+      int end   = start_ids[pIter+1];
+      if ((end - start) < 1) continue;
+      for (int ic = start; ic < end; ic++){
+        int in = (ic == end-1) ? start : ic+1;
+        double dx = m_xv[ic] - m_xv[in];
+        double dy = m_yv[ic] - m_yv[in];
+        if (dx == 0 || dy == 0) continue;
+
+        res.push_back(dPoint(m_xv[ic], m_yv[ic]));
+        res.push_back(dPoint(m_xv[in], m_yv[in]));
+      }
+    }
+    return res;
+}
+
+std::vector<dPoint> dPoly::getNon45Locs() const{
+  const auto &start_ids = getStartingIndices();
+
+    std::vector<dPoint> res;
+
+    for (int pIter = 0; pIter < m_numPolys; pIter++) {
+      int start = start_ids[pIter];
+      int end   = start_ids[pIter+1];
+      if ((end - start) < 1) continue;
+      for (int ic = start; ic < end; ic++){
+        int in = (ic == end-1) ? start : ic+1;
+        double dx = m_xv[ic] - m_xv[in];
+        double dy = m_yv[ic] - m_yv[in];
+        if (dx == 0 || dy == 0 || abs(dx) == abs(dy)) continue;
+
+        res.push_back(dPoint(m_xv[ic], m_yv[ic]));
+        res.push_back(dPoint(m_xv[in], m_yv[in]));
+      }
+    }
+    return res;
 }
 
 std::vector<dPoint> dPoly::getAcuteAngleLocs() const{
@@ -1391,7 +1465,10 @@ bool dPoly::readPoly(std::string filename,
   anno annotation;
   string layer, line;
 
+
   string color = getCurrentDefaultColor(); // default color for polygons
+  string default_color = color;
+  m_has_color_in_file = false;
 
   while( getline(fh, line) ) {
 
@@ -1432,7 +1509,9 @@ bool dPoly::readPoly(std::string filename,
     // Else keep 'color' unchanged.
     if (line[0] == 'c' ) {
       searchForColor(line, color);
+      if (color != default_color) m_has_color_in_file = true;
       if (!isLastLine) continue;
+
     }
 
     if (line[0] == 'a'){// search only if there is a match for performance.
@@ -1532,9 +1611,11 @@ void dPoly::writePoly(std::string filename, std::string defaultColor) {
     if (m_numVerts[pIter] <= 0) continue; // skip empty polygons
     if (pIter > 0) start += m_numVerts[pIter - 1];
 
-    if (pIter < (int)m_colors.size()) color = m_colors[pIter];
-    if (color != prevColor || pIter == 0) out << "color = " << color << endl;
-    prevColor = color;
+    if (m_has_color_in_file){
+      if (pIter < (int)m_colors.size()) color = m_colors[pIter];
+      if (color != prevColor || pIter == 0) out << "color = " << color << endl;
+      prevColor = color;
+    }
 
     string layer = "";
     if (pIter < (int)m_layers.size()) layer = m_layers[pIter];

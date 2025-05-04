@@ -101,6 +101,9 @@ public:
   void copyAnno(dPoly & clippedPoly);
 
   std::vector<dPoint> getAcuteAngleLocs() const;
+  std::vector<dPoint> getNonManhLocs() const;
+  std::vector<dPoint> getNon45Locs() const;
+  std::vector<dPoint> getDuplicates() const;
 
   void shift(double shift_x, double shift_y);
   void rotate(double angle);
@@ -300,7 +303,7 @@ private:
   const std::vector<int> & getStartingIndices() const;
   // If isPointCloud is true, treat each point as a set of unconnected points
   bool                     m_isPointCloud;
-
+  bool                     m_has_color_in_file;
   std::vector<double>      m_xv;
   std::vector<double>      m_yv;
   std::vector<int>         m_numVerts;

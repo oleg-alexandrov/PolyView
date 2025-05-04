@@ -61,6 +61,7 @@ struct polyOptions{
   std::string     fgColor;
   std::string     cmdLineColor;
   std::string     gridColor;
+  std::string     markColor;
   std::string     polyFileName;
   std::vector<double> colorScale;
 
@@ -87,6 +88,7 @@ struct polyOptions{
     fgColor          = "white";
     cmdLineColor     = "green";
     gridColor        = "white";
+    markColor        = "magenta";
     polyFileName     = "unnamed.xg";
   }
 
