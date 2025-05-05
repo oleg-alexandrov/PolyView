@@ -119,6 +119,7 @@ public slots:
   void toggleAlignMode();
   void addAnno();
   void deleteAnno();
+  void copyView();
   void insertVertex();
   void deleteVertex();
   void deletePoly();
@@ -375,7 +376,7 @@ private:
   QAction* m_deleteAnno;
   QAction* m_markAcute;
   QAction* m_alignModeAction;
-
+  QAction* m_copy_view;
   QAction* m_align_rotate90;
   QAction* m_align_rotate180;
   QAction* m_align_rotate270;

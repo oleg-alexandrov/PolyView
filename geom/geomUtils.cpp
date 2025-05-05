@@ -56,9 +56,9 @@ void setCurrentDefaultColor(int color){
 
 std::string getCurrentDefaultColor() {
   ss_default_color_ind++;
-  if (ss_default_color_ind >= 16){
-    ss_default_color_ind -= 15; // start from 1
-  }
+  int numColors = sizeof(ss_xgraph_colors)/sizeof(char*);
+  ss_default_color_ind = ss_default_color_ind % numColors;
+
   return ss_xgraph_colors[ss_default_color_ind];
 }
 

@@ -47,7 +47,7 @@
 #include <qpainter.h>
 #include <qmessagebox.h>
 #include <QTableWidgetItem>
-
+#include <QClipboard>
 #include <gui/polyView.h>
 #include <gui/utils.h>
 
@@ -160,6 +160,9 @@ polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
   // Actions for right-click menu
 
   // Insert vertex
+  m_copy_view = m_ContextMenu->addAction("Copy view to clipboard");
+  connect(m_copy_view, SIGNAL(triggered()), this, SLOT(copyView()));
+
   m_insertVertex = m_ContextMenu->addAction("Insert vertex");
   connect(m_insertVertex, SIGNAL(triggered()), this, SLOT(insertVertex()));
 
@@ -3095,6 +3098,15 @@ void polyView::deleteAnno() {
   m_polyVec[polyVecIndex].eraseAnno(annoIndexInCurrPoly);
   refreshPixmap();
   return;
+}
+
+void polyView::copyView() {
+  printCmd("view", m_viewXll, m_viewYll, m_viewWidX, m_viewWidY);
+  std::stringstream ff;
+  ff <<"view "<< m_viewXll<<" "<< m_viewYll<<" "<< m_viewWidX<<" "<< m_viewWidY;
+  QClipboard *clipboard = QGuiApplication::clipboard();
+
+  clipboard->setText(QString(ff.str().c_str()));
 }
 
 void polyView::insertVertex() {
