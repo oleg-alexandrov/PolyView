@@ -300,7 +300,7 @@ void appWindow::createMenusAndMainWidget(){
   selection->addAction("Delete selected polygons",
                         m_poly, SLOT(deleteSelectedPolys()), Qt::CTRL+Qt::Key_D);
   selection->addAction("Paste selected polygons",
-                        m_poly, SLOT(pasteSelectedPolys()), Qt::CTRL+Qt::Key_V);
+                        m_poly, SLOT(pasteSelectedPolys()), Qt::CTRL+Qt::Key_P);
   selection->addAction("Move selected polygons",
                         m_poly, SLOT(moveSelectedPolys()));
   selection->addAction("Deselect polygons/delete highlights",  m_poly,

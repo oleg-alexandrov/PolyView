@@ -148,6 +148,7 @@ public slots:
 
 
 protected:
+  bool hasSelectedElements();
   void updateMarks(bool need_to_refresh);
 
   void paintEvent(QPaintEvent *);

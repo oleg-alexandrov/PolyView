@@ -1351,12 +1351,17 @@ void polyView::copyPoly() {
   return;
 }
 
+bool polyView::hasSelectedElements(){
+  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0){
+    popUp("No polygons are selected.");
+    return false;
+  }
+  return true;
+}
+
 void polyView::translateSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
-    popUp("No polygons are selected.");
-    return;
-  }
+  if (!hasSelectedElements()) return;
 
   vector<double> inputVec, shiftVec;
   inputVec.clear();
@@ -1374,10 +1379,7 @@ void polyView::translateSelectedPolys() {
 
 void polyView::translateSelectedPolys(std::vector<double> & shiftVec) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
-    popUp("No polygons are selected.");
-    return;
-  }
+  if (!hasSelectedElements()) return;
 
   if (shiftVec.size() < 2) {
     popUp("Invalid translation vector.");
@@ -1407,10 +1409,7 @@ void polyView::translateSelectedPolys(std::vector<double> & shiftVec) {
 
 void polyView::rotateSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
-    popUp("No polygons are selected.");
-    return;
-  }
+  if (!hasSelectedElements()) return;
 
   vector<double> inputVec, angle;
   inputVec.clear();
@@ -1430,10 +1429,7 @@ void polyView::rotateSelectedPolys() {
 
 void polyView::rotateSelectedPolys(std::vector<double> & angle) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
-    popUp("No polygons are selected.");
-    return;
-  }
+  if (!hasSelectedElements()) return;
 
   if (angle.size() < 1) {
     popUp("Invalid rotation angle.");
@@ -1464,10 +1460,7 @@ void polyView::rotateSelectedPolys(std::vector<double> & angle) {
 
 void polyView::scaleSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
-    popUp("No polygons are selected.");
-    return;
-  }
+  if (!hasSelectedElements()) return;
 
   vector<double> inputVec, scale;
   inputVec.clear();
@@ -1485,10 +1478,7 @@ void polyView::scaleSelectedPolys() {
 
 void polyView::scaleSelectedPolys(std::vector<double> & scale) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
-    popUp("No polygons are selected.");
-    return;
-  }
+  if (!hasSelectedElements()) return;
 
   if (scale.size() < 1) {
     popUp("Invalid scale value.");
@@ -1520,10 +1510,7 @@ void polyView::scaleSelectedPolys(std::vector<double> & scale) {
 
 void polyView::transformSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
-    popUp("No polygons are selected.");
-    return;
-  }
+  if (!hasSelectedElements()) return;
 
   vector<double> inputVec, T;
   inputVec.clear();
@@ -1541,10 +1528,7 @@ void polyView::transformSelectedPolys() {
 
 void polyView::transformSelectedPolys(std::vector<double> & T) {
 
-  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
-    popUp("No polygons are selected.");
-    return;
-  }
+  if (!hasSelectedElements()) return;
 
   if (T.size() < 4) {
     popUp("Invalid transform matrix.");
@@ -1576,10 +1560,7 @@ void polyView::transformSelectedPolys(std::vector<double> & T) {
 
 void polyView::reverseSelectedPolys() {
 
-  if (getNumElements(m_selectedPolyIndices) == 0 && getNumElements(m_selectedAnnoIndices) == 0) {
-    popUp("No polygons are selected.");
-    return;
-  }
+  if (!hasSelectedElements()) return;
   
   reverseMarkedPolys(// Inputs
                      m_selectedPolyIndices,
@@ -1600,6 +1581,9 @@ void polyView::reverseSelectedPolys() {
 }
 
 void polyView::pasteSelectedPolys() {
+
+
+  if (!hasSelectedElements()) return;
 
   extractMarkedPolys(m_polyVec, m_selectedPolyIndices,  // Inputs
                      m_copiedPolyVec);                  // Outputs
@@ -3103,6 +3087,7 @@ void polyView::deleteAnno() {
 void polyView::copyView() {
   printCmd("view", m_viewXll, m_viewYll, m_viewWidX, m_viewWidY);
   std::stringstream ff;
+  ff.precision(16);
   ff <<"view "<< m_viewXll<<" "<< m_viewYll<<" "<< m_viewWidX<<" "<< m_viewWidY;
   QClipboard *clipboard = QGuiApplication::clipboard();
 

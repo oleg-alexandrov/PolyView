@@ -1248,6 +1248,7 @@ void dPoly::extractOnePoly(int polyIndex, // input
 void dPoly::extractMarkedPolys(std::vector<int> const& mark, // input
                                dPoly & polys) const {          // output 
 
+  if ((int)mark.size() < m_numPolys) return;
   const auto &start_ids = getStartingIndices();
 
   polys.reset();
