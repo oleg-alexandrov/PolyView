@@ -73,7 +73,7 @@ void utils::printUsage(std::string progName){
 
   cout <<endl<<"   point options:"<<endl;
   cout <<"     -p   | -points     (read as point cloud, not polygons)" <<endl;
-  cout <<"     -sh  | -shape   o  ([x, +, o, s, t] defines shape of the points in point mode display"<<endl;
+  cout <<"     -sh  | -shape   o  ([x, +, o, s, t, d] defines shape of the points in point mode display"<<endl;
   cout <<"     -si  | -size    3  ([1-8]  defines size of the points in point mode display"<<endl;
 
 
@@ -289,18 +289,20 @@ void utils::parseCmdOptions(//inputs
         && argIter < argc - 1){
        char shape = tolower(argv[argIter + 1][0]);
        if (shape == 'x'){
-         opt.pointShape = 0;
+         opt.pointShape = PT_X;
        } else if (shape == '+'){
-         opt.pointShape = 1;
+         opt.pointShape = PT_PLUS;
        }else if (shape == 's'){
-         opt.pointShape = 2;
+         opt.pointShape = PT_SQ;
        }else if (shape == 'o'){
-         opt.pointShape = 3;
+         opt.pointShape = PT_CIRC;
        }else if (shape == 't'){
-         opt.pointShape = 4;
+         opt.pointShape = PT_TR;
+       } else if (shape == 'd'){
+         opt.pointShape = PT_DMND;
        } else {
          cout <<"ERROR un-supported shape specified, using triangles"<<endl;
-         opt.pointShape = 5;
+         opt.pointShape = PT_REV_TR;
        }
       argIter++;
       continue;

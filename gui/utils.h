@@ -36,6 +36,16 @@ enum closedPolyInfo{
   forceClosedPoly, forceNonClosedPoly, readClosedPolyInfoFromFile
 };
 
+enum PointShape{
+  PT_X = 0,
+  PT_CIRC,
+  PT_SQ,
+  PT_TR,
+  PT_DMND,
+  PT_PLUS,
+  PT_REV_TR,
+
+};
 
 struct polyOptions{
   // Each polygon file has these options

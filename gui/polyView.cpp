@@ -571,7 +571,7 @@ void polyView::displayData(QPainter *paint, int pol_id) {
       if ( vecIter < 2){
         // in polydiff mode plot points of the two polygons the same way so that
         // the difference gets highlighted
-        point_shape = 0;
+        point_shape = PT_X;
         point_size  = 3;
       } else {
         lighter_darker = -1;//draw diff with lighter colors
@@ -2361,7 +2361,7 @@ void polyView::drawPointShapes(const QVector<QLine> &lines,
   paint->setPen(QPen(color, lineWidth));
   paint->setBrush(Qt::NoBrush);
 
-  if (shape_type == 2){
+  if (shape_type == PT_SQ){
     QVector<QRect> rects(lines.size());
     rects.resize(lines.size());
 
@@ -2374,7 +2374,7 @@ void polyView::drawPointShapes(const QVector<QLine> &lines,
     }
     paint->drawRects(rects);
 
-  } else if (shape_type == 3){
+  } else if (shape_type == PT_CIRC){
     for (const auto &line : lines) {
       paint->drawEllipse(line.p1().x(), line.p1().y(), line.p2().x(), line.p2().y());
     }
@@ -2389,74 +2389,58 @@ void polyView::getOnePointShape(int x0, int y0,
                                 QVector<QLine> &lines) {
   // Return each shape as a line segment or a set of line segments.
   // Later based on shape_type we will draw actual shape.
-  // shape_type:
-  //          0-> X
-  //          1-> +
-  //          2-> square
-  //          3-> ellipse
-  //          4-> triangle
-  //          other -> up-side-down triangle
 
   // len: size of the shape
   // x0,y0: center of the shape
 
-  if (shape_type == 0) {
+  int xl = x0 - len;
+  int xr = x0 + len;
+  int yl = y0 - len;
+  int yr = y0 + len;
+
+
+  if (shape_type == PT_X) {
     // Draw an X
-    int tl = len;
-    int xl = x0 - tl;
-    int xr = x0 + tl;
-    int yl = y0 - tl;
-    int yr = y0 + tl;
 
     lines.push_back(QLine(xl, yl, xr, yr));
     lines.push_back(QLine(xl, yr, xr,   yl));
 
-  }else if (shape_type == 1) {
+  }else if (shape_type == PT_PLUS) {
     // Draw an plus
-    int tl = len;
-    lines.push_back(QLine(x0-tl, y0, x0+tl, y0));
-    lines.push_back(QLine(x0, y0-tl, x0,   y0+tl));
 
-  }else if (shape_type == 2) {
+    lines.push_back(QLine(xl, y0, xr, y0));
+    lines.push_back(QLine(x0, yl, x0,   yr));
+
+  }else if (shape_type == PT_SQ) {
     // Draw an empty square
-    lines.push_back(QLine(x0 - len, y0 - len, 2*len, 2*len));
+    lines.push_back(QLine(xl, yl, 2*len, 2*len));
 
-  } else if (shape_type == 3) {
+  } else if (shape_type == PT_CIRC) {
     // Draw a small empty ellipse
-    lines.push_back(QLine(x0 - len, y0 - len, 2*len, 2*len));
+    lines.push_back(QLine(xl, yl, 2*len, 2*len));
 
-  } else if (shape_type == 4) {
-    // Draw an empty reversed triangle
-     int xl = x0 - len;
-     int xr = x0 + len;
-     int yl = y0 - len;
-     int yr = y0 + len;
-
-     lines.push_back(QLine(xl, yr, xr, yr));
-     lines.push_back(QLine(xl, yr, x0,   yl));
-     lines.push_back(QLine(xr, yr, x0,   yl));
-
-  }else{
+  } else if (shape_type == PT_TR) {
     // Draw an empty triangle
-    //cout <<"drawing triangle "<< shape_type <<" "<< len<<endl;
-    int xl = x0 - len;
-    int xr = x0 + len;
-    int yl = y0 - len;
-    int yr = y0 + len;
-//    cout <<xl <<" "<<  yl<<endl;
-//    cout <<xr <<" "<<  yl<<endl;
-//    cout <<"NEXT"<<endl;
-//    cout <<xl <<" "<<  yl<<endl;
-//    cout <<x0 <<" "<<  yr<<endl;
-//    cout <<"NEXT"<<endl;
-//    cout <<xr <<" "<<  yl<<endl;
-//    cout <<x0 <<" "<<  yr<<endl;
-//    cout <<"NEXT"<<endl;
 
     lines.push_back(QLine(xl, yl, xr, yl));
     lines.push_back(QLine(xl, yl, x0,   yr));
     lines.push_back(QLine(xr, yl, x0,   yr));
-   }
+
+
+  } else if (shape_type == PT_DMND){
+     // Diamond
+     lines.push_back(QLine(xl, y0, x0, yr));
+     lines.push_back(QLine(x0, yr, xr,  y0));
+     lines.push_back(QLine(xr,  y0, x0,   yl));
+     lines.push_back(QLine(x0,  yl, xl,   y0));
+
+   } else {
+     // Draw an empty reversed triangle
+
+      lines.push_back(QLine(xl, yr, xr, yr));
+      lines.push_back(QLine(xl, yr, x0,   yl));
+      lines.push_back(QLine(xr, yr, x0,   yl));
+    }
 
 }
 
@@ -2644,8 +2628,8 @@ void polyView::toggleShowPolyDiff() {
     m_polyOptionsVec[i].lineWidth = 2;
     m_polyOptionsVec[i].pointSize = 6;
   }
-  m_polyOptionsVec[2].pointShape = 0;
-  m_polyOptionsVec[3].pointShape = 2;
+  m_polyOptionsVec[2].pointShape = PT_X;
+  m_polyOptionsVec[3].pointShape = PT_SQ;
 
 
   m_polyOptionsVec[2].polyFileName = "diff1.xg";
