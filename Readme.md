@@ -274,6 +274,14 @@ provides a basic level of scripting and reproducibility.
 * Show the next/previous difference between given two given polygon files
   (starting with the largest difference)
 
+#### Mark menu
+* Mark small angles
+* Mark non-Manhattan edges
+* Mark non-45 edges
+* Mark duplicate points
+* Clear marks
+* Set mark color
+  
 #### Options menu
 
 * Set the line width of polygon edges
@@ -281,10 +289,8 @@ provides a basic level of scripting and reproducibility.
 
 #### Right-click menu
 
-* Show and save a mark at the current point
-* Create a polygon with integer vertices and edge angles multiple of 45 degrees
-* Enforce integer vertices and edge angles multiple of 45 degrees
-* Create a polygon with arbitrary angles
+* Copy current view to clipboard
+* Add label to the display
 * Delete the polygon at mouse cursor
 * Enter move polygons mode (use Shift-Mouse to move a polygon; if some polygons
   are selected using a highlight, then all selected polygons will be moved)
@@ -297,8 +303,6 @@ provides a basic level of scripting and reproducibility.
 * Reverse the orientation of the polygon closest to the mouse cursor
 * Insert annotation (text label)
 * Delete annotation (text label)
-* Mark acute angles (mark polygon vertices where inner or outer angle is less
-  than 90 degrees)
 * Align mode (a mode in which, given two polygon files, the second polygon file
   is kept fixed, while the first one can be interactively translated using
   Shift-Mouse and rotated/flipped from the right-click menu until it aligns to
