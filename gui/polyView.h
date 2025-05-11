@@ -270,6 +270,12 @@ private:
                                const std::vector<double> &colorScale,
                                QPainter *paint);
 
+  void drawAnnotation(const std::vector<anno> &annotations,
+                      std::vector< std::vector<int> > & textOnScreenGrid,
+                      double lineWidth,
+                      const std::string &color,
+                      QPainter *paint);
+
   void plotImage(QPainter *paint, utils::dPoly const& poly,
                  bool gray2rgb, const std::vector<double> &colorScale);
 
@@ -403,6 +409,7 @@ private:
   std::vector<utils::dPoly>   m_polyVecBk;
   std::vector<polyOptions>    m_polyOptionsVecBk;
   std::vector<utils::segDist> m_distVec;       // distances b/w polys to diff
+  std::vector<anno>           m_topAnno; // Annotations that needs to be plotted on top
   std::vector<double>         m_segX, m_segY;  // segment to plot
   int                         m_indexOfDistToPlot;
 

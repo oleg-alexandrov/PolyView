@@ -32,7 +32,7 @@
 namespace utils {
   
 enum AnnoType {
-  fileAnno = 0, vertAnno, polyAnno, layerAnno, lastAnno
+  fileAnno = 0, vertAnno, polyAnno, layerAnno, angleAnno, lastAnno
 };
 
 // A class holding a set of polygons in double precision
@@ -100,7 +100,7 @@ public:
 
   void copyAnno(dPoly & clippedPoly);
 
-  std::vector<dPoint> getAcuteAngleLocs() const;
+  std::vector<dPoint> getAcuteAngleLocs(double angle);
   std::vector<dPoint> getNonManhLocs() const;
   std::vector<dPoint> getNon45Locs() const;
   std::vector<dPoint> getDuplicates() const;
@@ -184,7 +184,8 @@ public:
   std::vector<anno>&  get_annotations()  { return m_annotations;}
   std::vector<anno>&  get_vertIndexAnno(){ return m_vertIndexAnno;}
   std::vector<anno>&  get_polyIndexAnno(){ return m_polyIndexAnno;}
-  std::vector<anno>&  get_layerAnno()    {return m_layerAnno;}
+  std::vector<anno>&  get_layerAnno()    { return m_layerAnno;}
+  std::vector<anno>&  get_angleAnno()    { return m_angleAnno;}
 
   const std::vector<anno>&  get_annotations()  const { return m_annotations;}
   const std::vector<anno>&  get_vertIndexAnno()const { return m_vertIndexAnno;}
@@ -316,7 +317,7 @@ private:
   std::vector<anno>        m_vertIndexAnno; // Anno showing vertex index
   std::vector<anno>        m_polyIndexAnno; // Anno showing poly index in a set of polys
   std::vector<anno>        m_layerAnno;     // Anno showing layer number
-
+  std::vector<anno>        m_angleAnno;
   // The following items are used for performance.
   // They should be cleared if geometry changes by calling clearExtraData()
   mutable boxTree< dRectWithId> m_boundingBoxTree;

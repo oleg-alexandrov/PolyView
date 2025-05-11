@@ -284,7 +284,9 @@ std::vector<anno> & dPoly::get_annoByType(AnnoType annoType) {
     return get_polyIndexAnno();
   }else if (annoType == layerAnno) {
     return get_layerAnno();
-  }else{
+  }else  if (annoType == angleAnno){
+    return get_angleAnno();
+  } else {
     std::cout << "Unknown annotation type." << std::endl;
     return get_annotations();
   }
@@ -301,7 +303,9 @@ void dPoly::set_annoByType(const std::vector<anno> & annotations, AnnoType annoT
     set_polyIndexAnno(annotations);
   }else if (annoType == layerAnno) {
     set_layerAnno(annotations);
-  }else{
+  }else if (annoType == angleAnno) {
+    m_angleAnno = annotations;
+  } else {
     std::cout << "Unknown annotation type." << std::endl;
   }
 
@@ -556,11 +560,14 @@ std::vector<dPoint> dPoly::getNon45Locs() const{
     return res;
 }
 
-std::vector<dPoint> dPoly::getAcuteAngleLocs() const{
+std::vector<dPoint> dPoly::getAcuteAngleLocs(double min_angle){
 
   const auto &start_ids = getStartingIndices();
 
+  double a = min_angle*M_PI/180.0, max_cosine = cos(a);
+
   std::vector<dPoint> res;
+  m_angleAnno.clear();
 
   for (int pIter = 0; pIter < m_numPolys; pIter++) {
     int start = start_ids[pIter];
@@ -579,8 +586,11 @@ std::vector<dPoint> dPoly::getAcuteAngleLocs() const{
       if (len1 > 0) dv1 /= len1;
       if (len2 > 0) dv2 /= len2;
       double innerp = dv1.real()*dv2.real() + dv1.imag()*dv2.imag();
-      if (innerp > 1e-7){ // acute angle
+      if (innerp > max_cosine){ // acute angle
         res.push_back(dPoint(m_xv[ic], m_yv[ic]));
+        double ang = 180*std::acos(innerp)/M_PI;
+        ang = rint(ang*100)/100.0;
+        m_angleAnno.push_back(anno(m_xv[ic], m_yv[ic], num2str(ang)));
       }
     }
   }

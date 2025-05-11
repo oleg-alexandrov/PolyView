@@ -345,7 +345,7 @@ void appWindow::createMenusAndMainWidget(){
 
   QMenu* mark = new QMenu("Mark", menu );
   menu->addMenu( mark);
-  mark-> addAction("Mark acute angles", m_poly, SLOT(markAcute()));
+  mark-> addAction("Mark small angles", m_poly, SLOT(markAcute()));
   mark-> addAction("Mark non-Manhattan edges", m_poly, SLOT(markNonManh()));
   mark-> addAction("Mark non-45 edges", m_poly, SLOT(markNon45()));
   mark-> addAction("Mark duplicate points", m_poly, SLOT(markDuplicatePoints()));

@@ -53,6 +53,11 @@ struct anno {
   double x;
   double y;
   std::string label;
+  anno(){
+    x = 0;
+    y = 0;
+  }
+  anno(double xi, double yi, const std::string &labeli): x(xi), y(yi), label(labeli){;}
 
   void appendTo(std::ofstream & outfile) const{
     outfile << "anno " << x << ' ' << y << ' ' << label << std::endl;

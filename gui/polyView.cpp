@@ -465,6 +465,7 @@ bool polyView::hasSelectedPolygons() const{
 // from world to screen coordinates.
 void polyView::displayData(QPainter *paint, int pol_id) {
 
+  m_topAnno.clear();
   //utils::Timer my_clock("polyView::displayData");
   setupViewingWindow(); // Must happen before anything else
 
@@ -609,12 +610,13 @@ void polyView::displayData(QPainter *paint, int pol_id) {
   // Plot the highlights
   bool plotPoints = false, plotEdges = true, plotFilled = false;
   int point_shape = 0;
-  textOnScreenGrid.clear();
+
+  vector<vector<int>> textOnScreenGrid_temp;
   for (int h = 0; h < (int)m_highlights.size(); h++) {
     m_highlights[h].set_color(m_prefs.fgColor.c_str());
     bool showAnno = false;
     plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth, 1.0,
-              point_shape, 1, colorScale, textOnScreenGrid, paint, m_highlights[h]);
+              point_shape, 1, colorScale, textOnScreenGrid_temp, paint, m_highlights[h]);
   }
 
   // This draws the polygon being created if in that mode
@@ -626,6 +628,9 @@ void polyView::displayData(QPainter *paint, int pol_id) {
   // Draw the marks if there
   drawMarks(paint);
 
+  QFont F; F.setPointSize(13); F.setBold(true);
+  paint->setFont(F);
+  drawAnnotation(m_topAnno, textOnScreenGrid, 2, "yellow", paint);
 
   // Plot Label
   if (!m_Label.empty()){
@@ -728,12 +733,16 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       annotations = clippedPoly.get_vertIndexAnno();
     } else if (m_showVertOrPolyIndexAnno == 2) {
       annotations = clippedPoly.get_polyIndexAnno();
-    }else if (m_showLayerAnno) {
+    } else if (m_showLayerAnno) {
       annotations = clippedPoly.get_layerAnno();
     }else if (m_showAnnotations) {
       annotations = clippedPoly.get_annotations();
     }
   }
+
+  const auto &angle_anno = clippedPoly.get_angleAnno();
+  for (const auto &ang: angle_anno) m_topAnno.push_back(ang);
+
   // When polys are filled, plot largest polys first
   if (plotFilled)
     clippedPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
@@ -871,6 +880,18 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     plotAnnotationScattered(clippedPoly.get_annotations(), colorScale, paint);
   }
 
+  drawAnnotation(annotations, textOnScreenGrid, lineWidth, "gold", paint);
+
+  //my_clock.tock("DRAW");
+
+  return;
+}
+
+void polyView::drawAnnotation(const vector<anno> &annotations,
+                              std::vector< std::vector<int> > & textOnScreenGrid,
+                              double lineWidth,
+                              const std::string &color,
+                              QPainter *paint){
   int numAnno = annotations.size();
   for (int aIter = 0; aIter < numAnno; aIter++) {
     const anno & A = annotations[aIter];
@@ -880,15 +901,10 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     );
 
     if (isClosestGridPtFree(textOnScreenGrid, x0, y0)) {
-      paint->setPen(QPen(QColor("gold"), lineWidth));
+      paint->setPen(QPen(QColor(color.c_str()), lineWidth));
       paint->drawText(x0, y0, (A.label).c_str());
     }
-
-  } // End placing annotations
-
-  //my_clock.tock("DRAW");
-
-  return;
+  }
 }
 
 void polyView::plotAnnotationScattered(const vector<anno> &annotations,
@@ -2968,6 +2984,10 @@ void polyView::addAnno() {
 void polyView::clearMarks(){
   m_markX.clear();
   m_markY.clear();
+  for (auto &pol : m_polyVec){
+    pol.get_angleAnno().clear();
+  }
+
   refreshPixmap();
 }
 
@@ -3036,8 +3056,16 @@ void polyView::markAcute() {
   m_markX.clear();
   m_markY.clear();
 
+  vector<double> inputVec, angles;
+  inputVec.push_back(90.0);
+  if (m_prefs.gridSize > 0) inputVec.push_back(m_prefs.gridSize);
+  if (!getRealValuesFromGui("Mark Angle", "Enter min angle", inputVec, angles)) return;
+
+  if (angles.empty()) return;
+
+
   for (auto &pol : m_polyVec){
-    auto acute = pol.getAcuteAngleLocs();
+    auto acute = pol.getAcuteAngleLocs(angles[0]);
     for (auto pt : acute){
       m_markX.push_back(pt.x);
       m_markY.push_back(pt.y);
@@ -3047,7 +3075,7 @@ void polyView::markAcute() {
   if (m_markX.empty()){
     cout <<"No acute angles"<<endl;
   }
-  updateMarks(need_to_refresh);
+  updateMarks(true);
 
 }
 
