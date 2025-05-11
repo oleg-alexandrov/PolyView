@@ -120,6 +120,7 @@ public slots:
   void addAnno();
   void deleteAnno();
   void copyView();
+  void addLabel();
   void insertVertex();
   void deleteVertex();
   void deletePoly();
@@ -346,6 +347,8 @@ private:
   int m_movie_frame_id;
   std::vector<utils::dPoly> m_highlights;
 
+  std::string m_Label;
+
   int m_showEdges, m_showPoints, m_showPointsEdges, m_displayMode;
   bool m_changeDisplayOrder, m_showLayerAnno;
   int m_showVertOrPolyIndexAnno; // these are conveniently grouped together
@@ -378,6 +381,7 @@ private:
   QAction* m_markAcute;
   QAction* m_alignModeAction;
   QAction* m_copy_view;
+  QAction* m_add_label;
   QAction* m_align_rotate90;
   QAction* m_align_rotate180;
   QAction* m_align_rotate270;

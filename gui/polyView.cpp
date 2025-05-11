@@ -159,10 +159,14 @@ polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
 
   // Actions for right-click menu
 
-  // Insert vertex
+
   m_copy_view = m_ContextMenu->addAction("Copy view to clipboard");
   connect(m_copy_view, SIGNAL(triggered()), this, SLOT(copyView()));
 
+  m_add_label =  m_ContextMenu->addAction("Add label");
+  connect(m_add_label, SIGNAL(triggered()), this, SLOT(addLabel()));
+
+  // Insert vertex
   m_insertVertex = m_ContextMenu->addAction("Insert vertex");
   connect(m_insertVertex, SIGNAL(triggered()), this, SLOT(insertVertex()));
 
@@ -621,6 +625,19 @@ void polyView::displayData(QPainter *paint, int pol_id) {
 
   // Draw the marks if there
   drawMarks(paint);
+
+
+  // Plot Label
+  if (!m_Label.empty()){
+    int x0, y0;
+    double posx = m_viewXll + 0.01*m_viewWidX;
+    double posy = m_viewYll + 0.01*m_viewWidY;
+    QFont F; F.setPointSize(18); F.setBold(true);F.setItalic(true);
+    paint->setFont(F);
+    worldToPixelCoords(posx, posy,  x0, y0);
+    paint->setPen(QPen(QColor("pink"), 8));
+    paint->drawText(x0, y0, m_Label.c_str());
+  }
 
   // Wipe this temporary data now that the display changed
   m_snappedPoints.clear();
@@ -3076,6 +3093,12 @@ void polyView::copyView() {
   QClipboard *clipboard = QGuiApplication::clipboard();
 
   clipboard->setText(QString(ff.str().c_str()));
+}
+
+void polyView::addLabel(){
+  string inputStr, outputStr;
+  getStringFromGui("Label", "Enter Label", inputStr, m_Label);
+  refreshPixmap();
 }
 
 void polyView::insertVertex() {
