@@ -36,6 +36,7 @@
 #include <map>
 #include <utils.h>
 #include <chooseFilesDlg.h>
+#include <complex>
 
 struct cmdLineOptions;
 
@@ -109,6 +110,7 @@ public slots:
   void setGridColor();
   void setMarkColor();
   void setBgColor();
+  void toggleRuler();
 
   // Right-click menu
   void saveMark();
@@ -211,6 +213,7 @@ private:
                     int lineWidth,
                     QPainter * paint);
   void addPolyVert(int px, int py);
+  void addRulerEdge(const Qt::MouseButton & state, int &px, int &py);
   void appendToPolyVec(const utils::dPoly & P);
   double pixelToWorldDist(int pd);
   void createHighlightWithPixelInputs(int pxll, int pyll, int pxur, int pyur);
@@ -343,6 +346,8 @@ private:
   QPixmap m_pixmap;
 
   std::vector<QPoint> m_snappedPoints, m_nonSnappedPoints;
+  std::vector<std::pair<std::complex<double>, std::complex<double>>> m_ruler_edges;
+
   int m_smallLen;
 
   QRect   m_emptyRubberBand;
@@ -362,6 +367,7 @@ private:
   bool m_createPoly, m_snapPolyTo45DegreeIntGrid;
   std::vector<double> m_currPolyX, m_currPolyY;
   std::vector<double> m_markX, m_markY;
+
 
   bool m_zoomToMouseSelection, m_viewChanged;
 
@@ -421,6 +427,7 @@ private:
   // Edit mode
   bool   m_movingVertsOrEdgesOrPolysNow;
   bool   m_deletingPolyNow;
+  bool   m_ruler_mode;
   int    m_displayModeBk;
   int    m_polyVecIndex;
   int    m_polyIndexInCurrPoly;

@@ -227,6 +227,102 @@ void utils::snapOneEdgeTo45(int numAngles, double* xs, double* ys,
   return;
 }
 
+double cross_prod(complex<double> z1, complex<double> z2) {
+  return (z1.real() * z2.imag()) - (z1.imag() * z2.real());
+}
+
+
+double utils::getDistanceSq(double Ax, double Ay,
+                            double Bx, double By,
+                            double Cx, double Cy,
+                            double Dx, double Dy,
+                            double &t, double &u){
+
+  double d1x  = Bx - Ax;
+  double d1y  = By - Ay;
+  double d2x  = Dx - Cx;
+  double d2y  = Dy - Cy;
+  double d12x = Cx - Ax;
+  double d12y = Cy - Ay;
+
+  double R = d1x*d2x + d1y*d2y;
+  double D1 = d1x*d1x + d1y*d1y;
+  double D2 = d2x*d2x + d2y*d2y;
+
+  double denom = D1*D2 - R*R;
+  double S1 = d1x*d12x + d1y*d12y;
+  double S2 = d2x*d12x + d2y*d12y;
+
+  auto force_range = [] (double &t) -> void {
+    if (t < 0) {
+      t = 0;
+
+    } else if (t > 1){
+      t = 1;
+    }
+  };
+
+
+  t = u = 0.0;
+
+  if (D1 < 1e-15){
+    if (D2 > 1e-15){
+      u = -S2/D2;
+      force_range(u);
+    }
+
+  } else if (D2 < 1e-15){
+
+    t = S1/D1;
+
+    force_range(t);
+
+  } else if (fabs(denom) < 1e-15){
+
+    u = -52/D2;
+
+    force_range(u);
+
+    t = (u*R + S1) / D1;
+
+    force_range(t);
+
+  } else {
+
+    t = (S1*D2 - S2*R) / denom;
+
+    force_range(t);
+
+    u = (t*R - S2)/D2;
+
+    force_range(u);
+
+    t = (u*R + S1) / D1;
+
+    force_range(t);
+  }
+
+  double dx = d1x*t - d2x*u - d12x;
+  double dy = d1y*t - d2y*u - d12y;
+
+  return dx*dx + dy*dy;
+}
+
+std::pair<std::complex<double>, std::complex<double>>
+utils::minDistFromSeg2Seg(const std::pair<std::complex<double>, std::complex<double>> &seg1,
+                          const std::pair<std::complex<double>, std::complex<double>> &seg2){
+
+  double u = 0, t = 0;
+  getDistanceSq(seg1.first.real(), seg1.first.imag(),
+                seg1.second.real(), seg1.second.imag(),
+                seg2.first.real(), seg2.first.imag(),
+                seg2.second.real(), seg2.second.imag(),
+                t, u);
+
+  return make_pair((1-t)*seg1.first + t*seg1.second, (1-u)*seg2.first + u*seg2.second);
+
+}
+
 void utils::minDistFromPtToSeg(//inputs
                                double xin, double yin,
                                double x0, double y0,

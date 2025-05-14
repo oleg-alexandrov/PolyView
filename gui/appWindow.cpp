@@ -356,6 +356,7 @@ void appWindow::createMenusAndMainWidget(){
   menu->addMenu( options);
   options->addAction("Set line width", m_poly, SLOT(setLineWidth()));
   options->addAction("Set background color", m_poly, SLOT(setBgColor()));
+  options->addAction("Toggle ruler mode ", m_poly, SLOT(toggleRuler()), Qt::CTRL + Qt::Key_E);
 
   QMenu* help = new QMenu("Help", menu );
   menu->addMenu(help);

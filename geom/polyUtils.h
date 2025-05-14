@@ -26,6 +26,7 @@
 #include <fstream>
 #include <cmath>
 #include <set>
+#include <complex>
 #include <map>
 #include <dPoly.h>
 #include <geomUtils.h>
@@ -82,6 +83,10 @@ namespace utils{
                                      std::vector<segDist> & distVec);
 
   void putPolyInMultiSet(const dPoly & P, std::multiset<dPoint> & mP);
+
+  std::pair<std::complex<double>, std::complex<double>>
+  getClosestPolyEdge( double x0, double y0,
+                      const std::vector<dPoly> & polyVec);
 
   void findClosestPolyEdge(// inputs
                            double x0, double y0,

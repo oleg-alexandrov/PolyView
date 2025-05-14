@@ -123,6 +123,27 @@ void utils::findClosestPolyVertex(// inputs
   return;
 }
 
+std::pair<std::complex<double>, std::complex<double>>
+utils::getClosestPolyEdge( double x0, double y0,
+                           const std::vector<dPoly> & polyVec){
+
+  double minDist  = DBL_MAX;
+  std::pair<std::complex<double>, std::complex<double>> nearest_edge;
+
+  for (int vecIter = 0; vecIter < (int)polyVec.size(); vecIter++) {
+
+    auto edge = polyVec[vecIter].getClosestPolyEdge(x0, y0); // out
+    double  ldist = norm(edge.first - edge.second);
+    if (ldist <= minDist) {
+      nearest_edge = edge;
+      minDist   = ldist;
+    }
+  }
+
+  return nearest_edge;
+
+}
+
 void utils::findClosestPolyEdge(// inputs
                                 double x0, double y0,
                                 const std::vector<dPoly> & polyVec,

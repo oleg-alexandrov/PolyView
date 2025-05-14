@@ -237,6 +237,8 @@ public:
                              double & min_dist
                              ) const;
 
+  std::pair<std::complex<double>, std::complex<double>> getClosestPolyEdge( double x0, double y0) const;
+
   void findClosestPolyEdge(//inputs
                            double x0, double y0,
                            // outputs

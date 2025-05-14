@@ -97,6 +97,7 @@ polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
   m_showLayerAnno      = false;
   m_showFilledPolys    = false;
   m_changeDisplayOrder = false;
+  m_ruler_mode = false;
   m_movie_frame_id = -1;
 
   m_emptyRubberBand = QRect(-10, -10, 0, 0); // off-screen rubberband
@@ -647,6 +648,7 @@ void polyView::displayData(QPainter *paint, int pol_id) {
   // Wipe this temporary data now that the display changed
   m_snappedPoints.clear();
   m_nonSnappedPoints.clear();
+  m_ruler_edges.clear();
 
   return;
 }
@@ -1281,6 +1283,10 @@ void polyView::mouseReleaseEvent (QMouseEvent * E) {
       return;
     }
 
+    if (m_ruler_mode){
+      addRulerEdge(E->button(), m_mouseRelX, m_mouseRelY);
+      return;
+    }
     printCurrCoords(E->button(),              // input
                     m_mouseRelX, m_mouseRelY // in-out
                     );
@@ -1697,7 +1703,7 @@ void polyView::refreshPixmap() {
 
 void polyView::paintEvent(QPaintEvent *) {
 
-    // Note that we draw from the cached pixmap, instead of redrawing
+  // Note that we draw from the cached pixmap, instead of redrawing
   // the image from scratch.
   QStylePainter paint(this);
   paint.drawPixmap(0, 0, m_pixmap);
@@ -1723,6 +1729,33 @@ void polyView::paintEvent(QPaintEvent *) {
                    2*m_smallLen, 2*m_smallLen
                    );
   }
+
+  for (int i = 0; i < m_ruler_edges.size(); i++){
+    auto edge = m_ruler_edges[i];
+    auto color = QColor( (i==2 ? "magenta" : "blue"));
+    paint.setPen(QPen(color, 2));
+    int x0, y0, x1, y1;
+    worldToPixelCoords(edge.first.real(),  edge.first.imag(), x0, y0);
+    worldToPixelCoords(edge.second.real(), edge.second.imag(), x1, y1);
+    paint.drawLine(x0, y0, x1, y1);
+
+    if (i == 2){
+      double dist = abs(edge.first - edge.second);
+      dist = rint(dist*1000)/1000.0;
+      QFont F; F.setPointSize(11); F.setBold(true);
+      paint.setFont(F);
+      paint.setPen(QPen(QColor("yellow"), 1));
+
+      auto text = to_string(dist);
+      text.erase (text.find_last_not_of('0') + 1, std::string::npos );
+
+      auto mid = 0.5*(edge.first + edge.second);
+      worldToPixelCoords(mid.real(), mid.imag(), x0, y0);
+      paint.drawText(x0, y0, text.c_str());
+    }
+  }
+  update();
+  paint.setPen(QPen(fgColor, m_prefs.lineWidth));
 
   return;
 }
@@ -1931,6 +1964,9 @@ void polyView::setMarkColor() {
   return;
 }
 
+void polyView::toggleRuler(){
+  m_ruler_mode = !m_ruler_mode;
+}
 void polyView::setBgColor() {
 
   vector<string> values;
@@ -2103,6 +2139,29 @@ void polyView::transformPolys(std::vector<double> & M) {
   else                 refreshPixmap();
 
   return;
+}
+
+void polyView::addRulerEdge(const Qt::MouseButton & state, int &px, int &py){
+
+
+  if (state == (int)Qt::LeftButton) {
+    if (m_ruler_edges.size() == 3) m_ruler_edges.clear();
+
+    double wx, wy;
+    pixelToWorldCoords(px, py, wx, wy);
+
+    auto edge = utils::getClosestPolyEdge( wx, wy, m_polyVec);
+    m_ruler_edges.push_back(edge);
+  }
+
+
+  if (m_ruler_edges.size() == 2){
+    auto ruler_dist = minDistFromSeg2Seg(m_ruler_edges[0], m_ruler_edges[1]);
+    m_ruler_edges.push_back(ruler_dist);
+    double dist = abs(ruler_dist.first - ruler_dist.second);
+    cout <<setprecision(16)<< " Ruler dist: " << dist<<endl;
+  }
+
 }
 
 void polyView::addPolyVert(int px, int py) {
@@ -3052,7 +3111,7 @@ void polyView::markNonManh(){
    updateMarks(need_to_refresh);
 }
 void polyView::markAcute() {
-  bool need_to_refresh =  m_markX.size() > 0;
+
   m_markX.clear();
   m_markY.clear();
 

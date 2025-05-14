@@ -1023,6 +1023,39 @@ void dPoly::findClosestPolyVertex(// inputs
   return;
 }
 
+std::pair<std::complex<double>, std::complex<double>>
+dPoly::getClosestPolyEdge( double x0, double y0) const{
+
+  double minDist  = DBL_MAX;
+
+  int start = 0;
+  double xval, yval;
+  std::pair<std::complex<double>, std::complex<double>> edge;
+  for (int pIter = 0; pIter < m_numPolys; pIter++) {
+
+    if (pIter > 0) start += m_numVerts[pIter - 1];
+
+    for (int vIter = 0; vIter < m_numVerts[pIter]; vIter++) {
+
+      int beg = start + vIter;
+      int end = start + (vIter + 1)%m_numVerts[pIter];
+
+      double dist = DBL_MAX;
+      minDistFromPtToSeg( x0, y0, m_xv[beg], m_yv[beg], m_xv[end], m_yv[end],
+                          xval, yval, dist);
+
+      if (dist <= minDist) {
+        edge = make_pair(std::complex<double>(m_xv[beg], m_yv[beg]),
+                         std::complex<double>(m_xv[end], m_yv[end]));
+        minDist   = dist;
+      }
+
+    }
+
+  }
+  return edge;
+}
+
 // Given a point and a set of polygons, find the polygon edge
 // closest to the given point and the location on the edge where the
 // smallest distance is achieved. Return the index of the polygon

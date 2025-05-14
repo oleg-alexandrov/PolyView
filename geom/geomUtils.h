@@ -29,6 +29,7 @@
 #include <cassert>
 #include <cfloat>
 #include <chrono>
+#include <complex>
 
 std::string getCurrentDefaultColor();
 void setCurrentDefaultColor(int color);
@@ -102,6 +103,16 @@ private:
                           double & minX, double & minY,
                           double & minDist
                           );
+
+  double getDistanceSq(double Ax, double Ay,
+                       double Bx, double By,
+                       double Cx, double Cy,
+                       double Dx, double Dy,
+                       double &t, double &u);
+
+  std::pair<std::complex<double>, std::complex<double>>
+  minDistFromSeg2Seg(const std::pair<std::complex<double>, std::complex<double>> &seg1,
+                     const std::pair<std::complex<double>, std::complex<double>> &seg2);
 
   void searchForLayer(std::string   lineStr, // input
                       std::string & layer    // output
