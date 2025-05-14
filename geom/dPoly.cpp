@@ -1024,9 +1024,9 @@ void dPoly::findClosestPolyVertex(// inputs
 }
 
 std::pair<std::complex<double>, std::complex<double>>
-dPoly::getClosestPolyEdge( double x0, double y0) const{
+dPoly::getClosestPolyEdge( double x0, double y0, double &minDist) const{
 
-  double minDist  = DBL_MAX;
+  minDist  = DBL_MAX;
 
   int start = 0;
   double xval, yval;
