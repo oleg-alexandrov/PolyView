@@ -286,6 +286,7 @@ provides a basic level of scripting and reproducibility.
 
 * Set the line width of polygon edges
 * Set the background color
+* Toggle ruler mode. In ruler mode, mouse click snaps to the nearest edge, and calculates distance between two edges.
 
 #### Right-click menu
 
