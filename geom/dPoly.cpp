@@ -1035,7 +1035,14 @@ dPoly::getClosestPolyEdge( double x0, double y0, double &minDist) const{
 
     if (pIter > 0) start += m_numVerts[pIter - 1];
 
+    bool skip_last_edge = !m_isPolyClosed[pIter] && (m_numVerts[pIter] > 1);
+
     for (int vIter = 0; vIter < m_numVerts[pIter]; vIter++) {
+
+      if ( skip_last_edge && vIter == (m_numVerts[pIter]-1)) {
+        // skip last open edge
+        continue;
+      }
 
       int beg = start + vIter;
       int end = start + (vIter + 1)%m_numVerts[pIter];

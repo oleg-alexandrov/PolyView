@@ -279,7 +279,7 @@ double utils::getDistanceSq(double Ax, double Ay,
 
   } else if (fabs(denom) < 1e-15){
 
-    u = -52/D2;
+    u = -S2/D2;
 
     force_range(u);
 
@@ -313,9 +313,9 @@ utils::minDistFromSeg2Seg(const std::pair<std::complex<double>, std::complex<dou
                           const std::pair<std::complex<double>, std::complex<double>> &seg2){
 
   double u = 0, t = 0;
-  getDistanceSq(seg1.first.real(), seg1.first.imag(),
+  getDistanceSq(seg1.first.real(),  seg1.first.imag(),
                 seg1.second.real(), seg1.second.imag(),
-                seg2.first.real(), seg2.first.imag(),
+                seg2.first.real(),  seg2.first.imag(),
                 seg2.second.real(), seg2.second.imag(),
                 t, u);
 
