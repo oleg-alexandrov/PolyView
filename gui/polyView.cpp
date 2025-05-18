@@ -1735,12 +1735,12 @@ void polyView::paintEvent(QPaintEvent *) {
     auto color = QColor( (i==2 ? "magenta" : "blue"));
     paint.setPen(QPen(color, 2));
     int x0, y0, x1, y1;
-    worldToPixelCoords(edge.first.real(),  edge.first.imag(), x0, y0);
-    worldToPixelCoords(edge.second.real(), edge.second.imag(), x1, y1);
+    worldToPixelCoords(edge.begx, edge.begy, x0, y0);
+    worldToPixelCoords(edge.endx, edge.endy, x1, y1);
     paint.drawLine(x0, y0, x1, y1);
 
     if (i == 2){
-      double dist = abs(edge.first - edge.second);
+      double dist = edge.length();
       dist = rint(dist*1000)/1000.0;
       QFont F; F.setPointSize(11); F.setBold(true);
       paint.setFont(F);
@@ -1749,8 +1749,10 @@ void polyView::paintEvent(QPaintEvent *) {
       auto text = to_string(dist);
       text.erase (text.find_last_not_of('0') + 1, std::string::npos );
 
-      auto mid = 0.5*(edge.first + edge.second);
-      worldToPixelCoords(mid.real(), mid.imag(), x0, y0);
+      auto midx = 0.5*(edge.begx + edge.endx);
+      auto midy = 0.5*(edge.begy + edge.endy);
+
+      worldToPixelCoords(midx, midy, x0, y0);
       paint.drawText(x0, y0, text.c_str());
     }
   }
@@ -2158,8 +2160,7 @@ void polyView::addRulerEdge(const Qt::MouseButton & state, int &px, int &py){
   if (m_ruler_edges.size() == 2){
     auto ruler_dist = minDistFromSeg2Seg(m_ruler_edges[0], m_ruler_edges[1]);
     m_ruler_edges.push_back(ruler_dist);
-    double dist = abs(ruler_dist.first - ruler_dist.second);
-    cout <<setprecision(16)<< " Ruler dist: " << dist<<endl;
+    cout <<setprecision(16)<< " Ruler dist: " << ruler_dist.length()<<endl;
   }
 
 }
@@ -2699,10 +2700,10 @@ void polyView::toggleShowPolyDiff() {
 
   dPoly & P = m_polyVec[0]; // alias
   dPoly & Q = m_polyVec[1]; // alias
-  vector<dPoint>  vP, vQ;
+
 
   findPolyDiff(P, Q,  // inputs
-               vP, vQ // outputs
+               m_diffPoints0, m_diffPoints1 // outputs
                );
 
   cout << " Changing the polygons colors to " << color1 << " and "
@@ -2711,8 +2712,8 @@ void polyView::toggleShowPolyDiff() {
   P.set_color(color1);
   Q.set_color(color2);
 
-  m_polyVec[2].set_pointCloud(vP, color1, layer1);
-  m_polyVec[3].set_pointCloud(vQ, color2, layer2);
+  m_polyVec[2].set_pointCloud(m_diffPoints0, color1, layer1);
+  m_polyVec[3].set_pointCloud(m_diffPoints1, color2, layer2);
 
   for (int i = 2; i <= 3; i++){
     m_polyOptionsVec[i].plotAsPoints = true;
@@ -2750,18 +2751,16 @@ void polyView::plotDiff(int direction) {
 
   if (!m_polyDiffMode) return;
 
-  // The current segment to plot
-  m_segX.clear(); m_segY.clear();
+  cout <<"DIST VEC: "<< m_distVec.size()<<endl;
 
   assert(direction == 1 || direction == -1);
 
   if (m_distVec.size() == 0) {
     assert(m_polyVec.size() >= 2);
-    findDistanceBwPolys(// inputs
+    findDistanceBwPolys(m_diffPoints0,
+                        m_diffPoints1,
                         m_polyVec[0], m_polyVec[1],
-                        // outputs
-                        m_distVec
-                        );
+                        m_distVec);
   }
 
   if (m_indexOfDistToPlot < 0) {
@@ -2802,6 +2801,8 @@ void polyView::plotDiff(int direction) {
     }
   }
 
+  // The current segment to plot
+  m_segX.clear(); m_segY.clear();
   m_segX.push_back(S.begx); m_segX.push_back(S.endx);
   m_segY.push_back(S.begy); m_segY.push_back(S.endy);
 

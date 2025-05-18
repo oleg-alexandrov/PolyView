@@ -346,7 +346,7 @@ private:
   QPixmap m_pixmap;
 
   std::vector<QPoint> m_snappedPoints, m_nonSnappedPoints;
-  std::vector<std::pair<std::complex<double>, std::complex<double>>> m_ruler_edges;
+  std::vector<utils::seg> m_ruler_edges;
 
   int m_smallLen;
 
@@ -414,11 +414,13 @@ private:
   bool                        m_polyDiffMode;
   std::vector<utils::dPoly>   m_polyVecBk;
   std::vector<polyOptions>    m_polyOptionsVecBk;
-  std::vector<utils::segDist> m_distVec;       // distances b/w polys to diff
+
   std::vector<anno>           m_topAnno; // Annotations that needs to be plotted on top
   std::vector<double>         m_segX, m_segY;  // segment to plot
   int                         m_indexOfDistToPlot;
 
+  std::vector<dPoint>  m_diffPoints0, m_diffPoints1;
+  std::vector<utils::segDist> m_distVec;       // distances b/w polys to diff
 
   // Choose which files to hide/show in the GUI
   chooseFilesDlg        * m_chooseFiles;

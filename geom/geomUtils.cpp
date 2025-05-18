@@ -308,18 +308,21 @@ double utils::getDistanceSq(double Ax, double Ay,
   return dx*dx + dy*dy;
 }
 
-std::pair<std::complex<double>, std::complex<double>>
-utils::minDistFromSeg2Seg(const std::pair<std::complex<double>, std::complex<double>> &seg1,
-                          const std::pair<std::complex<double>, std::complex<double>> &seg2){
+utils::seg
+utils::minDistFromSeg2Seg(const utils::seg &seg1,
+                          const utils::seg &seg2){
 
   double u = 0, t = 0;
-  getDistanceSq(seg1.first.real(),  seg1.first.imag(),
-                seg1.second.real(), seg1.second.imag(),
-                seg2.first.real(),  seg2.first.imag(),
-                seg2.second.real(), seg2.second.imag(),
+  getDistanceSq(seg1.begx, seg1.begy,
+                seg1.endx, seg1.endy,
+                seg2.begx, seg2.begy,
+                seg2.endx, seg2.endy,
                 t, u);
 
-  return make_pair((1-t)*seg1.first + t*seg1.second, (1-u)*seg2.first + u*seg2.second);
+  return utils::seg((1-t)*seg1.begx + t*seg1.endx,
+                    (1-t)*seg1.begy + t*seg1.endy,
+                    (1-u)*seg2.begx + u*seg2.endx,
+                    (1-u)*seg2.begy + u*seg2.endy);
 
 }
 

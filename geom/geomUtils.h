@@ -95,24 +95,6 @@ private:
                        double & x0, double & y0,
                        double & x1, double & y1);
 
-  void minDistFromPtToSeg(//inputs
-                          double xin, double yin,
-                          double x0, double y0,
-                          double x1, double y1,
-                          // outputs
-                          double & minX, double & minY,
-                          double & minDist
-                          );
-
-  double getDistanceSq(double Ax, double Ay,
-                       double Bx, double By,
-                       double Cx, double Cy,
-                       double Dx, double Dy,
-                       double &t, double &u);
-
-  std::pair<std::complex<double>, std::complex<double>>
-  minDistFromSeg2Seg(const std::pair<std::complex<double>, std::complex<double>> &seg1,
-                     const std::pair<std::complex<double>, std::complex<double>> &seg2);
 
   void searchForLayer(std::string   lineStr, // input
                       std::string & layer    // output
@@ -136,6 +118,8 @@ private:
       seg(double begx_in = 0.0, double begy_in = 0.0,
           double endx_in = 0.0, double endy_in = 0.0):
         begx(begx_in), begy(begy_in), endx(endx_in), endy(endy_in){}
+
+      double length() const {return sqrt((begx-endx)*(begx-endx) + (begy-endy)*(begy-endy));}
     };
 
 
@@ -260,6 +244,25 @@ private:
   };
 
   utils::linTrans transAroundPt(const utils::matrix2 & M, dPoint P);
+
+  void minDistFromPtToSeg(//inputs
+                            double xin, double yin,
+                            double x0, double y0,
+                            double x1, double y1,
+                            // outputs
+                            double & minX, double & minY,
+                            double & minDist
+                            );
+
+    double getDistanceSq(double Ax, double Ay,
+                         double Bx, double By,
+                         double Cx, double Cy,
+                         double Dx, double Dy,
+                         double &t, double &u);
+
+    utils::seg
+    minDistFromSeg2Seg(const utils::seg &seg1,
+                       const utils::seg &seg2);
 
 }
 

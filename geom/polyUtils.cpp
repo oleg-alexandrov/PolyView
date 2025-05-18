@@ -123,25 +123,24 @@ void utils::findClosestPolyVertex(// inputs
   return;
 }
 
-std::pair<std::complex<double>, std::complex<double>>
+utils::seg
 utils::getClosestPolyEdge( double x0, double y0,
                            const std::vector<dPoly> & polyVec){
 
-  double minDist  = DBL_MAX;
-  double  ldist;
-  std::pair<std::complex<double>, std::complex<double>> nearest_edge;
 
+  double minDist   = DBL_MAX;
+  utils::seg nearest_seg;
   for (int vecIter = 0; vecIter < (int)polyVec.size(); vecIter++) {
 
-    auto edge = polyVec[vecIter].getClosestPolyEdge(x0, y0, ldist); // out
+    double ldist;
+    auto seg = polyVec[vecIter].getClosestPolyEdge(x0, y0, ldist); // out
 
     if (ldist <= minDist) {
-      nearest_edge = edge;
+      nearest_seg = seg;
       minDist   = ldist;
     }
   }
-
-  return nearest_edge;
+  return nearest_seg;
 
 }
 
@@ -280,7 +279,6 @@ void utils::findDistanceBwPolys(// inputs
 
   return;
 }
-
 void utils::findDistanceFromPoly1ToPoly2(// inputs
                                          const dPoly & poly1,
                                          const dPoly & poly2,
@@ -306,25 +304,74 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
 
   if (numVerts1 == 0 || numVerts2 == 0) return; // no vertices
 
-  // Put the edges of the second polygon in a tree for fast access
-  const kdTree *pt_tree = nullptr;
-  edgeTree T;
+  std::vector<dPoint>  points;
+  points.resize(numVerts1);
 
-  if (poly2.isPointCloud()){// If point cloud use existing point tree for performance
-    pt_tree = poly2.getPointTree() ;
-  } else {
-    T.putPolyEdgesInTree(poly2);
+  for (int t = 0; t < numVerts1; t++) {
+    points[t].x = x1[t];
+    points[t].y = y1[t];
   }
 
-  std::vector<segDist> distVec_temp(numVerts1);
+  findDistanceFromPointsToPoly(points, poly2, distVec);
+
+  return;
+}
+
+void utils::findDistanceBwPolys(const std::vector<dPoint>  &points1,
+                                const std::vector<dPoint>  &points2,
+                                const dPoly & poly1,
+                                const dPoly & poly2,
+                                // outputs
+                                std::vector<segDist> & distVec
+                                ) {
+
+  // Find the distances from poly1 to poly2, then from poly2 to poly1.
+  // Sort them in decreasing order of their lengths. See
+  // findDistanceFromPoly1ToPoly2 for more info.
+
+  findDistanceFromPointsToPoly(points1, poly2, // inputs
+                               distVec       // outputs
+                               );
+
+  vector<segDist> l_distVec;
+  findDistanceFromPointsToPoly(points2, poly1, // inputs
+                               l_distVec     // outputs
+                               );
+
+  for (int s = 0; s < (int)l_distVec.size(); s++) distVec.push_back(l_distVec[s]);
+
+  sort(distVec.begin(), distVec.end(), segDistGreaterThan);
+
+  return;
+}
+void utils::findDistanceFromPointsToPoly(const std::vector<dPoint>  &points,
+                                         const dPoly & poly2,
+                                         std::vector<segDist> & distVec){
+
+  distVec.clear();
+  if (points.empty() || poly2.get_totalNumVerts() == 0) return; // no vertices
+
+  // Put the edges of the second polygon in a tree for fast access
+  const kdTree *pt_tree = nullptr;
+  const edgeTree *T = nullptr;
   bool point_cloud = poly2.isPointCloud();
+
+  if (point_cloud){// If point cloud use existing point tree for performance
+    pt_tree = poly2.getPointTree() ;
+  } else {
+    T = poly2.getEdgeTree();
+  }
+
+  std::vector<segDist> distVec_temp(points.size());
+
 
 #ifdef POLYVIEW_USE_OPENMP
     #pragma omp parallel for
 #endif
-  for (int t = 0; t < numVerts1; t++) {
 
-    double x = x1[t], y = y1[t];
+  for (unsigned t = 0; t < points.size(); t++) {
+
+    double x = points[t].x, y = points[t].y;
     double closestX, closestY, closestDist;
 
     if (point_cloud){
@@ -334,11 +381,11 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
       closestY = closestVertex.y;
     } else {
       seg closestEdge;
-      T.findClosestEdgeToPoint(x, y,                                        // inputs
+      T->findClosestEdgeToPoint(x, y,                                        // inputs
                                closestEdge, closestDist, closestX, closestY // outputs
       );
     }
-    if (closestDist>0){
+    if (closestDist > 0){
       distVec_temp[t] = segDist(x, y, closestX, closestY, closestDist);
     }
   }
@@ -347,8 +394,8 @@ void utils::findDistanceFromPoly1ToPoly2(// inputs
     if (seg.dist > 0) distVec.push_back(seg);
   }
 
-  return;
 }
+
 
 void utils::findDistanceBwPolysBruteForce(// inputs
                                           const dPoly & poly1,

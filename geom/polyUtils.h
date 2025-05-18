@@ -69,6 +69,17 @@ namespace utils{
                            std::vector<segDist> & distVec
                            );
 
+  void findDistanceBwPolys(const std::vector<dPoint>  &points1,
+                           const std::vector<dPoint>  &points2,
+                           const dPoly & poly1,
+                           const dPoly & poly2,
+                           // outputs
+                           std::vector<segDist> & distVec);
+
+  void findDistanceFromPointsToPoly(const std::vector<dPoint>  &points,
+                                    const dPoly & poly2,
+                                    std::vector<segDist> & distVec);
+
   void findDistanceFromPoly1ToPoly2(// inputs
                                     const dPoly & poly1,
                                     const dPoly & poly2,
@@ -84,7 +95,7 @@ namespace utils{
 
   void putPolyInMultiSet(const dPoly & P, std::multiset<dPoint> & mP);
 
-  std::pair<std::complex<double>, std::complex<double>>
+  utils::seg
   getClosestPolyEdge( double x0, double y0,
                       const std::vector<dPoly> & polyVec);
 

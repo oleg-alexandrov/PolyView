@@ -42,15 +42,18 @@ void edgeTree::putPolyEdgesInTree(const dPoly & poly){
   const int    * numVerts = poly.get_numVerts();
   int numPolys            = poly.get_numPolys();
   int totalNumVerts       = poly. get_totalNumVerts();
-  
+  const auto  &isclosed   = poly.get_isPolyClosed();
   m_allEdges.resize(totalNumVerts);
   
   int start = 0;
   for (int pIter = 0; pIter < numPolys; pIter++){
       
     if (pIter > 0) start += numVerts[pIter - 1];
+    bool skip_last_edge = !isclosed[pIter] && (numVerts[pIter] > 1);
 
     for (int vIter = 0; vIter < numVerts[pIter]; vIter++){
+
+      if ( skip_last_edge && vIter == (numVerts[pIter]-1)) continue;
 
       int vIter2 = (vIter + 1) % numVerts[pIter];
       double bx = xv[start + vIter ], by = yv[start + vIter ];

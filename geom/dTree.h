@@ -367,6 +367,14 @@ public:
                               double & closestX, double & closestY
                               ) const;
 
+  size_t size() const {return m_allEdges.size();}
+
+  void clear(){
+    m_boxTree.clear();
+    m_allEdges.clear();
+    m_boxesInRegion.clear();
+  }
+
 private:
 
   inline void edgeToBox(//inputs

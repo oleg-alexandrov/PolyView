@@ -19,6 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+#include <numeric>
 
 // For MS Windows
 #define _USE_MATH_DEFINES 
@@ -1001,67 +1002,29 @@ void dPoly::findClosestPolyVertex(// inputs
 
   min_x = x0; min_y = y0; min_dist = DBL_MAX;
   polyIndex = -1; vertIndex = -1;
+  const auto *tree = getPointTree();
+  utils::PointWithId closestVertex;
+  tree->findClosestVertexToPoint(x0, y0, closestVertex, min_dist);
 
-  int start = 0;
-  for (int pIter = 0; pIter < m_numPolys; pIter++) {
-
-    if (pIter > 0) start += m_numVerts[pIter - 1];
-
-    for (int vIter = 0; vIter < m_numVerts[pIter]; vIter++) {
-      double dist = distance(x0, y0, m_xv[start + vIter], m_yv[start + vIter]);
-      if (dist <= min_dist) {
-        polyIndex = pIter;
-        vertIndex = vIter;
-        min_dist  = dist;
-        min_x     = m_xv[start + vIter];
-        min_y     = m_yv[start + vIter];
-      }
-    }
-
-  }
+  vertexIndexToPolyIndex(closestVertex.id, polyIndex, vertIndex);
+  min_x = closestVertex.x;
+  min_y = closestVertex.y;
 
   return;
 }
 
-std::pair<std::complex<double>, std::complex<double>>
-dPoly::getClosestPolyEdge( double x0, double y0, double &minDist) const{
+utils::seg
+dPoly::getClosestPolyEdge(double x0, double y0, double &minDist) const{
 
-  minDist  = DBL_MAX;
+  const auto *edgeTree = getEdgeTree();
+  utils::seg closestEdge;
 
-  int start = 0;
-  double xval, yval;
-  std::pair<std::complex<double>, std::complex<double>> edge;
-  for (int pIter = 0; pIter < m_numPolys; pIter++) {
+  double  minX, minY;
+  edgeTree->findClosestEdgeToPoint(x0, y0, closestEdge, minDist, minX, minY);
 
-    if (pIter > 0) start += m_numVerts[pIter - 1];
-
-    bool skip_last_edge = !m_isPolyClosed[pIter] && (m_numVerts[pIter] > 1);
-
-    for (int vIter = 0; vIter < m_numVerts[pIter]; vIter++) {
-
-      if ( skip_last_edge && vIter == (m_numVerts[pIter]-1)) {
-        // skip last open edge
-        continue;
-      }
-
-      int beg = start + vIter;
-      int end = start + (vIter + 1)%m_numVerts[pIter];
-
-      double dist = DBL_MAX;
-      minDistFromPtToSeg( x0, y0, m_xv[beg], m_yv[beg], m_xv[end], m_yv[end],
-                          xval, yval, dist);
-
-      if (dist <= minDist) {
-        edge = make_pair(std::complex<double>(m_xv[beg], m_yv[beg]),
-                         std::complex<double>(m_xv[end], m_yv[end]));
-        minDist   = dist;
-      }
-
-    }
-
-  }
-  return edge;
+  return closestEdge;
 }
+
 
 // Given a point and a set of polygons, find the polygon edge
 // closest to the given point and the location on the edge where the
@@ -1075,6 +1038,7 @@ void dPoly::findClosestPolyEdge(//inputs
                                  double & minX, double & minY, double & minDist
                                  ) const{
 
+
   polyIndex = -1;
   vertIndex = -1;
   minX     = DBL_MAX, minY = DBL_MAX;
@@ -1085,8 +1049,15 @@ void dPoly::findClosestPolyEdge(//inputs
   for (int pIter = 0; pIter < m_numPolys; pIter++) {
 
     if (pIter > 0) start += m_numVerts[pIter - 1];
+    
+    bool skip_last_edge = !m_isPolyClosed[pIter] && (m_numVerts[pIter] > 1);
 
     for (int vIter = 0; vIter < m_numVerts[pIter]; vIter++) {
+
+      if ( skip_last_edge && vIter == (m_numVerts[pIter]-1)) {
+        // skip last open edge
+        continue;
+      }
 
       int beg = start + vIter;
       int end = start + (vIter + 1)%m_numVerts[pIter];
@@ -1253,6 +1224,17 @@ void dPoly::reverseMarkedPolys(std::vector<int> const & mark) {
     reverseOnePoly(i);
   }
   return;
+}
+
+void dPoly::vertexIndexToPolyIndex(int vertexId, int &polId, int &pointInPolyId) const {
+  const auto &starts = getStartingIndices();
+  for (int i = 0; i < m_numPolys; i++){
+    if (starts[i] > vertexId){
+      polId = i-1;
+      pointInPolyId = vertexId - starts[i-1];
+      return;
+    }
+  }
 }
 
 const std::vector<int>& dPoly::getStartingIndices() const{
@@ -1709,6 +1691,7 @@ void dPoly::writePoly(std::string filename, std::string defaultColor) {
 void dPoly::clearExtraData(){
 	m_boundingBoxTree.clear();
 	m_pointTree.clear();
+	m_edgeTree.clear();
 	m_vertIndexAnno.clear();
 	m_polyIndexAnno.clear();
 	m_BoundingBox.setInvalid();
@@ -1722,6 +1705,16 @@ const kdTree * dPoly::getPointTree() const{
   }
   return &m_pointTree;
 }
+
+const edgeTree * dPoly::getEdgeTree() const{
+  // we need to check of tree is empty.
+  if ( m_edgeTree.size() != m_xv.size()){
+    //utils::Timer my_clock("dPoly::getPointTree");
+    m_edgeTree.putPolyEdgesInTree(*this);
+  }
+  return &m_edgeTree;
+}
+
 const boxTree< dRectWithId> * dPoly::getBoundingBoxTree() const{
 
 

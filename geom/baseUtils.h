@@ -51,6 +51,10 @@ namespace utils{
     return sqrt( (x1 - x0)*(x1 - x0) + (y1 - y0)*(y1 - y0) );
   }
   
+  inline double norm(double x0, double y0, double x1, double y1){
+    return  (x1 - x0)*(x1 - x0) + (y1 - y0)*(y1 - y0);
+  }
+
   inline int iround(double x){ return (int)round(x); }
   inline int iceil (double x){ return (int)ceil( x); }
   inline int ifloor(double x){ return (int)floor(x); }

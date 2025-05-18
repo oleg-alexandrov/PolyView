@@ -136,7 +136,7 @@ public:
   
   int get_numPolys                    () const { return m_numPolys;                }
   int get_totalNumVerts               () const { return m_totalNumVerts;           }
-  std::vector<char> get_isPolyClosed  () const { return m_isPolyClosed;            }
+  const std::vector<char>& get_isPolyClosed  () const { return m_isPolyClosed;            }
   std::vector<std::string> get_colors () const { return m_colors;                  }
   std::vector<std::string> get_layers () const { return m_layers;                  }
 
@@ -237,8 +237,8 @@ public:
                              double & min_dist
                              ) const;
 
-  std::pair<std::complex<double>, std::complex<double>>
-  getClosestPolyEdge( double x0, double y0, double &minDist) const;
+  utils::seg
+  getClosestPolyEdge(double x0, double y0, double &minDist) const;
 
   void findClosestPolyEdge(//inputs
                            double x0, double y0,
@@ -295,12 +295,12 @@ public:
   // If three is already created it will just return the pointer
   const boxTree< dRectWithId>  * getBoundingBoxTree() const;
   const kdTree * getPointTree() const;
-
+  const edgeTree * getEdgeTree() const;
 private:
 
   // Clear pre-computed data if geometry changes
   void clearExtraData();
-
+  void vertexIndexToPolyIndex(int vertexId, int &polId, int &pointInPolyId) const;
   bool getColorInCntFile(const std::string & line, std::string & color);
   std::vector<anno> &  get_annoByType(AnnoType annoType);
   void set_annoByType(const std::vector<anno> & annotations, AnnoType annoType);
@@ -325,7 +325,7 @@ private:
   // They should be cleared if geometry changes by calling clearExtraData()
   mutable boxTree< dRectWithId> m_boundingBoxTree;
   mutable kdTree m_pointTree;
-
+  mutable edgeTree m_edgeTree;
   mutable std::vector<int>  m_startingIndices;
   mutable dRect m_BoundingBox;
 };
