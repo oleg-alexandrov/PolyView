@@ -190,7 +190,7 @@ void kdTree::findClosestVertexToPoint(// inputs
                                    closestVertex, closestDist // outputs
                                    );
 
-
+  closestDist = sqrt(closestDist);
   return;
 }
 
@@ -211,7 +211,7 @@ void kdTree::findClosestVertexToPointInternal(// inputs
   const utils::Node &node = getNode(root);
   const PointWithId & P = node.P; // alias
 
-  double dist = distance(x0, y0, P.x, P.y);
+  double dist = norm(x0, y0, P.x, P.y);
   
   if (dist < closestDist){
     closestVertex = P;
@@ -232,7 +232,9 @@ void kdTree::findClosestVertexToPointInternal(// inputs
                                        closestVertex, closestDist // outputs
                                        );
     // Don't go right unless there's any chance on improving what we already found
-    bool bad = (node.right == -1 || lx0 + closestDist <= rootX);
+    double dd  = rootX - lx0;
+    double dd2 = dd*dd;
+    bool bad = (node.right == -1 || (dd >= 0 && closestDist <= dd2));
     if (!bad) findClosestVertexToPointInternal(x0, y0, node.right,       // inputs
                                                closestVertex, closestDist // outputs
                                                );
@@ -243,7 +245,9 @@ void kdTree::findClosestVertexToPointInternal(// inputs
                                        closestVertex, closestDist // outputs
                                        );
     // Don't go left unless there's any chance on improving what we already found
-    bool bad = (node.left == -1 || rootX + closestDist <= lx0);
+    double dd  = lx0 - rootX;
+    double dd2 = dd*dd;
+    bool bad = (node.left == -1 || (dd >= 0 && closestDist <= dd2));
     if (!bad) findClosestVertexToPointInternal(x0, y0, node.left,        // inputs
                                                closestVertex, closestDist // outputs
                                                );

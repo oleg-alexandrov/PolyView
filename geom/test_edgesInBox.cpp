@@ -54,7 +54,7 @@ int main(int argc, char** argv){
   edgeTree T;
   T.putPolyEdgesInTree(poly);
 
-  vector<seg> edgesInBox;
+  vector<segWidthId> edgesInBox;
   T.findPolyEdgesInBox(xl, yl, xh, yh, // inputs
                        edgesInBox      // output
                        );

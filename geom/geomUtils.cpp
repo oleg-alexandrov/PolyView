@@ -326,14 +326,12 @@ utils::minDistFromSeg2Seg(const utils::seg &seg1,
 
 }
 
-void utils::minDistFromPtToSeg(//inputs
-                               double xin, double yin,
-                               double x0, double y0,
-                               double x1, double y1,
-                               // outputs
-                               double & minX, double & minY,
-                               double & minDist
-                               ){
+void utils::minDistSqFromPtToSeg(double xin, double yin,
+                                 double x0, double y0,
+                                 double x1, double y1,
+                                 // outputs
+                                 double & minX, double & minY,
+                                 double & minDistSq){
 
   // Given the point (xin, yin) and the segment going from (x0, y0) to
   // (x1, y1), find the point (minX, minY) on this segment (not on its
@@ -351,12 +349,53 @@ void utils::minDistFromPtToSeg(//inputs
   minX = x0 + t*(x1 - x0);
   minY = y0 + t*(y1 - y0);
 
-  minDist = sqrt ( (xin  - minX)*(xin - minX) + (yin  - minY)*(yin - minY) );
+  minDistSq = (xin  - minX)*(xin - minX) + (yin  - minY)*(yin - minY);
 
   return;
 }
 
+void utils::minDistFromPtToSeg(//inputs
+                               double xin, double yin,
+                               double x0, double y0,
+                               double x1, double y1,
+                               // outputs
+                               double & minX, double & minY,
+                               double & minDist
+                               ){
 
+  // Given the point (xin, yin) and the segment going from (x0, y0) to
+  // (x1, y1), find the point (minX, minY) on this segment (not on its
+  // continuation) closest to (xin, yin).
+  double minDistSq;
+  minDistSqFromPtToSeg(xin, yin, x0, y0, x1, y1, minX, minY, minDistSq);
+
+  minDist = sqrt(minDistSq);
+
+  return;
+}
+
+void utils::minDistFromPtToSeg(//inputs
+                               double xin, double yin,
+                               const seg &segment,
+                               // outputs
+                               double & minX, double & minY,
+                               double & minDist){
+
+  return minDistFromPtToSeg(xin, yin,
+                            segment.begx, segment.begy, segment.endx, segment.endy,
+                            minX, minY, minDist);
+}
+
+void utils::minDistSqFromPtToSeg(double xin, double yin,
+                                 const seg &segment,
+                                 // outputs
+                                 double & minX, double & minY,
+                                 double & minDist){
+
+  return minDistSqFromPtToSeg(xin, yin,
+                              segment.begx, segment.begy, segment.endx, segment.endy,
+                              minX, minY, minDist);
+}
 
 void utils::searchForColor(const std::string &lineStr, // input, not a reference on purpose
                            std::string & color  // output

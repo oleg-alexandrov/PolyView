@@ -122,6 +122,14 @@ private:
       double length() const {return sqrt((begx-endx)*(begx-endx) + (begy-endy)*(begy-endy));}
     };
 
+  struct segWidthId : public seg {
+    int id;
+    segWidthId(double begx_in = 0.0, double begy_in = 0.0,
+               double endx_in = 0.0, double endy_in = 0.0, int i = -1) :
+                seg( begx_in, begy_in, endx_in, endy_in), id(i){}
+
+    seg& getSeg(){return *this;}
+  };
 
   struct segDist: public seg{
     double dist;
@@ -245,6 +253,12 @@ private:
 
   utils::linTrans transAroundPt(const utils::matrix2 & M, dPoint P);
 
+  void minDistSqFromPtToSeg(double xin, double yin,
+                                   double x0, double y0,
+                                   double x1, double y1,
+                                   // outputs
+                                   double & minX, double & minY,
+                                   double & minDistSq);
   void minDistFromPtToSeg(//inputs
                             double xin, double yin,
                             double x0, double y0,
@@ -253,6 +267,18 @@ private:
                             double & minX, double & minY,
                             double & minDist
                             );
+
+  void minDistFromPtToSeg(double xin, double yin,
+                          const seg &segment,
+                          // outputs
+                          double & minX, double & minY,
+                          double & minDist);
+
+  void minDistSqFromPtToSeg(double xin, double yin,
+                            const seg &segment,
+                            // outputs
+                            double & minX, double & minY,
+                            double & minDist);
 
     double getDistanceSq(double Ax, double Ay,
                          double Bx, double By,

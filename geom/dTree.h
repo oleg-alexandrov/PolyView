@@ -355,7 +355,9 @@ public:
                           double xl, double yl,
                           double xh, double yh,
                           // outputs
-                          std::vector<utils::seg> & edgesInBox);
+                          std::vector<utils::segWidthId> & edgesInBox);
+
+  int findClosestEdge( double x0, double y0, utils::seg &closestEdge, double &closestDist) const;
 
   void findClosestEdgeToPoint(// inputs
                               double x0, double y0,
@@ -382,36 +384,23 @@ private:
                         // outputs
                         utils::dRectWithId & R
                         ){
-    // Given an edge, compute its bounding box and the info necessary info
-    // to reverse this transformation, see boxToEdge.
-    int id = 0;
-    if (bx > ex){ std::swap(bx, ex); id |= 1; } // id = id | 01
-    if (by > ey){ std::swap(by, ey); id |= 2; } // id = id | 10
-    R = utils::dRectWithId(bx, by, ex, ey, id);
-    return;
-  }
 
-  inline void boxToEdge(// inputs
-                        const utils::dRectWithId & R,
-                        // outputs
-                        double & bx, double & by, double & ex, double & ey
-                        ) const{
-    // Recover the edge based on the bounding box and id. The inverse of edgeToBox.
-    bx = R.xl; by = R.yl; ex = R.xh; ey = R.yh;
-    int id = R.id;
-    if (id & 1) std::swap (bx, ex);
-    if (id & 2) std::swap (by, ey);
+    if (bx > ex) std::swap(bx, ex);
+    if (by > ey) std::swap(by, ey);
+    R = utils::dRectWithId(bx, by, ex, ey, -1);
   }
 
   void findClosestEdgeToPointInternal(// inputs
                                       double x0, double y0,
                                       int root,
                                       // outputs
+                                      int &edge_id,
                                       utils::seg & closestEdge,
-                                      double     & closestDist) const;
+                                      double     & closestDistSq) const;
   // Internal data structures
   boxTree<utils::dRectWithId>      m_boxTree;
-  std::vector<utils::dRectWithId>  m_allEdges;
+  std::vector<utils::segWidthId>  m_allEdges;
+  //std::vector<std::pair<int,int>>  m_polyEdgeIds;
   std::vector<utils::dRectWithId>  m_boxesInRegion;
 
 };

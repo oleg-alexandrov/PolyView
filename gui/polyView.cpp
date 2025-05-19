@@ -1730,7 +1730,7 @@ void polyView::paintEvent(QPaintEvent *) {
                    );
   }
 
-  for (int i = 0; i < m_ruler_edges.size(); i++){
+  for (unsigned i = 0; i < m_ruler_edges.size(); i++){
     auto edge = m_ruler_edges[i];
     auto color = QColor( (i==2 ? "magenta" : "blue"));
     paint.setPen(QPen(color, 2));
@@ -1748,6 +1748,7 @@ void polyView::paintEvent(QPaintEvent *) {
 
       auto text = to_string(dist);
       text.erase (text.find_last_not_of('0') + 1, std::string::npos );
+      if (text.back() == '.') text.pop_back();
 
       auto midx = 0.5*(edge.begx + edge.endx);
       auto midy = 0.5*(edge.begy + edge.endy);

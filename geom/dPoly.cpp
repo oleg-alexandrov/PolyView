@@ -976,12 +976,13 @@ void dPoly::findClosestAnnotation(// inputs
   annoIndex = -1;
 
   for (size_t aIter = 0; aIter < m_annotations.size(); aIter++) {
-    double dist = distance(x0, y0, m_annotations[aIter].x, m_annotations[aIter].y);
+    double dist = norm(x0, y0, m_annotations[aIter].x, m_annotations[aIter].y);
     if (dist <= min_dist) {
       annoIndex = aIter;
       min_dist  = dist;
     }
   }
+  min_dist = sqrt(min_dist);
 
   return;
 }
@@ -1019,8 +1020,7 @@ dPoly::getClosestPolyEdge(double x0, double y0, double &minDist) const{
   const auto *edgeTree = getEdgeTree();
   utils::seg closestEdge;
 
-  double  minX, minY;
-  edgeTree->findClosestEdgeToPoint(x0, y0, closestEdge, minDist, minX, minY);
+  edgeTree->findClosestEdge(x0, y0, closestEdge, minDist);
 
   return closestEdge;
 }
@@ -1063,7 +1063,7 @@ void dPoly::findClosestPolyEdge(//inputs
       int end = start + (vIter + 1)%m_numVerts[pIter];
 
       double dist = DBL_MAX;
-      minDistFromPtToSeg(// inputs
+      minDistSqFromPtToSeg(// inputs
                          x0, y0, m_xv[beg], m_yv[beg], m_xv[end], m_yv[end],
                          // outputs
                          xval, yval, dist
@@ -1080,6 +1080,8 @@ void dPoly::findClosestPolyEdge(//inputs
     }
 
   }
+
+  minDist = sqrt(minDist);
 
   return;
 }
