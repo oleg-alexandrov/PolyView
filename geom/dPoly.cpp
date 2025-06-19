@@ -1229,6 +1229,9 @@ void dPoly::reverseMarkedPolys(std::vector<int> const & mark) {
 }
 
 void dPoly::vertexIndexToPolyIndex(int vertexId, int &polId, int &pointInPolyId) const {
+
+  polId = 0;
+  pointInPolyId = vertexId;
   const auto &starts = getStartingIndices();
   for (int i = 0; i < m_numPolys; i++){
     if (starts[i] > vertexId){
