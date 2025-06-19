@@ -1285,6 +1285,7 @@ void polyView::mouseReleaseEvent (QMouseEvent * E) {
 
     if (m_ruler_mode){
       addRulerEdge(E->button(), m_mouseRelX, m_mouseRelY);
+      update();
       return;
     }
     printCurrCoords(E->button(),              // input
@@ -1757,7 +1758,7 @@ void polyView::paintEvent(QPaintEvent *) {
       paint.drawText(x0, y0, text.c_str());
     }
   }
-  update();
+
   paint.setPen(QPen(fgColor, m_prefs.lineWidth));
 
   return;
