@@ -2753,8 +2753,6 @@ void polyView::plotDiff(int direction) {
 
   if (!m_polyDiffMode) return;
 
-  cout <<"DIST VEC: "<< m_distVec.size()<<endl;
-
   assert(direction == 1 || direction == -1);
 
   if (m_distVec.size() == 0) {
