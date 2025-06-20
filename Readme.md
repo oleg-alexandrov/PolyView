@@ -327,6 +327,7 @@ displayed.
   *  `-gridSize`  (integer)  Grid size in units of geometry.
   *  `-gridWidth` (integer)  Grid width in pixels.
   *  `-gridColor` (color) Grid color.
+  *  `-nt | -numThreads`    number of threads to use for openmp loops (if compiled with openmp)
   *  `-panelRatio`  (default = 0.2)  Ratio of width of the left panel showing
      the file names to window width. If set to zero, it will hide that panel.
 
