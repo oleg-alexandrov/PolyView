@@ -525,8 +525,12 @@ std::vector<dPoint> dPoly::getNonManhLocs() const{
     for (int pIter = 0; pIter < m_numPolys; pIter++) {
       int start = start_ids[pIter];
       int end   = start_ids[pIter+1];
-      if ((end - start) < 1) continue;
-      for (int ic = start; ic < end; ic++){
+
+      int end1 = end;
+      if (!m_isPolyClosed[pIter]) end1--;
+      if ((end1 - start) < 1) continue;
+
+      for (int ic = start; ic < end1; ic++){
         int in = (ic == end-1) ? start : ic+1;
         double dx = m_xv[ic] - m_xv[in];
         double dy = m_yv[ic] - m_yv[in];
@@ -547,8 +551,12 @@ std::vector<dPoint> dPoly::getNon45Locs() const{
     for (int pIter = 0; pIter < m_numPolys; pIter++) {
       int start = start_ids[pIter];
       int end   = start_ids[pIter+1];
-      if ((end - start) < 1) continue;
-      for (int ic = start; ic < end; ic++){
+
+      int end1 = end;
+      if (!m_isPolyClosed[pIter]) end1--;
+      if ((end1 - start) < 1) continue;
+
+      for (int ic = start; ic < end1; ic++){
         int in = (ic == end-1) ? start : ic+1;
         double dx = m_xv[ic] - m_xv[in];
         double dy = m_yv[ic] - m_yv[in];
@@ -574,7 +582,13 @@ std::vector<dPoint> dPoly::getAcuteAngleLocs(double min_angle){
     int start = start_ids[pIter];
     int end   = start_ids[pIter+1];
     if ((end - start) < 3) continue;
-    for (int ic = start; ic < end; ic++){
+    int end1 = end;
+    int start1 = start;
+    if (!m_isPolyClosed[pIter]) {
+      start1++;
+      end1--;
+    }
+    for (int ic = start1; ic < end1; ic++){
       int ip = (ic == start) ? end-1 : ic-1;
       int in = (ic == end-1) ? start : ic+1;
       std::complex<double> Pp(m_xv[ip], m_yv[ip]);
