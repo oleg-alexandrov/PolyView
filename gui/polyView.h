@@ -251,6 +251,12 @@ private:
   void displayData( QPainter *paint, int i = -1 );
   void drawMarks(QPainter *paint);
 
+  void plotDPolyFilled(double lineWidth,
+                       double transparency,
+                       QPainter *paint,
+                       utils::dPoly &currPoly,
+                       int lighter_darker);
+
   void plotDPoly(bool plotPoints, bool plotEdges,
                  bool plotFilled, bool showAnno,
                  bool scatter_annotation,
@@ -266,7 +272,6 @@ private:
                  // optional input, if provided only clip selected polygons
                  const std::vector<int> *selected = nullptr,
                  int lighter_darker = 0 // draw color as  0: normal, 1: darker, -1: lighter
-
                  );
 
   void plotAnnotationScattered(const std::vector<anno> &annotations,

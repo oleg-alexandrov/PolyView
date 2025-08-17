@@ -35,6 +35,7 @@
 #include <cassert>
 #include <cfloat>    // defines DBL_MAX
 #include <cmath>
+#include <QPainterPath>
 #include <cstdlib>
 #include <vector>
 #include <iomanip>   // required for use of setw()
@@ -49,6 +50,9 @@
 #include <QTableWidgetItem>
 #include <QClipboard>
 #include <gui/polyView.h>
+
+#include <QtGui>
+
 #include <gui/utils.h>
 
 #ifdef POLYVIEW_USE_OPENMP
@@ -666,6 +670,111 @@ void polyView::drawMarks(QPainter *paint){
    }
 }
 
+void polyView::plotDPolyFilled(double lineWidth,
+                               double transparency,
+                               QPainter *paint,
+                               dPoly &clippedPoly,
+                               int lighter_darker) {
+
+  //utils::Timer my_clock("polyView::plotDPoly");
+
+
+  //utils::Timer my_clock2("polyView::Paint");
+  const double * xv               = clippedPoly.get_xv();
+  const double * yv               = clippedPoly.get_yv();
+  const int    * numVerts         = clippedPoly.get_numVerts();
+  int numPolys                    = clippedPoly.get_numPolys();
+  const vector<char> isPolyClosed = clippedPoly.get_isPolyClosed();
+  const vector<string> colors     = clippedPoly.get_colors();
+  //int numVerts                  = clippedPoly.get_totalNumVerts();
+
+
+  // This is done for performance
+  // when too many polygons/points are drawn in a large area we don't need
+  // to use larger lineWidth; we cannot tell them apart anyways.
+  // When we zoom in, fewer polygons are in the view and it uses
+  // user setting for lineWidth.
+  // The following settings are experimentally decided
+  if (clippedPoly.get_totalNumVerts() >= 400000){
+    lineWidth = 0.5;
+
+  } else if (clippedPoly.get_totalNumVerts() >= 200000){
+    lineWidth = 1.0;
+
+  }else if (clippedPoly.get_totalNumVerts() >= 100000){
+    lineWidth = 1.0;
+  }
+
+  //my_clock.tock("CLIP");
+
+  auto set_lighter_darker = [lighter_darker](QColor &color)->void {
+    if (lighter_darker == 1) {
+      color = color.darker(150); // 50% darker
+    } else if (lighter_darker == -1){
+      color = color.lighter(130); // 30% lighter
+    }
+  };
+
+
+  QPainterPath outerPath;
+  QPainterPath holePath;
+  QColor color;
+
+  int start = 0;
+  for (int pIter = 0; pIter < numPolys; pIter++) {
+
+    if (pIter > 0) start += numVerts[pIter - 1];
+
+    if (!isPolyClosed[pIter]) continue;
+
+    if (pIter == 0){// use color of the first polygon for combined filled shape
+      color = QColor(colors[pIter].c_str());
+      set_lighter_darker(color);
+    }
+
+    int pSize = numVerts[pIter];
+    if (pSize == 0) continue;
+    // Determine the orientation of polygons
+
+    bool isHole = (signedPolyArea(pSize, xv + start, yv + start, m_counter_cc) < 0);
+
+    // Scale the polygon to screen (pixel) coordinates
+    // For closed polygons add the first point to the end so that all edges are drawn
+    QPolygonF pa(pSize+1);
+    int x0, y0;
+    for (int vIter = 0; vIter < pSize; vIter++) {
+
+
+      worldToPixelCoords(xv[start + vIter], yv[start + vIter], // inputs
+                         x0, y0);                              // outputs
+      pa[vIter] = QPoint(x0, y0);
+
+    }
+
+    worldToPixelCoords(xv[start], yv[start], // inputs
+                       x0, y0);                              // outputs
+    pa[pSize] = QPoint(x0, y0);
+
+
+    if (isHole){
+      holePath.addPolygon(pa);
+    } else {
+      outerPath.addPolygon(pa);
+    }
+  }
+
+  outerPath = outerPath.subtracted(holePath);
+
+  // 4. Draw the resulting path
+  color.setAlphaF(transparency);
+  paint->fillPath(outerPath, color);
+
+  color.setAlphaF(1.0);
+  paint->setPen(QPen(color, lineWidth));
+  paint->drawPath(outerPath);
+
+}
+
 // Plot a given dPoly with given options.
 // The viewing window in world coordinates corresponding to current
 // drawing region on screen is:
@@ -700,7 +809,6 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   } else if (m_showLayerAnno) {
     currPoly.compLayerAnno();
   }
-
 
   // Clip the polygon a bit beyond the viewing window, as to not see
   // the edges where the cut took place. It is a bit tricky to
@@ -746,11 +854,17 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   for (const auto &ang: angle_anno) m_topAnno.push_back(ang);
 
   // When polys are filled, plot largest polys first
-  if (plotFilled)
+  if (plotFilled){
     clippedPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
                                                        m_viewXll + m_viewWidX,
                                                        m_viewYll + m_viewWidY,
                                                        m_counter_cc);
+
+    plotDPolyFilled(lineWidth, transparency,
+                    paint, clippedPoly,
+                    lighter_darker);
+  }
+
 
   // length/size of point shapes
   if (point_size == 0){
@@ -793,6 +907,8 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
     if (pIter > 0) start += numVerts[pIter - 1];
 
+    if ( isPolyClosed[pIter] && plotFilled) continue;// closed ones are plotted by plotDPolyFilled
+
     QColor color = QColor(colors[pIter].c_str());
     set_lighter_darker(color);
 
@@ -806,10 +922,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
     int pSize = numVerts[pIter];
     if (pSize == 0) continue;
     // Determine the orientation of polygons
-    bool isHole = false;
-    if (plotFilled && isPolyClosed[pIter]) {
-      isHole = (signedPolyArea(pSize, xv + start, yv + start, m_counter_cc) < 0);
-    }
+
 
     // Scale the polygon to screen (pixel) coordinates
     // For closed polygons add the first point to the end so that all edges are drawn
@@ -839,20 +952,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
     if (plotEdges) {
 
-      if (plotFilled && isPolyClosed[pIter]) {
-
-        if (isHole){
-          auto color2 = QColor(m_prefs.bgColor.c_str());
-          color2.setAlphaF(transparency);
-          paint->setBrush(color2);
-        } else {
-          color.setAlphaF(transparency);
-          paint->setBrush(color);
-        }
-
-      }else {
-        paint->setBrush(Qt::NoBrush);
-      }
+      paint->setBrush(Qt::NoBrush);
       color.setAlphaF(1.0);
       paint->setPen(QPen(color, lineWidth));
 
@@ -863,9 +963,6 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
       }else {
 
-        if (plotFilled) {
-          paint->drawPolygon(pa);
-        }
         paint->setBrush(Qt::NoBrush);
         paint->drawPolyline(pa); // don't join the last vertex to the first
 
