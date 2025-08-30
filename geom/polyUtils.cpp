@@ -642,7 +642,7 @@ void utils::transformMarkedPolys(// Inputs
                                  const utils::matrix2 & M,
                                  // Inputs-outputs
                                  std::vector<dPoly> & polyVec) {
-  if (getNumElements(markedPolyIndices) == 0) return;
+  if (getNumElements(markedPolyIndices) == 0 && getNumElements(markedAnnoIndices) == 0) return;
 
   dPoint ctr;
   ctr.x = 0;
