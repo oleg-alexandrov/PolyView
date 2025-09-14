@@ -21,8 +21,15 @@
 // THE SOFTWARE.
 #ifndef EDGE_UTILS_H
 #define EDGE_UTILS_H
+#include "geomUtils.h"
 
 namespace utils {
+
+seg clipEdge(const seg &seg, double x_min, double y_min, double x_max, double y_max);
+
+bool clipEdge(double& x1, double& y1, double& x2, double& y2,
+              double x_min, double y_min, double x_max, double y_max);
+
   bool edgeIntersectsBox(// Input: arbitrary edge
                          double bx, double by,
                          double ex, double ey,

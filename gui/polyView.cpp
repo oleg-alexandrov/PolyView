@@ -54,6 +54,7 @@
 #include <QtGui>
 
 #include <gui/utils.h>
+#include "geom/edgeUtils.h"
 
 #ifdef POLYVIEW_USE_OPENMP
 #include <omp.h>
@@ -1840,7 +1841,8 @@ void polyView::paintEvent(QPaintEvent *) {
     if (i == 2){
       double dist = edge.length();
       dist = rint(dist*1000)/1000.0;
-      QFont F; F.setPointSize(11); F.setBold(true);
+      int fontsize = 11;
+      QFont F; F.setPointSize(fontsize); F.setBold(true);
       paint.setFont(F);
       paint.setPen(QPen(QColor("yellow"), 1));
 
@@ -1852,6 +1854,11 @@ void polyView::paintEvent(QPaintEvent *) {
       auto midy = 0.5*(edge.begy + edge.endy);
 
       worldToPixelCoords(midx, midy, x0, y0);
+
+      // make sure text displays inside the view
+      if (y0 <= m_screenYll)  y0 += fontsize;
+      if (x0 >= m_screenWidX) x0 -= fontsize*text.size();
+
       paint.drawText(x0, y0, text.c_str());
     }
   }
@@ -2257,6 +2264,10 @@ void polyView::addRulerEdge(const Qt::MouseButton & state, int &px, int &py){
 
 
   if (m_ruler_edges.size() == 2){
+
+    m_ruler_edges[0] = utils::clipEdge(m_ruler_edges[0], m_viewXll, m_viewYll, m_viewXll+m_viewWidX, m_viewYll+m_viewWidY);
+    m_ruler_edges[1] = utils::clipEdge(m_ruler_edges[1], m_viewXll, m_viewYll, m_viewXll+m_viewWidX, m_viewYll+m_viewWidY);
+
     auto ruler_dist = minDistFromSeg2Seg(m_ruler_edges[0], m_ruler_edges[1]);
     m_ruler_edges.push_back(ruler_dist);
     cout <<setprecision(16)<< " Ruler dist: " << ruler_dist.length()<<endl;

@@ -28,7 +28,91 @@
 #include <algorithm>
 #include <edgeUtils.h>
 #include <baseUtils.h>
+#include "geomUtils.h"
 using namespace std;
+
+
+const int INSIDE = 0; // 0000
+const int LEFT = 1;   // 0001
+const int RIGHT = 2;  // 0010
+const int BOTTOM = 4; // 0100
+const int TOP = 8;    // 1000
+
+// Function to compute region code for a point (x, y)
+int computeOutCode(double x, double y, double x_min, double y_min, double x_max, double y_max) {
+  int code = INSIDE;
+  if (x < x_min) {
+    code |= LEFT;
+  } else if (x > x_max) {
+    code |= RIGHT;
+  }
+  if (y < y_min) {
+    code |= BOTTOM;
+  } else if (y > y_max) {
+    code |= TOP;
+  }
+  return code;
+}
+
+utils::seg utils::clipEdge(const utils::seg &seg, double x_min, double y_min, double x_max, double y_max){
+
+  auto new_seg = seg;
+  clipEdge(new_seg.begx, new_seg.begy, new_seg.endx, new_seg.endy,
+           x_min, y_min, x_max, y_max);
+  return new_seg;
+}
+// Cohen-Sutherland line clipping algorithm
+bool utils::clipEdge(double& x1, double& y1, double& x2, double& y2,
+                     double x_min, double y_min, double x_max, double y_max) {
+
+  int outcode1 = computeOutCode(x1, y1, x_min, y_min, x_max, y_max);
+  int outcode2 = computeOutCode(x2, y2, x_min, y_min, x_max, y_max);
+  bool accept = false;
+
+  while (true) {
+    if (!(outcode1 | outcode2)) { // Both endpoints are inside
+      accept = true;
+      break;
+    } else if (outcode1 & outcode2) { // Both endpoints are in the same outside region
+      break;
+    } else { // Line segment potentially intersects the clipping window
+      double x, y;
+
+      // Pick an outside point to clip
+      int outcodeOut = outcode1 ? outcode1 : outcode2;
+
+      // Find intersection point
+      if (outcodeOut & TOP) { // Point is above the clip window
+        x = x1 + (x2 - x1) * (y_max - y1) / (y2 - y1);
+        y = y_max;
+      } else if (outcodeOut & BOTTOM) { // Point is below the clip window
+        x = x1 + (x2 - x1) * (y_min - y1) / (y2 - y1);
+        y = y_min;
+      } else if (outcodeOut & RIGHT) { // Point is to the right of the clip window
+        y = y1 + (y2 - y1) * (x_max - x1) / (x2 - x1);
+        x = x_max;
+      } else if (outcodeOut & LEFT) { // Point is to the left of the clip window
+        y = y1 + (y2 - y1) * (x_min - x1) / (x2 - x1);
+        x = x_min;
+      }
+
+      // Update the point that was outside
+      if (outcodeOut == outcode1) {
+        x1 = x;
+        y1 = y;
+        outcode1 = computeOutCode(x1, y1, x_min, y_min, x_max, y_max);
+      } else {
+        x2 = x;
+        y2 = y;
+        outcode2 = computeOutCode(x2, y2, x_min, y_min, x_max, y_max);
+      }
+    }
+  }
+  return accept;
+}
+
+
+
 
 bool utils::edgeIntersectsBox(// Input: arbitrary edge
                               double bx, double by,
