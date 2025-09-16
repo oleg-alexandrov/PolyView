@@ -1836,9 +1836,21 @@ void polyView::paintEvent(QPaintEvent *) {
     int x0, y0, x1, y1;
     worldToPixelCoords(edge.begx, edge.begy, x0, y0);
     worldToPixelCoords(edge.endx, edge.endy, x1, y1);
-    paint.drawLine(x0, y0, x1, y1);
 
-    if (i == 2){
+    if (i != 2){
+      paint.drawLine(x0, y0, x1, y1);
+    } else {
+      if (y0 <= m_screenYll) y0 += 1;
+      if (y1 <= m_screenYll) y1 += 1;
+      if (x0 <= m_screenXll) x0 += 1;
+      if (x1 <= m_screenXll) x1 += 1;
+
+      if (x0 >= m_screenWidX) x0 -=1;
+      if (x1 >= m_screenWidX) x1 -=1;
+      if (y0 >= m_screenWidY) y0 -=1;
+      if (y1 >= m_screenWidY) y1 -=1;
+      paint.drawLine(x0, y0, x1, y1);
+
       double dist = edge.length();
       dist = rint(dist*1000)/1000.0;
       int fontsize = 11;
