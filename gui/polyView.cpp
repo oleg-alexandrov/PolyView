@@ -166,8 +166,11 @@ polyView::polyView(QWidget *parent, chooseFilesDlg * chooseFiles,
   // Actions for right-click menu
 
 
-  m_copy_view = m_ContextMenu->addAction("Copy view to clipboard");
+  m_copy_view = m_ContextMenu->addAction("Copy view");
   connect(m_copy_view, SIGNAL(triggered()), this, SLOT(copyView()));
+
+  m_paste_view = m_ContextMenu->addAction("Paste view");
+  connect(m_paste_view, SIGNAL(triggered()), this, SLOT(pasteView()));
 
   m_add_label =  m_ContextMenu->addAction("Add label");
   connect(m_add_label, SIGNAL(triggered()), this, SLOT(addLabel()));
@@ -3302,7 +3305,31 @@ void polyView::copyView() {
   QClipboard *clipboard = QGuiApplication::clipboard();
 
   clipboard->setText(QString(ff.str().c_str()));
+
+
 }
+
+void polyView::pasteView() {
+
+  QClipboard *clipboard = QGuiApplication::clipboard();
+
+  auto text = clipboard->text().toStdString();
+
+  text.erase(0, 5); // erase "view "
+
+  std::istringstream iss(text);
+  iss >> m_viewXll >> m_viewYll >> m_viewWidX >> m_viewWidY;
+
+  if (iss){
+    refreshPixmap();
+  } else {
+    cout <<"View is not in the clipboard  "<<text<<  endl;
+  }
+
+
+
+}
+
 
 void polyView::addLabel(){
   string inputStr, outputStr;

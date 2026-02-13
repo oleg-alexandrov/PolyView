@@ -122,6 +122,7 @@ public slots:
   void addAnno();
   void deleteAnno();
   void copyView();
+  void pasteView();
   void addLabel();
   void insertVertex();
   void deleteVertex();
@@ -398,6 +399,7 @@ private:
   QAction* m_markAcute;
   QAction* m_alignModeAction;
   QAction* m_copy_view;
+  QAction* m_paste_view;
   QAction* m_add_label;
   QAction* m_align_rotate90;
   QAction* m_align_rotate180;
