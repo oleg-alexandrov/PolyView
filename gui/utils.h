@@ -69,6 +69,7 @@ struct polyOptions{
   double          transparency;
   std::string     bgColor;
   std::string     fgColor;
+  std::string     highlightColor;
   std::string     cmdLineColor;
   std::string     gridColor;
   std::string     markColor;
@@ -96,6 +97,7 @@ struct polyOptions{
     transparency      = 0;
     bgColor          = "black";
     fgColor          = "white";
+    highlightColor   = "violet";
     cmdLineColor     = "green";
     gridColor        = "white";
     markColor        = "magenta";

@@ -622,9 +622,9 @@ void polyView::displayData(QPainter *paint, int pol_id) {
 
   vector<vector<int>> textOnScreenGrid_temp;
   for (int h = 0; h < (int)m_highlights.size(); h++) {
-    m_highlights[h].set_color(m_prefs.fgColor.c_str());
+    m_highlights[h].set_color(m_prefs.highlightColor.c_str());
     bool showAnno = false;
-    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth, 1.0,
+    plotDPoly(plotPoints, plotEdges, plotFilled, showAnno, false, m_prefs.lineWidth+1, 1.0,
               point_shape, 1, colorScale, textOnScreenGrid_temp, paint, m_highlights[h]);
   }
 
