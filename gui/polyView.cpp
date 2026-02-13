@@ -718,6 +718,8 @@ void polyView::plotDPolyFilled(double lineWidth,
 
 
   QPainterPath outerPath;
+  outerPath.setFillRule(Qt::OddEvenFill);
+
   QPainterPath holePath;
   QColor color;
 
@@ -757,14 +759,13 @@ void polyView::plotDPolyFilled(double lineWidth,
     pa[pSize] = QPoint(x0, y0);
 
 
-    if (isHole){
-      holePath.addPolygon(pa);
-    } else {
-      outerPath.addPolygon(pa);
-    }
+    outerPath.addPolygon(pa);
+
+
   }
 
-  outerPath = outerPath.subtracted(holePath);
+  
+
 
   // 4. Draw the resulting path
   color.setAlphaF(transparency);
@@ -908,7 +909,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
     if (pIter > 0) start += numVerts[pIter - 1];
 
-    if ( isPolyClosed[pIter] && plotFilled) continue;// closed ones are plotted by plotDPolyFilled
+    //if ( isPolyClosed[pIter] && plotFilled) continue;// closed ones are plotted by plotDPolyFilled
 
     QColor color = QColor(colors[pIter].c_str());
     set_lighter_darker(color);
