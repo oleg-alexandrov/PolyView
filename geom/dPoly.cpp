@@ -1349,6 +1349,9 @@ namespace dPoly_local_functions{
   };
   bool greaterThanPtIndex (ptAndIndex P, ptAndIndex Q) {
 
+    if (fabs(P.area - Q.area) > 1e-12*std::max(P.area, Q.area)){
+      return (P.area > Q.area);
+    }
     if (greaterThan(P.point, Q.point) ) return true;
     if (greaterThan(Q.point, P.point) ) return false;
 

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 #include <QPolygon>
-#include <QMenu>
+#include <QMenu>ƒ
 #include <QContextMenuEvent>
 #include <QEvent>
 #include <QFileDialog>
@@ -832,6 +832,18 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
       clippedPoly,
       selected);
 
+  // When polys are filled, plot largest polys first
+  if (plotFilled){
+    clippedPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
+                                                       m_viewXll + m_viewWidX,
+                                                       m_viewYll + m_viewWidY,
+                                                       m_counter_cc);
+
+    plotDPolyFilled(lineWidth, transparency,
+                    paint, clippedPoly,
+                    lighter_darker);
+  }
+
   //utils::Timer my_clock2("polyView::Paint");
   const double * xv               = clippedPoly.get_xv();
   const double * yv               = clippedPoly.get_yv();
@@ -858,17 +870,6 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   const auto &angle_anno = clippedPoly.get_angleAnno();
   for (const auto &ang: angle_anno) m_topAnno.push_back(ang);
 
-  // When polys are filled, plot largest polys first
-  if (plotFilled){
-    clippedPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
-                                                       m_viewXll + m_viewWidX,
-                                                       m_viewYll + m_viewWidY,
-                                                       m_counter_cc);
-
-    plotDPolyFilled(lineWidth, transparency,
-                    paint, clippedPoly,
-                    lighter_darker);
-  }
 
 
   // length/size of point shapes
