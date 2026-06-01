@@ -819,10 +819,11 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
   // the edges where the cut took place. It is a bit tricky to
   // decide how much the extra should be.
   double tol    = 1e-12;
-  double extra  = 2*m_pixelSize*lineWidth;
-  double extraX = extra + tol*max(abs(m_viewXll), abs(m_viewXll + m_viewWidX));
-  double extraY = extra + tol*max(abs(m_viewYll), abs(m_viewYll + m_viewWidY));
+  double extra  = m_pixelSize*lineWidth;
+  double extraX = extra + tol* m_viewWidX;
+  double extraY = extra + tol* m_viewWidY;
   dPoly clippedPoly;
+
   currPoly.clipAll(//inputs
       m_viewXll - extraX,
       m_viewYll - extraY,
@@ -834,10 +835,6 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
   // When polys are filled, plot largest polys first
   if (plotFilled){
-    clippedPoly.sortBySizeAndMaybeAddBigContainingRect(m_viewXll,  m_viewYll,
-                                                       m_viewXll + m_viewWidX,
-                                                       m_viewYll + m_viewWidY,
-                                                       m_counter_cc);
 
     plotDPolyFilled(lineWidth, transparency,
                     paint, clippedPoly,
