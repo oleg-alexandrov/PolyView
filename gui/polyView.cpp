@@ -723,8 +723,9 @@ void polyView::plotDPolyFilled(double lineWidth,
   QPainterPath outerPath;
   outerPath.setFillRule(Qt::OddEvenFill);
 
-  QPainterPath holePath;
   QColor color;
+  color = QColor(colors[0].c_str());
+  set_lighter_darker(color);
 
   int start = 0;
   for (int pIter = 0; pIter < numPolys; pIter++) {
@@ -733,16 +734,11 @@ void polyView::plotDPolyFilled(double lineWidth,
 
     if (!isPolyClosed[pIter]) continue;
 
-    if (pIter == 0){// use color of the first polygon for combined filled shape
-      color = QColor(colors[pIter].c_str());
-      set_lighter_darker(color);
-    }
-
     int pSize = numVerts[pIter];
     if (pSize == 0) continue;
     // Determine the orientation of polygons
 
-    bool isHole = (signedPolyArea(pSize, xv + start, yv + start, m_counter_cc) < 0);
+    //bool isHole = (signedPolyArea(pSize, xv + start, yv + start, m_counter_cc) < 0);
 
     // Scale the polygon to screen (pixel) coordinates
     // For closed polygons add the first point to the end so that all edges are drawn
@@ -772,7 +768,8 @@ void polyView::plotDPolyFilled(double lineWidth,
 
   // 4. Draw the resulting path
   color.setAlphaF(transparency);
-  paint->fillPath(outerPath, color);
+  paint->setBrush(QBrush(color));
+  paint->fillPath(outerPath, QBrush(color));
 
   color.setAlphaF(1.0);
   paint->setPen(QPen(color, lineWidth));
@@ -910,7 +907,7 @@ void polyView::plotDPoly(bool plotPoints, bool plotEdges,
 
     if (pIter > 0) start += numVerts[pIter - 1];
 
-    //if ( isPolyClosed[pIter] && plotFilled) continue;// closed ones are plotted by plotDPolyFilled
+    if ( isPolyClosed[pIter] && plotFilled) continue;// closed ones are plotted by plotDPolyFilled
 
     QColor color = QColor(colors[pIter].c_str());
     set_lighter_darker(color);
