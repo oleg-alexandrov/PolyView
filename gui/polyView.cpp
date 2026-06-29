@@ -541,15 +541,18 @@ void polyView::displayData(QPainter *paint, int pol_id) {
     int lineWidth = m_polyOptionsVec[vecIter].lineWidth;
 
     // Note: plotFilled, plotEdges, and plotPoints are not mutually exclusive.
-    bool plotFilled = m_polyOptionsVec[vecIter].isPolyFilled || m_showFilledPolys;
+    bool plotPoints = m_polyOptionsVec[vecIter].plotAsPoints  ||
+      (m_displayMode == m_showPoints)                         ||
+      (m_displayMode == m_showPointsEdges);
+
+    bool plotFilled = (m_polyOptionsVec[vecIter].isPolyFilled || m_showFilledPolys) &&
+        !m_polyOptionsVec[vecIter].plotAsPoints;
+
     bool plotEdges  = (!m_polyOptionsVec[vecIter].plotAsPoints) &&
       (m_displayMode != m_showPoints);
     if (plotFilled)
       plotEdges = true; // this is a bugfix, otherwise polygons with no interior do not show up
     
-    bool plotPoints = m_polyOptionsVec[vecIter].plotAsPoints  ||
-      (m_displayMode == m_showPoints)                         ||
-      (m_displayMode == m_showPointsEdges);
 
     int point_shape = 0;
     if (plotPoints) {
@@ -682,6 +685,7 @@ void polyView::plotDPolyFilled(double lineWidth,
 
   //utils::Timer my_clock("polyView::plotDPoly");
 
+  if (clippedPoly.isPointCloud()) return;
 
   //utils::Timer my_clock2("polyView::Paint");
   const double * xv               = clippedPoly.get_xv();
